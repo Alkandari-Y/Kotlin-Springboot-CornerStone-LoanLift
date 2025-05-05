@@ -24,6 +24,7 @@
     <modules>
         <module>authentication</module>
         <module>banking</module>
+        <module>common</module>
     </modules>
     <scm>
         <connection/>
@@ -32,8 +33,10 @@
         <url/>
     </scm>
     <properties>
-        <java.version>21</java.version>
         <kotlin.version>1.9.25</kotlin.version>
+        <kotlin.compiler.languageVersion>1.9</kotlin.compiler.languageVersion>
+        <kotlin.compiler.apiVersion>1.9</kotlin.compiler.apiVersion>
+        <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
     </properties>
     <dependencies>
         <dependency>

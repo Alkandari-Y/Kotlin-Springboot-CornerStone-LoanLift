@@ -23,6 +23,7 @@ class JwtService {
             .setSubject(user.username)
             .claim("userId", user.id.toString())
             .claim("roles", roleNames)
+            .claim("isActive", user.isActive)
             .setIssuedAt(now)
             .setExpiration(expiry)
             .signWith(secretKey)
