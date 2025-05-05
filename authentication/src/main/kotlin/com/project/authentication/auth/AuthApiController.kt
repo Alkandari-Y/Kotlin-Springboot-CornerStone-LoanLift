@@ -2,7 +2,6 @@ package com.project.authentication.auth
 
 import com.project.authentication.auth.dtos.LoginRequest
 import com.project.authentication.auth.dtos.RegisterCreateRequest
-import com.project.authentication.auth.dtos.toEntity
 import com.project.authentication.entities.AuthUserDetails
 import com.project.authentication.services.JwtService
 import com.project.authentication.services.UserService
@@ -11,7 +10,6 @@ import com.project.common.responses.authenthication.ValidateTokenResponse
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.userdetails.UsernameNotFoundException

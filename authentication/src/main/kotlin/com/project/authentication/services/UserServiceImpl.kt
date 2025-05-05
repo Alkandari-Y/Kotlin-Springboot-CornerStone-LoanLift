@@ -4,6 +4,7 @@ import com.project.authentication.auth.dtos.RegisterCreateRequest
 import com.project.authentication.auth.dtos.toEntity
 import com.project.authentication.entities.UserEntity
 import com.project.authentication.exceptions.UserExistsException
+import com.project.authentication.exceptions.UserNotFoundException
 import com.project.authentication.repositories.UserRepository
 import com.project.common.exceptions.ErrorCode
 import org.springframework.data.repository.findByIdOrNull
@@ -36,5 +37,11 @@ class UserServiceImpl(
 
     override fun findUserByUsername(username: String): UserEntity? {
         return userRepository.findByUsername(username)
+    }
+
+    override fun setActiveUser(userId: Long) {
+        val user = userRepository.findByIdOrNull(userId)
+            ?: throw UserNotFoundException()
+        userRepository.save(user.copy(isActive = true))
     }
 }

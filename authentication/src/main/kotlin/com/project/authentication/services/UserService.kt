@@ -7,4 +7,5 @@ interface UserService {
     fun createUser(user: RegisterCreateRequest): UserEntity
     fun findUserById(userId: Long): UserEntity?
     fun findUserByUsername(username: String): UserEntity?
+    fun setActiveUser(userId: Long)
 }

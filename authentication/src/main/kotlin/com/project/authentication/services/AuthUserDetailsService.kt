@@ -21,7 +21,7 @@ class AuthUserDetailsService (
             username = user.username,
             password = user.password,
             authorities = user.roles.toSet()
-                .map { SimpleGrantedAuthority(it.name) } // Ensure immutable during iteration
+                .map { SimpleGrantedAuthority(it.name) }
         )
     }
 }
