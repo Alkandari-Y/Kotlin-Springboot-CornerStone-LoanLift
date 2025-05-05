@@ -1,15 +1,19 @@
 package com.project.authentication.auth
 
+import com.project.authentication.auth.dtos.JwtResponseDto
+import com.project.authentication.auth.dtos.LoginRequest
 import com.project.authentication.auth.dtos.RegisterRequest
+import com.project.authentication.exceptions.InvalidCredentialsException
+import com.project.authentication.exceptions.UserExistsException
+import com.project.authentication.exceptions.UserNotFoundException
 import com.project.authentication.services.JwtService
 import com.project.authentication.services.UserService
-import com.project.common.exceptions.APIException
-import com.project.common.exceptions.ErrorCode
-import org.springframework.http.HttpStatus
+import com.project.common.responses.authenthication.ValidateTokenResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.web.bind.annotation.*
+import java.security.Principal
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -22,8 +26,13 @@ class AuthApiController(
     @PostMapping("/register")
     fun register(@RequestBody request: RegisterRequest): ResponseEntity<JwtResponseDto> {
         val user = userService.createUser(request)
-        val token = jwtService.generateToken(user)
-        return ResponseEntity.ok(JwtResponseDto(token))
+        val (access, refresh) = jwtService.generateTokenPair(user)
+        return ResponseEntity.ok(
+            JwtResponseDto(
+                access = access,
+                refresh = refresh
+            )
+        )
     }
 
     @PostMapping("/login")
@@ -32,27 +41,32 @@ class AuthApiController(
         val authentication = authenticationManager.authenticate(authToken)
 
         if (!authentication.isAuthenticated) {
-            throw APIException(
-                "Invalid credentials",
-                HttpStatus.UNAUTHORIZED,
-                ErrorCode.INVALID_CREDENTIALS
-            )
+            throw throw InvalidCredentialsException()
         }
 
         val user = userService.findByUsername(request.username)
-            ?: throw APIException("Invalid credentials", HttpStatus.NOT_FOUND, ErrorCode.INVALID_CREDENTIALS)
+            ?: throw InvalidCredentialsException()
 
-        val token = jwtService.generateToken(user)
-        return ResponseEntity.ok(JwtResponseDto(token))
+        val (access, refresh) = jwtService.generateTokenPair(user)
+        return ResponseEntity.ok(
+            JwtResponseDto(
+                access = access,
+                refresh = refresh
+            )
+        )
+    }
+
+    @PostMapping("/validate")
+    fun validateToken(principal: Principal
+    ): ValidateTokenResponse {
+        val user = userService.findByUsername(principal.name)
+            ?: throw UserNotFoundException()
+        return ValidateTokenResponse(
+            userId = user.id.toString(),
+            isActive = user.isActive,
+            roles = user.roles.map { it.name }
+        )
     }
 }
 
-data class JwtResponseDto(
-    val token: String
-)
 
-
-data class LoginRequest(
-    val username: String,
-    val password: String
-)

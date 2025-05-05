@@ -3,10 +3,8 @@ package com.project.authentication.services
 import com.project.authentication.auth.dtos.RegisterRequest
 import com.project.authentication.auth.dtos.toUserEntity
 import com.project.authentication.entities.UserEntity
+import com.project.authentication.exceptions.UserExistsException
 import com.project.authentication.respositories.UserRepository
-import com.project.common.exceptions.APIException
-import com.project.common.exceptions.ErrorCode
-import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -24,11 +22,7 @@ class UserServiceImpl(
         )
 
         if (userExists) {
-           throw APIException(
-               "User with name ${newUserRequest.username} already exists",
-               HttpStatus.BAD_REQUEST,
-               ErrorCode.USER_ALREADY_EXISTS
-           )
+           throw UserExistsException()
         }
 
         val role = roleService.getDefaultRole()

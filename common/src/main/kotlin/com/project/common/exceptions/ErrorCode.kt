@@ -1,6 +1,7 @@
 package com.project.common.exceptions
 
 enum class ErrorCode {
+    ACCESS_DENIED,
     ACCOUNT_NOT_FOUND,
     ACCOUNT_LIMIT_REACHED,
     ACCOUNT_VERIFICATION_EXCEPTION,
@@ -15,4 +16,5 @@ enum class ErrorCode {
     INVALID_INPUT,
     INVALID_AGE,
     INTERNAL_SERVER_ERROR,
+    UNAUTHORIZED
 }

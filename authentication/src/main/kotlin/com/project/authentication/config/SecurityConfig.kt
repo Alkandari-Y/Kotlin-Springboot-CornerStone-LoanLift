@@ -1,6 +1,5 @@
 package com.project.authentication.config
 
-
 import com.project.authentication.filters.JwtAuthFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
