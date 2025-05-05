@@ -5,7 +5,7 @@ import org.springframework.security.core.GrantedAuthority
 
 @Entity
 @Table(name = "roles")
-class RoleEntity(
+data class RoleEntity(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,8 +15,6 @@ class RoleEntity(
     @Column(name = "name", nullable = false, unique = true)
     val name: String = "",
 
-    @ManyToMany(mappedBy = "roles")
-    val users: Set<UserEntity> = emptySet()
 ) : GrantedAuthority {
     override fun getAuthority(): String = name
 }

@@ -1,72 +1,78 @@
 package com.project.authentication.auth
 
-import com.project.authentication.auth.dtos.JwtResponseDto
 import com.project.authentication.auth.dtos.LoginRequest
-import com.project.authentication.auth.dtos.RegisterRequest
-import com.project.authentication.exceptions.InvalidCredentialsException
-import com.project.authentication.exceptions.UserExistsException
-import com.project.authentication.exceptions.UserNotFoundException
+import com.project.authentication.auth.dtos.RegisterCreateRequest
+import com.project.authentication.auth.dtos.toEntity
+import com.project.authentication.entities.AuthUserDetails
 import com.project.authentication.services.JwtService
 import com.project.authentication.services.UserService
+import com.project.common.responses.authenthication.JwtResponse
 import com.project.common.responses.authenthication.ValidateTokenResponse
+import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.web.bind.annotation.*
+import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.security.Principal
+
 
 @RestController
 @RequestMapping("/api/v1/auth")
-class AuthApiController(
-    private val authenticationManager: AuthenticationManager,
+class UserController(
     private val userService: UserService,
-    private val jwtService: JwtService
+    private val authenticationManager: AuthenticationProvider,
+    private val jwtService: JwtService,
+    private val passwordEncoder: PasswordEncoder,
 ) {
-
-    @PostMapping("/register")
-    fun register(@RequestBody request: RegisterRequest): ResponseEntity<JwtResponseDto> {
-        val user = userService.createUser(request)
-        val (access, refresh) = jwtService.generateTokenPair(user)
-        return ResponseEntity.ok(
-            JwtResponseDto(
-                access = access,
-                refresh = refresh
-            )
+    @PostMapping(path = ["/register"])
+    fun register(
+        @Valid @RequestBody userCreateRequest: RegisterCreateRequest
+    ): ResponseEntity<JwtResponse> {
+        val userEntity = userService.createUser(
+            userCreateRequest
         )
+        val (access, refresh) = jwtService.generateTokenPair(userEntity, userEntity.roles.map { it.name })
+        return ResponseEntity(JwtResponse(access, refresh), HttpStatus.OK)
     }
 
-    @PostMapping("/login")
-    fun login(@RequestBody request: LoginRequest): ResponseEntity<JwtResponseDto> {
-        val authToken = UsernamePasswordAuthenticationToken(request.username, request.password)
-        val authentication = authenticationManager.authenticate(authToken)
-
-        if (!authentication.isAuthenticated) {
-            throw throw InvalidCredentialsException()
-        }
-
-        val user = userService.findByUsername(request.username)
-            ?: throw InvalidCredentialsException()
-
-        val (access, refresh) = jwtService.generateTokenPair(user)
-        return ResponseEntity.ok(
-            JwtResponseDto(
-                access = access,
-                refresh = refresh
-            )
+    @PostMapping(path = ["/login"])
+    fun login(
+        @Valid @RequestBody loginRequestDto: LoginRequest
+    ): ResponseEntity<JwtResponse> {
+        val authToken = UsernamePasswordAuthenticationToken(
+            loginRequestDto.username,
+            loginRequestDto.password
         )
+
+        val authentication = authenticationManager.authenticate(authToken)
+        val userDetails = authentication.principal as? AuthUserDetails
+            ?: throw UsernameNotFoundException("User not found")
+        val user =
+            userService.findUserByUsername(userDetails.username)
+                ?: throw UsernameNotFoundException("User not found")
+
+        val (access, refresh) = jwtService.generateTokenPair(user, user.roles.map { it.name })
+        return ResponseEntity(JwtResponse(access, refresh), HttpStatus.OK)
     }
 
     @PostMapping("/validate")
-    fun validateToken(principal: Principal
+    fun checkToken(
+        principal: Principal
     ): ValidateTokenResponse {
-        val user = userService.findByUsername(principal.name)
-            ?: throw UserNotFoundException()
+
+        val user = userService.findUserByUsername(principal.name)
+            ?: throw UsernameNotFoundException("User not found")
+
         return ValidateTokenResponse(
             userId = user.id.toString(),
             isActive = user.isActive,
-            roles = user.roles.map { it.name }
-        )
+            roles = user.roles.map { it.name })
     }
 }
-
-

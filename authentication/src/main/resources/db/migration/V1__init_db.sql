@@ -4,10 +4,10 @@ DROP TABLE IF EXISTS "users";
 
 
 CREATE TABLE "users" (
-     "id" UUID NOT NULL PRIMARY KEY,
-     "civil_id" VARCHAR(255) NOT NULL,
-     "username" VARCHAR(255) NOT NULL,
-     "email" VARCHAR(255) NOT NULL,
+     "id"   SERIAL PRIMARY KEY ,
+     "civil_id" VARCHAR(255) NOT NULL UNIQUE,
+     "username" VARCHAR(255) NOT NULL UNIQUE,
+     "email" VARCHAR(255) NOT NULL UNIQUE,
      "password" VARCHAR(255) NOT NULL,
      "created_at" DATE NOT NULL,
      "updated_at" DATE NOT NULL,
@@ -15,14 +15,21 @@ CREATE TABLE "users" (
 );
 
 CREATE TABLE "roles" (
-     "id" BIGSERIAL PRIMARY KEY,
+     "id"   SERIAL PRIMARY KEY ,
      "name" VARCHAR(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE "user_roles" (
-    "id" BIGSERIAL PRIMARY KEY,
-    "user_id" UUID NOT NULL,
-    "role_id" BIGINT NOT NULL,
+    "id"   SERIAL PRIMARY KEY ,
+    "user_id" INT NOT NULL,
+    "role_id" INT NOT NULL,
     CONSTRAINT "fk_user" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE,
     CONSTRAINT "fk_role" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE CASCADE
 );
+
+INSERT INTO public.roles (name)
+VALUES
+    ('ROLE_USER'),
+    ('ROLE_ADMIN'),
+    ('ROLE_DEVELOPER');
+
