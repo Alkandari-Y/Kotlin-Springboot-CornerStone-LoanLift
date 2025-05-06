@@ -42,7 +42,6 @@ class JwtService (
     ): String {
         val now = Date()
         val expiry = Date(now.time + expirationMs)
-        val roles = user.roles.map { it.name }
 
         return Jwts.builder()
             .setSubject(user.username)

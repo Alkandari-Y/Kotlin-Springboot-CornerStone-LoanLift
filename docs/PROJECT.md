@@ -102,7 +102,7 @@ Each campaign is an **investment opportunity**, where contributors (lenders/pled
 * `created_at` (datetime)
 
 #### Ownership Logic:
-- If `type = user` → `user_id` must be non-null.
+- If `type = personal` → `user_id` must be non-null.
 - If `type = campaign` → `campaign_id` must be non-null.
 - One account **must not** belong to both.
 

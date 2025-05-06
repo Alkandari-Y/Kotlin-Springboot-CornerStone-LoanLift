@@ -23,7 +23,7 @@ class JwtAuthenticationFilter(
             val username = jwtService.extractUsername(token)
             val roles = jwtService.extractRoles(token)
 
-            val authorities = roles.map { SimpleGrantedAuthority("ROLE_$it") }
+            val authorities = roles.map { SimpleGrantedAuthority(it) }
             val authToken = UsernamePasswordAuthenticationToken(
                 username, null, authorities
             )

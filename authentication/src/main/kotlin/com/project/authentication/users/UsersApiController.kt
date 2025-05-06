@@ -5,14 +5,12 @@ import com.project.authentication.services.UserService
 import com.project.authentication.users.dtos.RolesAssignmentRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.annotation.Secured
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.security.Principal
 
 
 @RestController
@@ -22,7 +20,7 @@ class UsersApiController(
     private val roleService: RoleService
 ) {
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/add-role/{userId}")
     fun addRole(
         @PathVariable("userId") userId: Long,
@@ -32,9 +30,11 @@ class UsersApiController(
         return ResponseEntity(HttpStatus.OK)
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/set-active/{userId}")
-    fun setActiveUser(@PathVariable("userId") userId: Long): ResponseEntity<Unit> {
+    fun setActiveUser(
+        @PathVariable("userId") userId: Long
+    ): ResponseEntity<Unit> {
         userService.setActiveUser(userId)
         return ResponseEntity(HttpStatus.OK)
     }

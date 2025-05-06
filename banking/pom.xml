@@ -24,6 +24,15 @@
         </repository>
     </repositories>
 
+
+    <dependencies>
+        <dependency>
+            <groupId>com.project</groupId>
+            <artifactId>common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
@@ -68,9 +77,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-
-    </dependencies>
-
 </project>
