@@ -32,7 +32,7 @@ class SecurityConfig(
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http.csrf { it.disable() }
             .authorizeHttpRequests {
-                it.requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                it.requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/users/set-active/**").permitAll()
                     .anyRequest().authenticated()
             }
             .sessionManagement {

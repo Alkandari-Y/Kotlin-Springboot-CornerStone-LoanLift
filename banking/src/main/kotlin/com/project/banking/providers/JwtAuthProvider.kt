@@ -11,13 +11,13 @@ import org.springframework.web.client.exchange
 
 @Named
 class JwtAuthProvider (
-    @Value("\${authService.url}")
+    @Value("\${authServiceBase.url}")
     private val authServiceURL: String
 ){
     fun authenticateToken(token: String): ValidateTokenResponse {
         val restTemplate = RestTemplate()
         val response = restTemplate.exchange<ValidateTokenResponse>(
-            url = authServiceURL,
+            url = "$authServiceURL/auth/validate",
             method = HttpMethod.POST,
             requestEntity = HttpEntity<String>(
                 MultiValueMap.fromMultiValue(mapOf("Authorization" to listOf("Bearer $token")))

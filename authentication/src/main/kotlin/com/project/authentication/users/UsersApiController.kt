@@ -30,12 +30,16 @@ class UsersApiController(
         return ResponseEntity(HttpStatus.OK)
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    // TODO: SWITCH THIS TO API KEY AUTH
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/set-active/{userId}")
     fun setActiveUser(
         @PathVariable("userId") userId: Long
-    ): ResponseEntity<Unit> {
-        userService.setActiveUser(userId)
-        return ResponseEntity(HttpStatus.OK)
+    ): ResponseEntity<Boolean> {
+        val result = userService.setActiveUser(userId)
+        return ResponseEntity(
+            result,
+            HttpStatus.OK
+        )
     }
 }

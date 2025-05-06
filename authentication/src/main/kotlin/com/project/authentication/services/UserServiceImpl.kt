@@ -39,9 +39,10 @@ class UserServiceImpl(
         return userRepository.findByUsername(username)
     }
 
-    override fun setActiveUser(userId: Long) {
+    override fun setActiveUser(userId: Long): Boolean {
         val user = userRepository.findByIdOrNull(userId)
             ?: throw UserNotFoundException()
         userRepository.save(user.copy(isActive = true))
+        return true
     }
 }
