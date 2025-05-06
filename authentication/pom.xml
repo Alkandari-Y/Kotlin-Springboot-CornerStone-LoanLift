@@ -11,6 +11,31 @@
 
     <artifactId>authentication</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <scope>runtime</scope>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <scope>runtime</scope>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.project</groupId>
+            <artifactId>common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.code.style>official</kotlin.code.style>
@@ -31,20 +56,22 @@
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <configuration>
+                    <jvmTarget>${kotlin.compiler.jvmTarget}</jvmTarget>
+                    <languageVersion>${kotlin.compiler.languageVersion}</languageVersion>
+                    <apiVersion>${kotlin.compiler.apiVersion}</apiVersion>
+                </configuration>
                 <executions>
                     <execution>
                         <id>compile</id>
                         <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
+                        <goals><goal>compile</goal></goals>
                     </execution>
                     <execution>
                         <id>test-compile</id>
                         <phase>test-compile</phase>
-                        <goals>
-                            <goal>test-compile</goal>
-                        </goals>
+                        <goals><goal>test-compile</goal></goals>
                     </execution>
                 </executions>
             </plugin>
@@ -66,9 +93,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-
-    </dependencies>
-
 </project>

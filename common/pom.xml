@@ -9,13 +9,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>banking</artifactId>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.code.style>official</kotlin.code.style>
-        <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
-    </properties>
+    <artifactId>common</artifactId>
 
     <repositories>
         <repository>
@@ -24,13 +18,7 @@
         </repository>
     </repositories>
 
-
     <dependencies>
-        <dependency>
-            <groupId>com.project</groupId>
-            <artifactId>common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -77,4 +65,7 @@
             </plugin>
         </plugins>
     </build>
+
+
+
 </project>
