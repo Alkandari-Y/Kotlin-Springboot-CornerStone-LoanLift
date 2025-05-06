@@ -35,7 +35,7 @@ data class AccountEntity(
     val category: CategoryEntity?,
 
     @OneToOne(mappedBy = "account", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
-    val ownership: AccountOwnershipEntity? = null
+    val owner: AccountOwnershipEntity? = null
     ) {
     constructor() : this(
         id = null,

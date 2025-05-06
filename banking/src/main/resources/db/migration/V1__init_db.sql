@@ -10,7 +10,7 @@ CREATE TABLE "categories"
     "name" VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE "profiles"
+CREATE TABLE "kycs"
 (
     "id"            SERIAL PRIMARY KEY,
     "user_id"       INT           NOT NULL UNIQUE,

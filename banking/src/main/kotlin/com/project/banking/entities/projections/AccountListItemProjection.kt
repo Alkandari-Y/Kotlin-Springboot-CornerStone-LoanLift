@@ -1,20 +1,26 @@
 package com.project.banking.entities.projections
 
+import com.project.banking.entities.AccountOwnerType
 import java.math.BigDecimal
 
 interface AccountListItemProjection {
     val id: Long
     val name: String
-    val userId: Long
+    val accountNumber: String
     val balance: BigDecimal
-    val isPrimary: Boolean
     val isActive: Boolean
     val isDeleted: Boolean
-    val accountNumber: String
     val category: CategoryItemProjection
+    val owner: AccountOwnershipProjection
 }
 
 interface CategoryItemProjection {
     val id: Long
     val name: String
+}
+
+interface AccountOwnershipProjection {
+    val id: Long
+    val ownerId: Long
+    val ownerType: AccountOwnerType
 }

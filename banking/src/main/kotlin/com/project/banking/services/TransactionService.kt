@@ -1,12 +1,11 @@
 package com.project.banking.services
 
-import com.project.banking.accounts.dtos.TransactionResultDto
-import com.project.banking.accounts.dtos.TransferCreateRequestDto
-
+import com.project.banking.accounts.dtos.TransactionResponse
+import com.project.banking.accounts.dtos.TransferCreateRequest
 
 interface TransactionService {
     fun transfer(
-        newTransaction: TransferCreateRequestDto,
+        newTransaction: TransferCreateRequest,
         userIdMakingTransfer: Long
-    ): TransactionResultDto
+    ): TransactionResponse
 }

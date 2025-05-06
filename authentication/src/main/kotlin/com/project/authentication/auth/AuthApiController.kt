@@ -69,8 +69,11 @@ class UserController(
             ?: throw UsernameNotFoundException("User not found")
 
         return ValidateTokenResponse(
-            userId = user.id.toString(),
+            userId = user.id ?: throw IllegalStateException("User id is null"),
             isActive = user.isActive,
-            roles = user.roles.map { it.name })
+            roles = user.roles.map { it.name },
+            username = user.username,
+            email = user.email
+        )
     }
 }

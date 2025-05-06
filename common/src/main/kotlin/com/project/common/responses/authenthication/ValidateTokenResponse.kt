@@ -1,7 +1,17 @@
 package com.project.common.responses.authenthication
 
 data class ValidateTokenResponse (
-    val userId: String,
+    val userId: Long,
     val isActive: Boolean,
-    val roles: List<String>
+    val roles: List<String>,
+    val email: String,
+    val username: String
 )
+
+fun ValidateTokenResponse.toUserInfoDto() = UserInfoDto(
+    userId = userId,
+    isActive = isActive,
+    email = email,
+    username = username
+)
+

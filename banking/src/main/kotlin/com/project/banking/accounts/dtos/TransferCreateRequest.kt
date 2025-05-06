@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank
 import org.jetbrains.annotations.NotNull
 import java.math.BigDecimal
 
-data class TransferCreateRequestDto(
+data class TransferCreateRequest(
     @field:NotBlank
     val sourceAccountNumber: String,
     @field:NotBlank

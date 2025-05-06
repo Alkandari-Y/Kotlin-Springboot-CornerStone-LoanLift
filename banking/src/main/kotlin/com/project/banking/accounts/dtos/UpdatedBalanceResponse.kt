@@ -6,6 +6,6 @@ data class UpdatedBalanceResponse(
     val newBalance: BigDecimal
 )
 
-fun TransactionResultDto.toUpdatedBalanceResponse() = UpdatedBalanceResponse(
+fun TransactionResponse.toUpdatedBalanceResponse() = UpdatedBalanceResponse(
     newBalance = this.sourceAccount.balance.setScale(3)
 )

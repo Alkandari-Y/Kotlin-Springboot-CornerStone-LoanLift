@@ -33,7 +33,7 @@ data class KYCEntity(
 ) {
     constructor(): this(
         id =null,
-        user=null,
+        userId=null,
         firstName="",
         lastName="",
         dateOfBirth=LocalDate.now(),

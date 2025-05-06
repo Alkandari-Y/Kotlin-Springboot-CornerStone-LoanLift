@@ -4,6 +4,7 @@ import com.project.banking.kycs.dtos.KYCRequest
 import com.project.banking.kycs.dtos.KYCResponse
 import com.project.banking.kycs.dtos.toResponse
 import com.project.banking.services.KYCService
+import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,15 +16,14 @@ import org.springframework.web.bind.annotation.*
 class KycApiController(
     private val kycService: KYCService,
 ) {
-    @PostMapping(path = ["/kyc"])
+    @PostMapping
     fun createOrUpdateKYC(
         @Valid @RequestBody kycRequest: KYCRequest,
-        @RequestAttribute("authUserId") userId: Long,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
     ): ResponseEntity<KYCResponse> {
-
         val kyc = kycService.createKYCOrUpdate(
             kycRequest = kycRequest,
-            userId = userId,
+            userId = authUser.userId,
         )
         return ResponseEntity(
             kyc.toResponse(),
@@ -31,11 +31,11 @@ class KycApiController(
         )
     }
 
-    @GetMapping(path = ["/kyc"])
+    @GetMapping
     fun getKYCBy(
-        @RequestAttribute("authUserId") userId: Long,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
     ): ResponseEntity<KYCResponse> {
-        val kyc = kycService.findKYCByUserId(userId)
+        val kyc = kycService.findKYCByUserId(authUser.userId)
             ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         return ResponseEntity(
             kyc.toResponse(),

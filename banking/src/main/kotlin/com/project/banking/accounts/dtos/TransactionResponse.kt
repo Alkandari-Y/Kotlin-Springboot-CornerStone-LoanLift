@@ -1,6 +1,9 @@
 package com.project.banking.accounts.dtos
 
-data class TransactionResultDto(
+import com.project.banking.entities.AccountEntity
+import com.project.banking.entities.TransactionEntity
+
+data class TransactionResponse(
     val sourceAccount: AccountEntity,
     val destinationAccount: AccountEntity,
     val transaction: TransactionEntity,
