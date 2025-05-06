@@ -44,10 +44,11 @@ class KycApiController(
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(path = ["/kyc/{userId}"])
+    @GetMapping(path = ["/client/{userId}"])
     fun getKYCByUserId(
         @PathVariable("userId") userId: Long
     ): ResponseEntity<KYCResponse> {
+        println("in controller")
         val kyc = kycService.findKYCByUserId(userId)
             ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         return ResponseEntity(

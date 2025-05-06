@@ -21,13 +21,15 @@ class JwtAuthenticationFilter(
         val token = extractToken(request)
         if (token != null && jwtService.isTokenValid(token, jwtService.extractUsername(token))) {
             val username = jwtService.extractUsername(token)
-            val roles = jwtService.extractRoles(token)
+            val userDetails = userDetailsService.loadUserByUsername(username)
+            val authorities = jwtService.extractRoles(token)
+                .map { SimpleGrantedAuthority(it) }
 
-            val authorities = roles.map { SimpleGrantedAuthority(it) }
             val authToken = UsernamePasswordAuthenticationToken(
-                username, null, authorities
+                userDetails, null, authorities
             )
             SecurityContextHolder.getContext().authentication = authToken
+
         }
         chain.doFilter(request, response)
     }

@@ -4,6 +4,7 @@ import com.project.common.exceptions.APIException
 import com.project.common.exceptions.ApiErrorResponse
 import com.project.common.exceptions.ErrorCode
 import com.project.common.exceptions.ValidationError
+import io.jsonwebtoken.ExpiredJwtException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.BadCredentialsException
@@ -16,6 +17,22 @@ import java.time.Instant
 
 @ControllerAdvice
 class GlobalExceptionHandler {
+
+    @ExceptionHandler(ExpiredJwtException::class)
+    fun handleExpiredToken(
+        ex: ExpiredJwtException,
+        request: WebRequest
+    ): ResponseEntity<ApiErrorResponse> {
+        val errorResponse = ApiErrorResponse(
+            timestamp = Instant.now().toString(),
+            status = HttpStatus.UNAUTHORIZED.value(),
+            error = HttpStatus.UNAUTHORIZED.reasonPhrase,
+            message = "Expired JWT token. Please re-login",
+            code = ErrorCode.EXPIRED_TOKEN.name,
+            path = request.getDescription(false).removePrefix("uri=")
+        )
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse)
+    }
 
     @ExceptionHandler(APIException::class)
     fun handleAPIBaseException(

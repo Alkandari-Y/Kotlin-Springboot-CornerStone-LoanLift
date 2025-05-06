@@ -2,6 +2,7 @@ package com.project.banking.filters
 
 import com.project.banking.providers.JwtAuthProvider
 import com.project.common.responses.authenthication.toUserInfoDto
+import com.project.common.security.RemoteUserPrincipal
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -23,7 +24,6 @@ class RemoteAuthenticationFilter(
         filterChain: FilterChain
     ) {
         val bearerToken: String? = request.getHeader("Authorization")
-        println("Bearer token: $bearerToken")
         if (bearerToken.isNullOrBlank() || !bearerToken.startsWith("Bearer ")) {
             response.sendError(HttpStatus.UNAUTHORIZED.value(), "Authorization header is missing or invalid")
             return
@@ -32,20 +32,25 @@ class RemoteAuthenticationFilter(
         try {
             val token = bearerToken.substring(7)
             val result = jwtAuthProvider.authenticateToken(token)
-            val userInfo = result.toUserInfoDto()
+            val authorities = result.roles.map { SimpleGrantedAuthority( it ) }
 
+            val userRemoteUserPrincipal = RemoteUserPrincipal(
+                username = result.username,
+                userId = result.userId,
+                isActive = result.isActive,
+                email = result.email,
+                authorities = authorities.toSet()
+            )
 
-            request.setAttribute("authUser", userInfo)
+            request.setAttribute("authUser", result.toUserInfoDto())
 
-            val authorities = result.roles.map { SimpleGrantedAuthority(it) }
-            logger.info("User roles: ${result.roles}")
-
-            val authentication = UsernamePasswordAuthenticationToken(
-                userInfo,
+            val authToken = UsernamePasswordAuthenticationToken(
+                userRemoteUserPrincipal,
                 null,
                 authorities
             )
-            SecurityContextHolder.getContext().authentication = authentication
+            SecurityContextHolder.getContext().authentication = authToken
+            println("Authorities: ${SecurityContextHolder.getContext().authentication.authorities}")
 
             filterChain.doFilter(request, response)
 
