@@ -1,7 +1,6 @@
 package com.project.banking.accounts.dtos
 
 import com.project.banking.entities.AccountEntity
-import com.project.banking.entities.CategoryEntity
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -21,12 +20,11 @@ data class AccountCreateRequest(
     val name: String
 )
 
-fun AccountCreateRequest.toEntity(categoryEntity: CategoryEntity): AccountEntity {
+fun AccountCreateRequest.toEntity(): AccountEntity {
     return AccountEntity(
         name = name,
         balance = initialBalance.setScale(3, RoundingMode.HALF_UP),
         isActive = true,
         isDeleted = false,
-        category = categoryEntity
     )
 }

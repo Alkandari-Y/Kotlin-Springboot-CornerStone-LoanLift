@@ -12,8 +12,12 @@ data class AccountOwnershipEntity(
     @Column(name = "owner_id")
     val ownerId: Long? = null,
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "owner_type")
     val ownerType: AccountOwnerType = AccountOwnerType.USER,
+
+    @Column(name = "is_primary")
+    val isPrimary: Boolean = false,
 
     @OneToOne
     @JoinColumn(name = "account_id", referencedColumnName = "id", unique = true)
@@ -23,7 +27,8 @@ data class AccountOwnershipEntity(
         id = null,
         ownerId = null,
         ownerType = AccountOwnerType.USER,
-        account = null
+        account = null,
+        isPrimary = false,
     )
 }
 

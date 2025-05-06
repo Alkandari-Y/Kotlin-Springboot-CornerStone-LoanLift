@@ -9,14 +9,7 @@ interface AccountListItemProjection {
     val accountNumber: String
     val balance: BigDecimal
     val isActive: Boolean
-    val isDeleted: Boolean
-    val category: CategoryItemProjection
     val owner: AccountOwnershipProjection
-}
-
-interface CategoryItemProjection {
-    val id: Long
-    val name: String
 }
 
 interface AccountOwnershipProjection {

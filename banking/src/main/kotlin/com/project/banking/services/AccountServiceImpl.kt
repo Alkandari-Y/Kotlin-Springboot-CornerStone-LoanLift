@@ -23,11 +23,15 @@ class AccountServiceImpl(
         return accountRepository.allAccounts()
     }
 
-    override fun getAccountByUserId(userId: Long): List<AccountEntity> {
+    override fun getAccountByUserId(userId: Long): List<AccountListItemProjection> {
         return accountRepository.findAllByOwner(userId, AccountOwnerType.USER)
     }
 
-    override fun createClientAccount(accountEntity: AccountEntity, userInfoDto: UserInfoDto): AccountEntity {
+    override fun createClientAccount(
+        accountEntity: AccountEntity,
+        userInfoDto: UserInfoDto)
+    : AccountEntity {
+
         val numOfCustomerAccount = accountRepository.countByOwner(
             userId = userInfoDto.userId,
             ownerType = AccountOwnerType.USER
@@ -43,9 +47,9 @@ class AccountServiceImpl(
                 ownerId = userInfoDto.userId,
                 ownerType = AccountOwnerType.USER,
                 account = newAccount,
+                isPrimary = numOfCustomerAccount == 0L,
             )
         )
-
         return newAccount
     }
 

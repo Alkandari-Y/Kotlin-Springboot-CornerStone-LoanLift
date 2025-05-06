@@ -3,6 +3,7 @@ package com.project.banking.entities
 
 import jakarta.persistence.*
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.*
 
 @Entity
@@ -30,11 +31,11 @@ data class AccountEntity(
         .replace("[A-Za-z]".toRegex(), "")
         .replace("-", ""),
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = [CascadeType.DETACH])
-    @JoinColumn(name="category_id")
-    val category: CategoryEntity?,
+    @Column(name = "created_at", nullable = false)
+    val createdAt: LocalDateTime = LocalDateTime.now(),
 
-    @OneToOne(mappedBy = "account", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+
+    @OneToOne(mappedBy = "account", fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     val owner: AccountOwnershipEntity? = null
     ) {
     constructor() : this(
@@ -45,7 +46,5 @@ data class AccountEntity(
         isDeleted = false,
         accountNumber = UUID.randomUUID().toString()
             .replace("[A-Za-z]".toRegex(), "")
-            .replace("-", ""),
-        category = null,
-    )
+            .replace("-", ""))
 }

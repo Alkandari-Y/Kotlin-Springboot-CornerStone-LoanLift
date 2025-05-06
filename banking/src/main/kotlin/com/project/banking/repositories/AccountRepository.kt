@@ -23,7 +23,7 @@ interface AccountRepository: JpaRepository<AccountEntity, Long> {
     fun findAllByOwner(
         @Param("userId") userId: Long,
         @Param("ownerType") ownerType: AccountOwnerType = AccountOwnerType.USER
-    ): List<AccountEntity>
+    ): List<AccountListItemProjection>
 
     @Query("""
     SELECT a FROM AccountEntity a

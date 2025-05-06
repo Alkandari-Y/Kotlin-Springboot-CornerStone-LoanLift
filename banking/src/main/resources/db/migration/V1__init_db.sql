@@ -29,11 +29,7 @@ CREATE TABLE "accounts"
     "is_active"      BOOLEAN       NOT NULL,
     "created_at"     TIMESTAMP     NOT NULL,
     "is_deleted"     BOOLEAN       NOT NULL,
-    "account_number" VARCHAR(255)  NOT NULL UNIQUE,
-    "category_id"    INT           NOT NULL,
-    CONSTRAINT "fk_account_category"
-        FOREIGN KEY ("category_id")
-            REFERENCES "categories" ("id")
+    "account_number" VARCHAR(255)  NOT NULL UNIQUE
 );
 
 CREATE TABLE "transactions"
