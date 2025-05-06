@@ -16,4 +16,5 @@ interface AccountOwnershipProjection {
     val id: Long
     val ownerId: Long
     val ownerType: AccountOwnerType
+    val isPrimary: Boolean
 }

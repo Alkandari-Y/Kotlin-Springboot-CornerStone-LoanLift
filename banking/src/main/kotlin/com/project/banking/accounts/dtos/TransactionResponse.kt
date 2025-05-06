@@ -7,4 +7,5 @@ data class TransactionResponse(
     val sourceAccount: AccountEntity,
     val destinationAccount: AccountEntity,
     val transaction: TransactionEntity,
+    val category: String
 )

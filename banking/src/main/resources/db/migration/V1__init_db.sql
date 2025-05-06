@@ -18,16 +18,15 @@ CREATE TABLE "kycs"
     "last_name"     VARCHAR(255)  NOT NULL,
     "date_of_birth" DATE          NOT NULL,
     "nationality"   VARCHAR(255)  NOT NULL,
-    "salary"        DECIMAL(8, 2) NOT NULL
+    "salary"        DECIMAL(9, 3) NOT NULL
 );
 
 CREATE TABLE "accounts"
 (
     "id"             SERIAL PRIMARY KEY,
     "name"           VARCHAR(255)  NOT NULL,
-    "balance"        DECIMAL(8, 2) NOT NULL,
+    "balance"        DECIMAL(9, 3) NOT NULL,
     "is_active"      BOOLEAN       NOT NULL,
-    "created_at"     TIMESTAMP     NOT NULL,
     "is_deleted"     BOOLEAN       NOT NULL,
     "account_number" VARCHAR(255)  NOT NULL UNIQUE
 );
@@ -37,9 +36,7 @@ CREATE TABLE "transactions"
     "id"                  SERIAL PRIMARY KEY,
     "source_account"      INT           NOT NULL,
     "destination_account" INT           NOT NULL,
-    "amount"              DECIMAL(8, 2) NOT NULL,
-    "owner_reference_id"  INT           NOT NULL,
-    "reference_type"      VARCHAR(50)   NOT NULL,
+    "amount"              DECIMAL(9, 3) NOT NULL,
     "created_at"          TIMESTAMP     NOT NULL,
     "category_id"         INT           NOT NULL,
     CONSTRAINT "fk_transaction_source"

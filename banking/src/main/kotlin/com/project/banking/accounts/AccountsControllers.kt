@@ -1,7 +1,13 @@
 package com.project.banking.accounts
 
 import com.project.banking.accounts.dtos.AccountCreateRequest
+import com.project.banking.accounts.dtos.AccountResponse
+import com.project.banking.accounts.dtos.TransferCreateRequest
+import com.project.banking.accounts.dtos.UpdateAccountRequest
+import com.project.banking.accounts.dtos.UpdatedBalanceResponse
+import com.project.banking.accounts.dtos.toBasicResponse
 import com.project.banking.accounts.dtos.toEntity
+import com.project.banking.accounts.dtos.toUpdatedBalanceResponse
 import com.project.banking.entities.AccountEntity
 import com.project.banking.entities.projections.AccountListItemProjection
 import com.project.banking.services.AccountService
@@ -50,24 +56,42 @@ class AccountsControllers(
         return ResponseEntity(account, HttpStatus.CREATED)
     }
 
-//    @PostMapping(path=["/transfer"])
-//    fun transfer(
-//        @Valid @RequestBody transferCreateRequestDto: TransferCreateRequest,
-//    ): ResponseEntity<UpdatedBalanceResponse> {
-//            val result = transactionService.transfer(
-//                transferCreateRequestDto,
-//                userIdMakingTransfer =
-//            )
-//            return ResponseEntity(
-//                result.toUpdatedBalanceResponse(),
-//                HttpStatus.OK
-//            )
-//    }
+    @PostMapping(path=["/transfer"])
+    fun transfer(
+        @Valid @RequestBody transferCreateRequestDto: TransferCreateRequest,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
 
-//    @PostMapping(path=["/{accountNumber}/close"])
-//    fun closeAccount(
-//        @PathVariable accountNumber : String,
-//    ) {
-//        accountService.closeAccount(accountNumber )
-//    }
+        ): ResponseEntity<UpdatedBalanceResponse> {
+            val result = transactionService.transfer(
+                transferCreateRequestDto,
+                userIdMakingTransfer = authUser.userId,
+            )
+            return ResponseEntity(
+                result.toUpdatedBalanceResponse(),
+                HttpStatus.OK
+            )
+    }
+
+    @PostMapping(path=["/close/{accountNumber}"])
+    fun closeAccount(
+        @PathVariable accountNumber : String,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+        ): ResponseEntity<Unit> {
+        accountService.closeAccount(accountNumber, authUser.userId)
+        return ResponseEntity(HttpStatus.OK)
+    }
+
+    @PutMapping(path=["/{accountNumber}"])
+    fun updateAccount(
+        @PathVariable accountNumber : String,
+        @Valid @RequestBody accountUpdate: UpdateAccountRequest,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+    ): ResponseEntity<AccountResponse>{
+        val updatedAccount = accountService.updateAccount(
+            accountNumber = accountNumber,
+            userId = authUser.userId,
+            accountUpdate = accountUpdate,
+        ).toBasicResponse()
+        return ResponseEntity(updatedAccount, HttpStatus.OK)
+    }
 }

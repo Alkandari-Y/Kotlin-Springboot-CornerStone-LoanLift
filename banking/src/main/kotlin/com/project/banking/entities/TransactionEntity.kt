@@ -28,12 +28,19 @@ data class TransactionEntity(
     val amount: BigDecimal,
 
     @CreationTimestamp
-    val createdDate: Instant = Instant.now(),
+    @Column(name = "created_at", nullable = false)
+    val createdAt: Instant = Instant.now(),
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    val category: CategoryEntity? = null,
     ) {
     constructor() : this(
         id = null,
         sourceAccount = null,
         destinationAccount = null,
         amount = BigDecimal.ZERO,
+        createdAt = Instant.now(),
+        category = null
     )
 }
