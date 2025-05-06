@@ -5,9 +5,11 @@ import com.project.banking.accounts.dtos.TransferCreateRequest
 import com.project.banking.accounts.exceptions.AccountNotFoundException
 import com.project.banking.accounts.exceptions.InsufficientFundsException
 import com.project.banking.accounts.exceptions.InvalidTransferException
+import com.project.banking.entities.AccountOwnershipEntity
 import com.project.banking.entities.TransactionEntity
 import com.project.banking.repositories.AccountRepository
 import com.project.banking.repositories.TransactionRepository
+import com.project.banking.transactions.dtos.TransactionDetails
 import com.project.common.exceptions.ErrorCode
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
@@ -16,7 +18,8 @@ import java.math.BigDecimal
 @Service
 class TransactionServiceImpl(
     private val transactionRepository: TransactionRepository,
-    private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository,
+    private val categoryService: CategoryService
 ): TransactionService {
 
     @Transactional
@@ -42,7 +45,7 @@ class TransactionServiceImpl(
         if (sourceAccount.owner?.ownerId != userIdMakingTransfer) {
             throw InvalidTransferException("Cannot transfer with another persons account.", code = ErrorCode.INVALID_TRANSFER)
         }
-
+        val category = categoryService.getCategoryByName("personal")
         val newSourceBalance = sourceAccount.balance.setScale(3).subtract(newTransaction.amount)
         val newDestinationBalance = destinationAccount.balance.setScale(3).add(newTransaction.amount)
 
@@ -55,6 +58,7 @@ class TransactionServiceImpl(
                 sourceAccount = sourceAccount,
                 destinationAccount = destinationAccount,
                 amount = newTransaction.amount.setScale(3),
+                category = category,
             )
         )
 
@@ -67,7 +71,21 @@ class TransactionServiceImpl(
         return TransactionResponse(
             sourceAccount = updatedSourceAccount,
             destinationAccount = updatedDestinationAccount,
-            transaction = transaction
+            transaction = transaction,
+            category = category?.name!!,
         )
+    }
+
+    override fun getTransactionsByAccount(accountOwnership: AccountOwnershipEntity): List<TransactionDetails> {
+        return transactionRepository.findRelatedTransactions(
+            accountOwnership.ownerId!!,
+            accountOwnership.ownerType
+        )
+    }
+
+    override fun getAllTransactionByUserId(
+        accountOwnership: AccountOwnershipEntity
+    ): List<TransactionResponse> {
+        TODO("Not yet implemented")
     }
 }

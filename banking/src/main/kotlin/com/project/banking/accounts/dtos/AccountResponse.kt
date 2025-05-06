@@ -1,3 +1,18 @@
 package com.project.banking.accounts.dtos
 
-data class AccountResopnse()
+import com.project.banking.entities.AccountEntity
+import java.math.BigDecimal
+
+data class AccountResponse(
+    val id: Long,
+    val accountNumber: String,
+    val name: String,
+    val balance: BigDecimal,
+)
+
+fun AccountEntity.toBasicResponse() = AccountResponse(
+    id = id!!,
+    accountNumber = accountNumber!!,
+    name = name,
+    balance = balance
+)
