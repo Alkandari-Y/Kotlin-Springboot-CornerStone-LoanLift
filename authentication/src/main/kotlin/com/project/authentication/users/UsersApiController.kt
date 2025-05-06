@@ -1,8 +1,12 @@
 package com.project.authentication.users
 
+import com.project.authentication.entities.RoleEntity
 import com.project.authentication.services.RoleService
 import com.project.authentication.services.UserService
+import com.project.authentication.users.dtos.RoleCreateRequest
 import com.project.authentication.users.dtos.RolesAssignmentRequest
+import com.project.authentication.users.dtos.toEntity
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -24,7 +28,7 @@ class UsersApiController(
     @PostMapping("/add-role/{userId}")
     fun addRole(
         @PathVariable("userId") userId: Long,
-        @RequestBody newRoles: RolesAssignmentRequest,
+        @Valid @RequestBody newRoles: RolesAssignmentRequest,
     ): ResponseEntity<Unit> {
         roleService.assignRolesToUser(userId, newRoles.roles)
         return ResponseEntity(HttpStatus.OK)
@@ -42,4 +46,17 @@ class UsersApiController(
             HttpStatus.OK
         )
     }
+
+    @PreAuthorize("hasRole('ROLE_DEVELOPER')")
+    @PostMapping("/roles")
+    fun createNewRoles(
+        @Valid @RequestBody newRole: RoleCreateRequest,
+    ): ResponseEntity<RoleEntity> {
+        return ResponseEntity(
+            roleService.createRole(
+                newRole.toEntity()
+            ),
+            HttpStatus.CREATED)
+    }
 }
+

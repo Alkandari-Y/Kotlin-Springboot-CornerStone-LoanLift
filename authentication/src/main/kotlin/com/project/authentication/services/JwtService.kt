@@ -64,7 +64,7 @@ class JwtService (
 
 
     fun extractRoles(token: String): List<String> =
-        parseToken(token).get("roles", List::class.java) as List<String>
+        parseToken(token).get("roles", ArrayList::class.java).map { it.toString() }
 
     fun isTokenValid(token: String, username: String): Boolean =
         extractUsername(token) == username

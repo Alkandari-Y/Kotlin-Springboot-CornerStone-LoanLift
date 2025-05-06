@@ -1,8 +1,6 @@
 package com.project.banking.entities
 
-import com.project.banking.events.KycCreatedEvent
 import jakarta.persistence.*
-import org.springframework.context.ApplicationEventPublisher
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
