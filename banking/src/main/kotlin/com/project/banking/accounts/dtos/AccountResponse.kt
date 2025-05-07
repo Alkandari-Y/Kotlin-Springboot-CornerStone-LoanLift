@@ -8,11 +8,15 @@ data class AccountResponse(
     val accountNumber: String,
     val name: String,
     val balance: BigDecimal,
+    val active: Boolean,
+    val ownerId: Long
 )
 
 fun AccountEntity.toBasicResponse() = AccountResponse(
     id = id!!,
-    accountNumber = accountNumber!!,
+    accountNumber = accountNumber,
     name = name,
-    balance = balance
+    balance = balance,
+    ownerId = ownerId!!,
+    active = active
 )

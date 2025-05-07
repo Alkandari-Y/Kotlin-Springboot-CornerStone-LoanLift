@@ -2,7 +2,6 @@ package com.project.banking.services
 
 import com.project.banking.accounts.dtos.TransactionResponse
 import com.project.banking.accounts.dtos.TransferCreateRequest
-import com.project.banking.entities.AccountOwnershipEntity
 import com.project.banking.transactions.dtos.TransactionDetails
 
 interface TransactionService {
@@ -11,10 +10,8 @@ interface TransactionService {
         userIdMakingTransfer: Long
     ): TransactionResponse
 
-    fun getTransactionsByAccount(
-        accountOwnership: AccountOwnershipEntity
-    ): List<TransactionDetails>
+    fun getTransactionsByAccount(accountNumber: String): List<TransactionDetails>
     fun getAllTransactionByUserId(
-        accountOwnership: AccountOwnershipEntity
+        userId: Long
     ): List<TransactionResponse>
 }

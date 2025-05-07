@@ -17,7 +17,8 @@ import org.springframework.web.multipart.MultipartFile
 
 @Service
 class CampaignServiceImpl(
-    private val campaignRepository: CampaignRepositories
+    private val campaignRepository: CampaignRepositories,
+    private val fileStorageService: FileStorageService,
 ): CampaignService {
     override fun getAllCampaigns(): List<CampaignEntity> {
         return campaignRepository.findAll()
@@ -40,7 +41,7 @@ class CampaignServiceImpl(
             )
         }
         val account = 1L
-        val imageUrl = saveMultipartFileLocally(image)
+        val imageUrl = fileStorageService.uploadFile(image)
         val campaign = campaignDto.toEntity(
             createdBy = user.userId,
             imageUrl = imageUrl,

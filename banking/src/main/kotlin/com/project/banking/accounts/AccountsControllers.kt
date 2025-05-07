@@ -10,8 +10,6 @@ import com.project.banking.accounts.dtos.toEntity
 import com.project.banking.accounts.dtos.toUpdatedBalanceResponse
 import com.project.banking.accounts.exceptions.AccountNotFoundException
 import com.project.banking.entities.AccountEntity
-import com.project.banking.entities.projections.AccountListItemProjection
-import com.project.banking.services.AccountOwnershipService
 import com.project.banking.services.AccountService
 import com.project.banking.services.TransactionService
 import com.project.common.exceptions.APIException
@@ -28,14 +26,13 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/accounts")
 class AccountsControllers(
     private val accountService: AccountService,
-    private val accountOwnershipService: AccountOwnershipService,
     private val transactionService: TransactionService
 ) {
 
     @GetMapping
     fun getAllAccounts(
         @AuthenticationPrincipal user: RemoteUserPrincipal
-    ): List<AccountListItemProjection> {
+    ): List<AccountResponse> {
         return accountService.getAccountByUserId(user.getUserId())
     }
     @PostMapping
@@ -75,7 +72,7 @@ class AccountsControllers(
             )
     }
 
-    @PostMapping(path=["/close/{accountNumber}"])
+    @DeleteMapping(path=["/close/{accountNumber}"])
     fun closeAccount(
         @PathVariable accountNumber : String,
         @RequestAttribute("authUser") authUser: UserInfoDto,
@@ -103,26 +100,26 @@ class AccountsControllers(
         @PathVariable accountNumber : String,
         @AuthenticationPrincipal user: RemoteUserPrincipal
     ): ResponseEntity<AccountResponse>{
-        val accountOwned = accountOwnershipService.getByAccountNumber(accountNumber)
+        println("in controller $accountNumber")
+        val account = accountService.getByAccountNumber(accountNumber)
             ?: throw AccountNotFoundException()
-
-        val isOwner = accountOwned.ownerId == user.getUserId()
+        println("in controller $account")
+        val isOwner = account.ownerId == user.getUserId()
         val isAdmin = user.authorities.any { it.authority == "ROLE_ADMIN" }
 
         if (!isOwner && !isAdmin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
-        val account = accountOwned.account ?: throw AccountNotFoundException()
 
-        if (account.isDeleted || account.isActive.not()) {
+        if (account.active.not() && isAdmin.not()) {
             throw APIException(
-                message = "Account was deleted or is not active anymore",
+                message = "Account is not active anymore",
                 httpStatus = HttpStatus.BAD_REQUEST,
                 code = ErrorCode.ACCOUNT_NOT_ACTIVE,
             )
         }
 
-        return ResponseEntity(accountOwned.account?.toBasicResponse(), HttpStatus.OK)
+        return ResponseEntity(account.toBasicResponse(), HttpStatus.OK)
     }
 }

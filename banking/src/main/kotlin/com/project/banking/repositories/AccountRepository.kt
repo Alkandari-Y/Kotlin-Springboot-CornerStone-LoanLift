@@ -1,8 +1,7 @@
 package com.project.banking.repositories
 
+import com.project.banking.accounts.dtos.AccountResponse
 import com.project.banking.entities.AccountEntity
-import com.project.banking.entities.AccountOwnerType
-import com.project.banking.entities.projections.AccountListItemProjection
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -10,55 +9,24 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface AccountRepository: JpaRepository<AccountEntity, Long> {
-    @Query("SELECT a FROM AccountEntity a WHERE a.isActive = TRUE AND a.isDeleted = FALSE")
-    fun allAccounts(): List<AccountListItemProjection>
+
+    @Query("""
+    SELECT new com.project.banking.accounts.dtos.AccountResponse(
+        a.id,
+        a.accountNumber,
+        a.name,
+        a.balance,
+        a.active,
+        a.ownerId
+    )
+    FROM AccountEntity a
+    WHERE a.ownerId = :ownerId AND a.active = true
+""")
+    fun findAllByOwnerId(@Param("ownerId") ownerId: Long): List<AccountResponse>
+
+    @Query("SELECT COUNT(a) FROM AccountEntity a WHERE a.ownerId = :userId AND a.active = TRUE")
+    fun getAccountCountByUserId(@Param("userId") userId: Long): Long
 
     fun findByAccountNumber(accountNumber: String): AccountEntity?
-
-    @Query("""
-    SELECT a FROM AccountEntity a
-    JOIN a.owner ao
-    WHERE ao.ownerId = :userId AND ao.ownerType = :ownerType
-""")
-    fun findAllByOwner(
-        @Param("userId") userId: Long,
-        @Param("ownerType") ownerType: AccountOwnerType = AccountOwnerType.USER
-    ): List<AccountListItemProjection>
-
-    @Query("""
-    SELECT a FROM AccountEntity a
-    JOIN a.owner ao
-    WHERE a.id = :accountId AND ao.ownerId = :userId AND ao.ownerType = :ownerType
-""")
-    fun findByIdAndOwner(
-        @Param("accountId") accountId: Long,
-        @Param("userId") userId: Long,
-        @Param("ownerType") ownerType: AccountOwnerType = AccountOwnerType.USER
-    ): AccountEntity?
-
-    @Query("""
-    SELECT COUNT(a) FROM AccountEntity a
-    JOIN a.owner ao
-    WHERE ao.ownerId = :userId AND ao.ownerType = :ownerType
-""")
-    fun countByOwner(
-        @Param("userId") userId: Long,
-        @Param("ownerType") ownerType: AccountOwnerType = AccountOwnerType.USER
-    ): Long
-
-    @Query("""
-    SELECT a FROM AccountEntity a
-    JOIN a.owner ao
-    WHERE ao.ownerId = :userId 
-    AND ao.ownerType = :ownerType
-    AND a.isActive = true AND a.isDeleted = false
-""")
-    fun findActiveByOwner(
-        @Param("userId") userId: Long,
-        @Param("ownerType") ownerType: AccountOwnerType = AccountOwnerType.USER
-    ): List<AccountListItemProjection>
-
-
-
 
 }
