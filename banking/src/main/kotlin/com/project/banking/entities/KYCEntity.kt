@@ -42,4 +42,3 @@ data class KYCEntity(
     )
 }
 
-var kycDateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")

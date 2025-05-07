@@ -25,6 +25,7 @@
         <module>authentication</module>
         <module>banking</module>
         <module>common</module>
+        <module>campaignlift</module>
     </modules>
     <scm>
         <connection/>

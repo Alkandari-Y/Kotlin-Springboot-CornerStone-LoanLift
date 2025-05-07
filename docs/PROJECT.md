@@ -141,7 +141,7 @@ Each campaign is an **investment opportunity**, where contributors (lenders/pled
 * `amount_raised` (calculated)
 * `interest_rate`
 * `repayment_months`
-* `monthly_installment` (calculated)
+* `monthly_installment`
 * `status` (`new`, `pending`, `active`, `funded`, `failed`, `completed`, `defaulted`, `rejected`, `deactivated`)
 * `extra_docs` (JSON or file metadata — for bank rep to review)
 * `submitted_at`

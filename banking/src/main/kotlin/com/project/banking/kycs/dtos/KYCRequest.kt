@@ -1,7 +1,7 @@
 package com.project.banking.kycs.dtos
 
 import com.project.banking.entities.KYCEntity
-import com.project.banking.entities.kycDateFormatter
+import com.project.common.utils.dateFormatter
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.NotBlank
 import org.jetbrains.annotations.NotNull
@@ -28,7 +28,7 @@ fun KYCRequest.toEntity(userId: Long) = KYCEntity(
     userId = userId,
     firstName = firstName,
     lastName = lastName,
-    dateOfBirth = LocalDate.parse(dateOfBirth, kycDateFormatter),
+    dateOfBirth = LocalDate.parse(dateOfBirth, dateFormatter),
     salary = salary,
     nationality = nationality
 )

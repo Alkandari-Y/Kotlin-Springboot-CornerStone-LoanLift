@@ -2,12 +2,12 @@ package com.project.banking.services
 
 import com.project.banking.accounts.exceptions.AccountVerificationException
 import com.project.banking.entities.KYCEntity
-import com.project.banking.entities.kycDateFormatter
 import com.project.banking.events.KycCreatedEvent
 import com.project.banking.kycs.dtos.KYCRequest
 import com.project.banking.kycs.dtos.toEntity
 import com.project.banking.repositories.KYCRepository
 import com.project.common.exceptions.ErrorCode
+import com.project.common.utils.dateFormatter
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -30,7 +30,7 @@ class KYCServiceImpl(
             firstName= kycRequest.firstName,
             lastName= kycRequest.lastName,
             dateOfBirth= kycRequest.dateOfBirth.let {
-                LocalDate.parse(kycRequest.dateOfBirth, kycDateFormatter)
+                LocalDate.parse(kycRequest.dateOfBirth, dateFormatter)
             },
             nationality= kycRequest.nationality,
             salary= kycRequest.salary,
