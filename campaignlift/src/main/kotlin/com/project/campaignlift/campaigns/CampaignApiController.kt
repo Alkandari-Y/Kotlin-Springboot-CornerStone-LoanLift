@@ -51,6 +51,11 @@ class CampaignApiController (
         @RequestAttribute("authUser") authUser: UserInfoDto,
         authentication: Authentication
     ): ResponseEntity<CampaignEntity> {
+
+        if (authUser.isActive.not()) {
+            throw APIException("kyc not verified")
+        }
+
         val token = authentication.credentials?.toString()
 
         if (token.isNullOrEmpty()) {
@@ -61,7 +66,6 @@ class CampaignApiController (
             )
         }
         val account = bandServiceProvider.getAccount(campaignCreateRequest.accountId, token)
-            ?: throw APIException("Invalid account id", HttpStatus.BAD_REQUEST, ErrorCode.INVALID_INPUT)
 
         val campaign = campaignService.createCampaign(
             campaignDto = campaignCreateRequest,
@@ -72,19 +76,24 @@ class CampaignApiController (
         return ResponseEntity(campaign, HttpStatus.CREATED)
     }
 
-    @GetMapping("/images/{filename}")
+    @GetMapping("/details/{campaignId}")
     fun getPublicFile(
-        @PathVariable filename: String):
-            ResponseEntity<Resource> {
-        val file = Paths.get("uploads").resolve(filename).normalize().toFile()
-        if (!file.exists()) return ResponseEntity.notFound().build()
-
-        val resource = UrlResource(file.toURI())
-        return ResponseEntity.ok()
-            .contentType(
-    MediaTypeFactory.getMediaType(file.name)
-                .orElse(MediaType.APPLICATION_OCTET_STREAM)
-            ).body(resource)
+        @PathVariable("campaignId") campaignId: Long): CampaignEntity
+    {
+        val campaign = campaignService.getCampaignById(campaignId)
+        ?: throw APIException(
+                "Campaign with id $campaignId not found",
+                HttpStatus.NOT_FOUND,
+                ErrorCode.ACCOUNT_NOT_FOUND
+        )
+        if (campaign.status in listOf(CampaignStatus.NEW, CampaignStatus.REJECTED, CampaignStatus.PENDING)) {
+            throw  APIException(
+                "Campaign with id $campaignId not found",
+                HttpStatus.NOT_FOUND,
+                ErrorCode.ACCOUNT_NOT_FOUND
+            )
+        }
+        return campaign
     }
 
     @GetMapping("/manage")

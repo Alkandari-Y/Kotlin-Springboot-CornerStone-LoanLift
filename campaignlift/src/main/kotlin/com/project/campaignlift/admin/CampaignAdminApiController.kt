@@ -34,7 +34,16 @@ class CampaignAdminApiController (
     }
 
     @GetMapping("/details/{campaignId}")
-    fun getCampaignById(campaignId: Long) = "This is a campaign with id: $campaignId"
+    fun getCampaignById(@PathVariable("campaignId") campaignId: Long): CampaignEntity {
+        val campaign = campaignService.getCampaignById(campaignId)
+        ?: throw APIException(
+                "Campaign with id $campaignId not found",
+                HttpStatus.NOT_FOUND,
+                ErrorCode.ACCOUNT_NOT_FOUND
+            )
+
+        return campaign
+    }
 
     @PutMapping("/details/{campaignId}")
     fun editCampaign(campaignId: Long) = "This is a campaign with id: $campaignId"
