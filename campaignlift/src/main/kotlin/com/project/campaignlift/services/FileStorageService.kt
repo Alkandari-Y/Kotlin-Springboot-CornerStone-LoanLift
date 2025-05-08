@@ -12,7 +12,7 @@ class FileStorageService(private val s3Client: S3Client) {
     private val bucketName = "loanlift-public"
 
     fun uploadFile(file: MultipartFile): String {
-        val key = UUID.randomUUID().toString() + "-" + file.originalFilename
+        val key = UUID.randomUUID().toString()
 
         val request = PutObjectRequest.builder()
             .bucket(bucketName)

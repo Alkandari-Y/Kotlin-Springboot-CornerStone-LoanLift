@@ -62,6 +62,9 @@ class GlobalExceptionHandler {
             code = ErrorCode.INTERNAL_SERVER_ERROR.name,
             path = request.getDescription(false).removePrefix("uri=")
         )
+        println(ex.message)
+        println(ex.cause)
+        print(ex.stackTrace)
         return ResponseEntity.status(status).body(errorResponse)
     }
 

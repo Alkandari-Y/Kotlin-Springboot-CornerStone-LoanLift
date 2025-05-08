@@ -53,9 +53,14 @@ data class CampaignEntity(
     @Column(name = "image_url")
     val imageUrl: String? = null,
 
+
+    @OneToMany(mappedBy = "campaign", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    val comments: List<CommentEntity>? = null,
+
     @Transient
     var amountRaised: BigDecimal = BigDecimal.ZERO,
-) {
+
+    ) {
     constructor() : this(
         id = null,
         createdBy = 0L,

@@ -56,7 +56,10 @@ class CampaignApiController (
             throw APIException("kyc not verified")
         }
 
+        println("stage 1")
+
         val token = authentication.credentials?.toString()
+        println("stage 2")
 
         if (token.isNullOrEmpty()) {
             throw APIException(
@@ -65,8 +68,14 @@ class CampaignApiController (
                 ErrorCode.INVALID_CREDENTIALS
             )
         }
-        val account = bandServiceProvider.getAccount(campaignCreateRequest.accountId, token)
+        println("stage 3")
 
+        val account = bandServiceProvider.getAccount(
+            campaignCreateRequest.accountId,
+            token,
+            authUser.userId
+        )
+        println("stage 4")
         val campaign = campaignService.createCampaign(
             campaignDto = campaignCreateRequest,
             user = authUser,
@@ -95,6 +104,12 @@ class CampaignApiController (
         }
         return campaign
     }
+
+    @GetMapping("/details/{campaignId}/comments")
+    fun allAllCampaignComments() = "This is a comment"
+
+    @PostMapping("/details/{campaignId}/comments")
+    fun addComment() = "This is a comment"
 
     @GetMapping("/manage")
     fun getMyCampaigns(

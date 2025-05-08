@@ -5,12 +5,6 @@ import java.io.File
 import java.nio.file.Paths
 import java.util.UUID
 
-import software.amazon.awssdk.auth.credentials.*
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.s3.*
-import software.amazon.awssdk.services.s3.model.*
-import java.net.URI
-
 
 fun saveMultipartFileLocally(file: MultipartFile): String {
     val uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toFile()

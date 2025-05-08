@@ -40,6 +40,7 @@ class CampaignServiceImpl(
                 httpStatus = HttpStatus.BAD_REQUEST
             )
         }
+
         val imageUrl = fileStorageService.uploadFile(image)
         val campaign = campaignDto.toEntity(
             createdBy = user.userId,

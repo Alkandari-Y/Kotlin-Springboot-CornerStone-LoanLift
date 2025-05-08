@@ -32,8 +32,8 @@ class BandServiceProvider(
         return response.body ?: false
     }
 
-    fun getAccount(accountId: Long, token: String): AccountResponse {
-        val url = "$bankServiceBaseUrl/clients/{clientId}/account?accountId=$accountId"
+    fun getAccount(accountId: Long, token: String, clientId: Long): AccountResponse {
+        val url = "$bankServiceBaseUrl/accounts/clients?accountId=$accountId"
         val account = sendRequest<AccountResponse>(url, token).body
             ?: throw APIException("Account not found", HttpStatus.NOT_FOUND, ErrorCode.ACCOUNT_NOT_FOUND)
         return account
