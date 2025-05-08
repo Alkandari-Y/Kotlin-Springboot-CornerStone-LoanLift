@@ -2,7 +2,6 @@ package com.project.campaignlift.campaigns.dtos
 
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
-import com.project.campaignlift.entities.CommentEntity
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -21,24 +20,25 @@ data class CampaignDetailResponse(
     val accountId: Long,
     val imageUrl: String,
     var amountRaised: BigDecimal,
-    var comments: List<CommentResponseDto> = emptyList()
 )
 
 
-fun CampaignEntity.toDetailResponse(comments: List<CommentResponseDto> = emptyList()) = CampaignDetailResponse(
-    createdBy = createdBy!!,
-    categoryId = categoryId!!,
-    title = title,
-    description = description!!,
-    goalAmount = goalAmount!!,
-    interestRate = interestRate,
-    repaymentMonths = repaymentMonths,
-    status = status,
-    submittedAt = submittedAt!!,
-    approvedBy = approvedBy,
-    campaignDeadline = campaignDeadline!!,
-    accountId = accountId!!,
-    imageUrl = imageUrl!!,
+fun CampaignEntity.toDetailResponse(
+    amountRaised: BigDecimal =
+    BigDecimal.ZERO
+) = CampaignDetailResponse(
+    createdBy = this.createdBy!!,
+    categoryId =this. categoryId!!,
+    title = this.title,
+    description = this.description!!,
+    goalAmount = this.goalAmount!!,
+    interestRate = this.interestRate,
+    repaymentMonths = this.repaymentMonths,
+    status = this.status,
+    submittedAt = this.submittedAt!!,
+    approvedBy = this.approvedBy,
+    campaignDeadline = this.campaignDeadline!!,
+    accountId = this.accountId!!,
+    imageUrl = this.imageUrl!!,
     amountRaised = amountRaised,
-    comments = comments
 )

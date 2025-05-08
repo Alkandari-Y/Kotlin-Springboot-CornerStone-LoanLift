@@ -2,7 +2,7 @@ package com.project.campaignlift.campaigns.dtos
 
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
-import com.project.campaignlift.entities.CommentEntity
+import com.project.campaignlift.entities.projections.CommentProjection
 
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -17,43 +17,30 @@ data class CampaignWithCommentsDto(
     val interestRate: BigDecimal,
     val repaymentMonths: Int,
     val status: CampaignStatus,
-    val submittedAt: LocalDate?,
-    val approvedBy: Long?,
     val campaignDeadline: LocalDate?,
-    val accountId: Long?,
     val imageUrl: String?,
     val amountRaised: BigDecimal = BigDecimal.ZERO,
-    val comments: List<CommentResponseDto> = emptyList()
+    val comments: List<CommentProjection> = emptyList()
 )
 
 
-fun CampaignEntity.toCampaignWithCommentsDto(comments: List<CommentResponseDto> = emptyList()): CampaignWithCommentsDto {
+fun CampaignEntity.toCampaignWithCommentsDto(
+    amountRaised: BigDecimal = BigDecimal.ZERO,
+    comments: List<CommentProjection> = emptyList()
+): CampaignWithCommentsDto {
     return CampaignWithCommentsDto(
-        id = id,
-        createdBy = createdBy,
-        categoryId = categoryId,
-        title = title,
-        description = description,
-        goalAmount = goalAmount,
-        interestRate = interestRate,
-        repaymentMonths = repaymentMonths,
-        status = status,
-        submittedAt = submittedAt,
-        approvedBy = approvedBy,
-        campaignDeadline = campaignDeadline,
-        accountId = accountId,
-        imageUrl = imageUrl,
+        id = this.id!!,
+        title = this.title,
+        description = this.description,
+        goalAmount = this.goalAmount,
+        interestRate = this.interestRate,
+        repaymentMonths = this.repaymentMonths,
+        status = this.status,
+        campaignDeadline = this.campaignDeadline,
+        createdBy = this.createdBy,
+        categoryId = this.categoryId,
+        imageUrl = this.imageUrl,
         amountRaised = amountRaised,
-        comments = this.comments?.map { it.toResponseDto() } ?: comments
+        comments = comments,
     )
 }
-//
-//fun CommentEntity.toResponseDto(): CommentResponseDto {
-//    return CommentResponseDto(
-//        id = id!!,
-//        campaignId = campaign?.id!!,
-//        message = message!!,
-//        createdBy = createdBy!!,
-//        createdAt = createdAt!!
-//    )
-//}

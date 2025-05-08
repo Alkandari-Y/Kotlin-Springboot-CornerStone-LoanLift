@@ -1,7 +1,7 @@
 package com.project.campaignlift.services
 
-import com.project.campaignlift.campaigns.dtos.CommentResponseDto
 import com.project.campaignlift.entities.CommentEntity
+import com.project.campaignlift.entities.projections.CommentProjection
 import com.project.campaignlift.repositories.CommentRepository
 import com.project.common.exceptions.APIException
 import com.project.common.exceptions.ErrorCode
@@ -41,20 +41,10 @@ class CommentServiceImpl (
         )
     }
 
-    override fun getAllCommentsByCampaignId(campaignId: Long): List<CommentResponseDto> {
-        campaignService.getCampaignById(campaignId)
-            ?: throw APIException(
-                message = "Campaign with id $campaignId not found",
-                httpStatus = HttpStatus.NOT_FOUND,
-                code = ErrorCode.CAMPAIGN_NOT_FOUND
-            )
-
-        return commentRepository.getAllByCampaignId(campaignId)
+    override fun getAllCommentsByCampaignId(campaignId: Long): List<CommentProjection> {
+        return commentRepository.findByCampaignId(campaignId)
     }
 
-//    override fun getCommentsByCampaign(campaignId: Long): List<CommentEntity> {
-//        TODO("Not yet implemented")
-//    }
 //
 //    override fun deleteComment(id: Long) {
 //        TODO("Not yet implemented")

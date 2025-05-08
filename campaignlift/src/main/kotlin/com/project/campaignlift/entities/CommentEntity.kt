@@ -22,8 +22,18 @@ data class CommentEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "campaign_id", nullable = false)
-    val campaign: CampaignEntity? = null
+    val campaign: CampaignEntity? = null,
 
-) {
-    constructor() : this(id = null, createdBy = null, createdAt = null, message = null, campaign = null)
+    @OneToOne(mappedBy = "comment", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val reply: ReplyEntity? = null,
+
+    ) {
+    constructor() : this(
+        id = null,
+        createdBy = null,
+        createdAt = null,
+        message = null,
+        campaign = null,
+        reply = null
+    )
 }

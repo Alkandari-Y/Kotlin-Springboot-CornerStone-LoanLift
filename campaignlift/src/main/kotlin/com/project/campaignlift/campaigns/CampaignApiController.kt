@@ -1,10 +1,8 @@
 package com.project.campaignlift.campaigns
 
-import com.project.campaignlift.campaigns.dtos.CampaignDetailResponse
 import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.campaigns.dtos.CampaignWithCommentsDto
 import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
-import com.project.campaignlift.campaigns.dtos.toDetailResponse
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.providers.BandServiceProvider
@@ -98,17 +96,11 @@ class CampaignApiController (
         return campaign
     }
 
-    @GetMapping("/details/{campaignId}/comments")
-    fun allAllCampaignComments() = "This is a comment"
-
-    @PostMapping("/details/{campaignId}/comments")
-    fun addComment() = "This is a comment"
-
     @GetMapping("/manage")
     fun getMyCampaigns(
         @RequestAttribute("authUser") authUser: UserInfoDto,
-    ): List<CampaignEntity> {
-        return campaignService.getALlByUserId(authUser.userId)
+    ): List<CampaignListItemResponse> {
+        return campaignService.getAllByUserId(authUser.userId)
     }
 
 

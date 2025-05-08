@@ -4,7 +4,6 @@ import com.project.campaignlift.admin.dtos.CampaignStatusRequest
 import com.project.campaignlift.campaigns.dtos.CampaignDetailResponse
 import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.campaigns.dtos.toDetailResponse
-import com.project.campaignlift.campaigns.dtos.toResponseDto
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.providers.BandServiceProvider
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.*
 class CampaignAdminApiController (
     private val campaignService: CampaignService,
     private val bandServiceProvider: BandServiceProvider,
-    private val commentRepository: CommentRepository
 ){
 
     @GetMapping("/list")
@@ -47,9 +45,7 @@ class CampaignAdminApiController (
                 HttpStatus.NOT_FOUND,
                 ErrorCode.ACCOUNT_NOT_FOUND
             )
-        val comments = commentRepository.findByCampaign(campaign)
-
-        return campaign.toDetailResponse(comments.map { it.toResponseDto() })
+        return campaign.toDetailResponse()
     }
 
     @PutMapping("/details/{campaignId}")
