@@ -1,7 +1,7 @@
-package com.project.authentication.exceptions
+package com.project.common.exceptions.auth
 
 import com.project.common.exceptions.APIException
-import com.project.common.exceptions.ErrorCode
+import com.project.common.enums.ErrorCode
 import org.springframework.http.HttpStatus
 
 class UserExistsException (

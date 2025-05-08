@@ -14,7 +14,7 @@ data class ReplyEntity(
     val message: String? = null,
 
     @Column(name = "created_at", updatable = false)
-    val createdAt: LocalDateTime? = null,
+    val createdAt: LocalDateTime? = LocalDateTime.now(),
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id", nullable = false)

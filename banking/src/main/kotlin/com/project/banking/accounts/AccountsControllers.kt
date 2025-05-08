@@ -6,14 +6,14 @@ import com.project.banking.accounts.dtos.UpdateAccountRequest
 import com.project.banking.accounts.dtos.UpdatedBalanceResponse
 import com.project.banking.accounts.dtos.toEntity
 import com.project.banking.accounts.dtos.toUpdatedBalanceResponse
-import com.project.banking.accounts.exceptions.AccountNotFoundException
+import com.project.common.exceptions.accounts.AccountNotFoundException
 import com.project.banking.entities.AccountEntity
 import com.project.banking.extensions.toBasicResponse
 import com.project.banking.services.AccountService
 import com.project.banking.services.KYCService
 import com.project.banking.services.TransactionService
 import com.project.common.exceptions.APIException
-import com.project.common.exceptions.ErrorCode
+import com.project.common.enums.ErrorCode
 import com.project.common.responses.authenthication.UserInfoDto
 import com.project.common.responses.banking.AccountBalanceCheck
 import com.project.common.responses.banking.AccountResponse

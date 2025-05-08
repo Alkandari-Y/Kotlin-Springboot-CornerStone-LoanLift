@@ -2,7 +2,7 @@ package com.project.campaignlift.config
 
 import com.project.common.exceptions.APIException
 import com.project.common.exceptions.ApiErrorResponse
-import com.project.common.exceptions.ErrorCode
+import com.project.common.enums.ErrorCode
 import com.project.common.exceptions.ValidationError
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -12,9 +12,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import java.time.Instant
+import java.time.format.DateTimeFormatter
 
 @ControllerAdvice
 class GlobalExceptionHandler {
+    //    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     @ExceptionHandler(APIException::class)
     fun handleAPIBaseException(

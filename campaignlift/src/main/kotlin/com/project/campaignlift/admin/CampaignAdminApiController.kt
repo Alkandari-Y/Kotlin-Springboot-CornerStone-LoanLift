@@ -7,13 +7,13 @@ import com.project.campaignlift.campaigns.dtos.toDetailResponse
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.providers.BandServiceProvider
-import com.project.campaignlift.repositories.CommentRepository
 import com.project.campaignlift.services.CampaignService
-import com.project.common.exceptions.APIException
-import com.project.common.exceptions.ErrorCode
+import com.project.common.exceptions.auth.MissingCredentialsException
+import com.project.common.exceptions.campaigns.CampaignNotFoundException
+import com.project.common.exceptions.campaigns.CampaignOwnerNotFoundException
+import com.project.common.exceptions.campaigns.InvalidCampaignStatusChangeException
 import com.project.common.responses.authenthication.UserInfoDto
 import com.project.common.responses.banking.UserAccountsResponse
-import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
@@ -38,13 +38,11 @@ class CampaignAdminApiController (
     }
 
     @GetMapping("/details/{campaignId}")
-    fun getCampaignById(@PathVariable("campaignId") campaignId: Long): CampaignDetailResponse {
+    fun getCampaignById(@PathVariable("campaignId") campaignId: Long)
+    : CampaignDetailResponse {
         val campaign = campaignService.getCampaignById(campaignId)
-        ?: throw APIException(
-                "Campaign with id $campaignId not found",
-                HttpStatus.NOT_FOUND,
-                ErrorCode.ACCOUNT_NOT_FOUND
-            )
+            ?: throw CampaignNotFoundException()
+
         return campaign.toDetailResponse()
     }
 
@@ -66,7 +64,7 @@ class CampaignAdminApiController (
         )
 
         if (status !in allowedStatuses) {
-            throw APIException("Invalid status change: $status", HttpStatus.BAD_REQUEST, ErrorCode.INVALID_INPUT)
+            throw InvalidCampaignStatusChangeException(status.name)
         }
 
         val approvedBy = if (status == CampaignStatus.PENDING) null else authUser.userId
@@ -85,24 +83,14 @@ class CampaignAdminApiController (
         authentication: Authentication
     ): UserAccountsResponse {
         val campaign = campaignService.getCampaignById(campaignId)
-            ?: throw APIException(
-                "Campaign with id $campaignId not found",
-                HttpStatus.NOT_FOUND,
-                ErrorCode.ACCOUNT_NOT_FOUND
-            )
+            ?: throw CampaignNotFoundException()
+
         val adminToken = authentication.credentials?.toString()
+            ?: throw MissingCredentialsException()
 
-        if (adminToken.isNullOrEmpty()) {
-            throw APIException(
-                "Invalid Request. Please provide admin credentials",
-                HttpStatus.UNAUTHORIZED,
-                ErrorCode.INVALID_CREDENTIALS
-            )
-        }
-
-        val owner = campaign.createdBy ?: throw APIException("Campaign owner not found", HttpStatus.NOT_FOUND, ErrorCode.ACCOUNT_NOT_FOUND)
+        val owner = campaign.createdBy
+            ?: throw CampaignOwnerNotFoundException(campaignId)
 
         return bandServiceProvider.getUserAccountsAndProfile(owner, adminToken)
-
     }
 }

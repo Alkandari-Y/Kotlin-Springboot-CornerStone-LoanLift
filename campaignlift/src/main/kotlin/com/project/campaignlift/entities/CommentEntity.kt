@@ -15,7 +15,7 @@ data class CommentEntity(
     val createdBy: Long? = null,
 
     @Column(name = "created_at", updatable = false)
-    val createdAt: LocalDateTime? = null,
+    val createdAt: LocalDateTime? = LocalDateTime.now(),
 
     @Column(name = "message")
     val message: String? = null,

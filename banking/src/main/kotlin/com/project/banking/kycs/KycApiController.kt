@@ -4,6 +4,7 @@ import com.project.banking.kycs.dtos.KYCRequest
 import com.project.banking.kycs.dtos.KYCResponse
 import com.project.banking.kycs.dtos.toResponse
 import com.project.banking.services.KYCService
+import com.project.common.exceptions.kycs.KycNotFoundException
 import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -24,9 +25,10 @@ class KycApiController(
         val kyc = kycService.createKYCOrUpdate(
             kycRequest = kycRequest,
             userId = authUser.userId,
-        )
+        ).toResponse()
+
         return ResponseEntity(
-            kyc.toResponse(),
+            kyc,
             HttpStatus.CREATED
         )
     }
@@ -35,8 +37,10 @@ class KycApiController(
     fun getKYCBy(
         @RequestAttribute("authUser") authUser: UserInfoDto,
     ): ResponseEntity<KYCResponse> {
+
         val kyc = kycService.findKYCByUserId(authUser.userId)
-            ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+            ?: throw KycNotFoundException(authUser.userId)
+
         return ResponseEntity(
             kyc.toResponse(),
             HttpStatus.OK
@@ -48,9 +52,10 @@ class KycApiController(
     fun getKYCByUserId(
         @PathVariable("userId") userId: Long
     ): ResponseEntity<KYCResponse> {
-        println("in controller")
+
         val kyc = kycService.findKYCByUserId(userId)
-            ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+            ?: throw KycNotFoundException(userId)
+
         return ResponseEntity(
             kyc.toResponse(),
             HttpStatus.OK

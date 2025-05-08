@@ -12,5 +12,6 @@ data class ApiErrorResponse(
     val message: String,
     val code: String,
     val path: String,
-    val fieldErrors: List<ValidationError>? = null
+    val fieldErrors: List<ValidationError>? = null,
+    val traceId: String? = null
 )

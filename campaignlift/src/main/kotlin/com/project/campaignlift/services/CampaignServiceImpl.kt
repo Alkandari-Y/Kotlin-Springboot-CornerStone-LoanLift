@@ -5,11 +5,12 @@ import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.repositories.CampaignRepositories
 import com.project.campaignlift.repositories.CommentRepository
-import com.project.common.exceptions.APIException
-import com.project.common.exceptions.ErrorCode
+import com.project.common.exceptions.campaigns.CampaignDeletionNotAllowedException
+import com.project.common.exceptions.campaigns.CampaignNotFoundException
+import com.project.common.exceptions.campaigns.CampaignPermissionDeniedException
+import com.project.common.exceptions.kycs.IncompleteUserRegistrationException
 import com.project.common.responses.authenthication.UserInfoDto
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.math.BigDecimal
@@ -35,14 +36,10 @@ class CampaignServiceImpl(
         accountId: Long
     ): CampaignEntity {
         if (user.isActive.not()) {
-            throw APIException(
-                message = "User must complete KYC registration",
-                code = ErrorCode.INCOMPLETE_USER_REGISTRATION,
-                httpStatus = HttpStatus.BAD_REQUEST
-            )
+            throw IncompleteUserRegistrationException()
         }
 
-        val imageUrl = fileStorageService.uploadFile(image)
+        val imageUrl = fileStorageService.uploadFilePublic(image)
         val campaign = campaignDto.toEntity(
             createdBy = user.userId,
             imageUrl = imageUrl,
@@ -61,17 +58,25 @@ class CampaignServiceImpl(
         return updatedCampaign
     }
 
-    override fun deleteCampaign(id: Long) {
-        campaignRepository.deleteById(id)
+    override fun deleteCampaign(campaignId: Long, authUserId: Long) {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+
+        if (campaign.createdBy != authUserId) {
+            throw CampaignPermissionDeniedException(authUserId, campaignId)
+        }
+
+        if (campaign.status != CampaignStatus.NEW) {
+            throw CampaignDeletionNotAllowedException(campaignId, campaign.status.name)
+        }
+
+        campaignRepository.deleteById(campaignId)
     }
 
     override fun getCampaignDetails(campaignId: Long): CampaignWithCommentsDto? {
         val campaign = campaignRepository.findByIdOrNull(campaignId)
-            ?: throw APIException(
-                "Campaign with id $campaignId not found",
-                HttpStatus.NOT_FOUND,
-                ErrorCode.ACCOUNT_NOT_FOUND
-            )
+            ?: throw CampaignNotFoundException()
+
         val comments = commentRepository.findByCampaignId(campaignId)
         val amountRaised = BigDecimal.ZERO
         return campaign.toCampaignWithCommentsDto(amountRaised, comments)
@@ -87,11 +92,7 @@ class CampaignServiceImpl(
 
     override fun changeCampaignStatus(campaignId: Long, status: CampaignStatus): CampaignEntity {
         val campaign = campaignRepository.findByIdOrNull(campaignId)
-            ?: throw APIException(
-                "Campaign with id $campaignId not found",
-                HttpStatus.NOT_FOUND,
-                ErrorCode.ACCOUNT_NOT_FOUND
-            )
+            ?: throw CampaignNotFoundException()
 
         val updatedCampaign = campaign.copy(status = status)
         return campaignRepository.save(updatedCampaign)
@@ -99,11 +100,7 @@ class CampaignServiceImpl(
 
     override fun approveRejectCampaignStatus(campaignId: Long, status: CampaignStatus, adminId: Long?): CampaignEntity {
         val campaign = campaignRepository.findByIdOrNull(campaignId)
-            ?: throw APIException(
-                "Campaign with id $campaignId not found",
-                HttpStatus.NOT_FOUND,
-                ErrorCode.ACCOUNT_NOT_FOUND
-            )
+            ?: throw CampaignNotFoundException()
 
         val updatedCampaign = campaign.copy(status = status, approvedBy = adminId)
         return campaignRepository.save(updatedCampaign)

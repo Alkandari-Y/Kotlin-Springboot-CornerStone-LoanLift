@@ -1,12 +1,13 @@
 package com.project.banking.services
 
 import com.project.banking.accounts.dtos.UpdateAccountRequest
-import com.project.banking.accounts.exceptions.AccountLimitException
-import com.project.banking.accounts.exceptions.AccountNotFoundException
-import com.project.banking.accounts.exceptions.AccountVerificationException
+import com.project.common.exceptions.accounts.AccountLimitException
+import com.project.common.exceptions.accounts.AccountNotFoundException
+import com.project.common.exceptions.accounts.AccountVerificationException
 import com.project.banking.entities.AccountEntity
 import com.project.banking.repositories.AccountRepository
 import com.project.common.exceptions.APIException
+import com.project.common.exceptions.accounts.AccountNotActiveException
 import com.project.common.responses.authenthication.UserInfoDto
 import com.project.common.responses.banking.AccountResponse
 import jakarta.transaction.Transactional
@@ -42,7 +43,7 @@ class AccountServiceImpl(
     override fun closeAccount(accountNumber: String, userId: Long) {
         accountRepository.findByAccountNumber(accountNumber)?.apply {
             if (this.ownerId != userId) {
-                throw AccountVerificationException("Only owners can close accounts")
+                throw AccountVerificationException()
             }
             if (this.active) {
                 accountRepository.save(this.copy(active = false))
@@ -57,11 +58,11 @@ class AccountServiceImpl(
         accountUpdate: UpdateAccountRequest
     ): AccountEntity {
         val accountToUpdate = accountRepository.findByAccountNumber(accountNumber)
-            ?: throw AccountNotFoundException("Account not found")
+            ?: throw AccountNotFoundException()
 
 
         if (!accountToUpdate.active) {
-            throw APIException("Account is not active")
+            throw AccountNotActiveException(accountNumber)
         }
 
         val updatedAccount =accountRepository.save(

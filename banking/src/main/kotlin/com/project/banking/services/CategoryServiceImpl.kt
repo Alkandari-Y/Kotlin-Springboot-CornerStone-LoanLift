@@ -19,6 +19,4 @@ class CategoryServiceImpl(
     override fun getCategoryByName(name: String): CategoryEntity? {
         return categoryRepository.findByName(name)
     }
-
-
 }

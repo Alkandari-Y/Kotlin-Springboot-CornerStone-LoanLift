@@ -1,6 +1,6 @@
 package com.project.banking.transactions
 
-import com.project.banking.accounts.exceptions.AccountNotFoundException
+import com.project.common.exceptions.accounts.AccountNotFoundException
 import com.project.banking.services.AccountService
 import com.project.banking.services.TransactionService
 import com.project.banking.transactions.dtos.TransactionDetails

@@ -2,7 +2,7 @@ package com.project.authentication.config
 
 import com.project.common.exceptions.APIException
 import com.project.common.exceptions.ApiErrorResponse
-import com.project.common.exceptions.ErrorCode
+import com.project.common.enums.ErrorCode
 import com.project.common.exceptions.ValidationError
 import io.jsonwebtoken.ExpiredJwtException
 import org.springframework.http.HttpStatus

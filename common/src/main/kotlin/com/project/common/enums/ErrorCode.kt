@@ -1,4 +1,4 @@
-package com.project.common.exceptions
+package com.project.common.enums
 
 enum class ErrorCode {
     ACCESS_DENIED,
@@ -36,4 +36,15 @@ enum class ErrorCode {
     CAMPAIGN_NOT_STARTED,
     CAMPAIGN_ALREADY_PAID,
     CAMPAIGN_NOT_PAID,
+    KYC_NOT_FOUND,
+    KYC_ALREADY_VERIFIED,
+    KYC_ALREADY_EXISTS,
+    KYC_NOT_VERIFIABLE,
+    KYC_NOT_VERIFIED,
+    KYC_ALREADY_EXISTS_WITH_DIFFERENT_USER,
+    COMMENT_NOT_FOUND,
+    COMMENT_ALREADY_EXISTS,
+    COMMENT_NOT_DELETED,
+    COMMENT_NOT_FOUND_WITH_USER,
+    REPLY_ALREADY_EXISTS,
 }

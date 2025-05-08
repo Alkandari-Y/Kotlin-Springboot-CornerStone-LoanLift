@@ -2,15 +2,15 @@ package com.project.banking.services
 
 import com.project.banking.accounts.dtos.TransactionResponse
 import com.project.banking.accounts.dtos.TransferCreateRequest
-import com.project.banking.accounts.exceptions.AccountNotFoundException
-import com.project.banking.accounts.exceptions.InsufficientFundsException
-import com.project.banking.accounts.exceptions.InvalidTransferException
+import com.project.common.exceptions.accounts.AccountNotFoundException
+import com.project.common.exceptions.accounts.InsufficientFundsException
+import com.project.common.exceptions.accounts.InvalidTransferException
 import com.project.banking.entities.TransactionEntity
 import com.project.banking.repositories.AccountRepository
 import com.project.banking.repositories.TransactionRepository
 import com.project.banking.transactions.dtos.TransactionDetails
 import com.project.common.enums.TransactionType
-import com.project.common.exceptions.ErrorCode
+import com.project.common.enums.ErrorCode
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -38,7 +38,7 @@ class TransactionServiceImpl(
         if (sourceAccount.active.not() || destinationAccount.active.not()) {
             throw InvalidTransferException(
                 "Cannot transfer with inactive account.",
-                code = ErrorCode.INVALID_ACCOUNT_TYPE
+                code = ErrorCode.INVALID_TRANSFER
             )
         }
 
@@ -53,7 +53,7 @@ class TransactionServiceImpl(
         val newDestinationBalance = destinationAccount.balance.setScale(3).add(newTransaction.amount)
 
         if (newSourceBalance < BigDecimal.ZERO) {
-            throw InsufficientFundsException("Transfer would result in a negative balance.")
+            throw InsufficientFundsException()
         }
 
         val transaction = transactionRepository.save(

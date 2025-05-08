@@ -26,5 +26,5 @@ interface CampaignService {
     ): CampaignEntity
     fun changeCampaignStatus(campaignId: Long, status: CampaignStatus): CampaignEntity
     fun approveRejectCampaignStatus(campaignId: Long, status: CampaignStatus, adminId: Long? = null): CampaignEntity
-    fun deleteCampaign(id: Long)
+    fun deleteCampaign(campaignId: Long, authUserId: Long)
 }

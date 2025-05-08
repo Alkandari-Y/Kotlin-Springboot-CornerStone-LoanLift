@@ -4,11 +4,14 @@ import com.project.campaignlift.comments.dtos.CommentResponseDto
 import com.project.campaignlift.comments.dtos.toResponseDto
 import com.project.campaignlift.comments.dtos.CommentCreateRequest
 import com.project.campaignlift.comments.dtos.ReplyCreateRequest
+import com.project.campaignlift.comments.dtos.ReplyDto
+import com.project.campaignlift.entities.ReplyEntity
 import com.project.campaignlift.services.CommentService
 import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -23,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController
 class CommentsApiController(
     private val commentService: CommentService,
     ) {
-
 
     @GetMapping("/campaign/{campaignId}")
     fun allAllCampaignComments(
@@ -45,12 +47,25 @@ class CommentsApiController(
         return ResponseEntity(comment, HttpStatus.CREATED)
     }
 
+    @DeleteMapping("/edit/{commentId}")
+    fun deleteComment(
+        @PathVariable("commentId") commentId: Long,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+        ) {
+        commentService.deleteComment(commentId, authUser.userId)
+    }
+
     @PostMapping("/reply")
     fun replyToComment(
         @Valid @RequestBody replyCreate: ReplyCreateRequest,
         @RequestAttribute("authUser") authUser: UserInfoDto,
-        ) {
-
+        ): ResponseEntity<ReplyDto> {
+        val reply = commentService.createReply(
+            commentId = replyCreate.commentId,
+            message = replyCreate.message,
+            userId = authUser.userId,
+        )
+        return ResponseEntity(reply.toResponseDto(), HttpStatus.CREATED)
     }
 
 }

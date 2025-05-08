@@ -1,17 +1,15 @@
 package com.project.campaignlift.providers
 
 import com.project.common.exceptions.APIException
-import com.project.common.exceptions.ErrorCode
-import com.project.common.responses.banking.AccountBalanceCheck
+import com.project.common.enums.ErrorCode
+import com.project.common.exceptions.accounts.AccountNotFoundException
 import com.project.common.responses.banking.AccountResponse
 import com.project.common.responses.banking.UserAccountsResponse
 import jakarta.inject.Named
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
-import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.exchange
 
 @Named
 class BandServiceProvider(
@@ -23,7 +21,11 @@ class BandServiceProvider(
     fun getUserAccountsAndProfile(userId: Long, adminToken: String): UserAccountsResponse {
         val url = "$bankServiceBaseUrl/accounts/clients/$userId"
         val response = sendRequest<UserAccountsResponse>(url, adminToken)
-        return response.body ?: throw IllegalStateException("Get user details response has no body")
+        return response.body ?: throw APIException(
+            "Failed to fetch user accounts for userId=$userId",
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            ErrorCode.INTERNAL_SERVER_ERROR
+        )
     }
 
     fun checkAccountExists(accountId: Long, token: String): Boolean {
@@ -35,7 +37,7 @@ class BandServiceProvider(
     fun getAccount(accountId: Long, token: String, clientId: Long): AccountResponse {
         val url = "$bankServiceBaseUrl/accounts/clients?accountId=$accountId"
         val account = sendRequest<AccountResponse>(url, token).body
-            ?: throw APIException("Account not found", HttpStatus.NOT_FOUND, ErrorCode.ACCOUNT_NOT_FOUND)
+            ?: throw AccountNotFoundException()
         return account
     }
 

@@ -1,7 +1,7 @@
-package com.project.banking.accounts.exceptions
+package com.project.common.exceptions.accounts
 
 import com.project.common.exceptions.APIException
-import com.project.common.exceptions.ErrorCode
+import com.project.common.enums.ErrorCode
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 
