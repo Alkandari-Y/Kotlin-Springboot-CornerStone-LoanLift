@@ -46,7 +46,7 @@ class RemoteAuthenticationFilter(
 
             val authToken = UsernamePasswordAuthenticationToken(
                 userRemoteUserPrincipal,
-                null,
+                token,
                 authorities
             )
             SecurityContextHolder.getContext().authentication = authToken

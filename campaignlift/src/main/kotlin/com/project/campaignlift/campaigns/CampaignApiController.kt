@@ -2,6 +2,7 @@ package com.project.campaignlift.campaigns
 
 import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
 import com.project.campaignlift.entities.CampaignEntity
+import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.services.CampaignService
 import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.validation.Valid
@@ -12,6 +13,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.MediaTypeFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
@@ -31,8 +33,8 @@ class CampaignApiController (
     @GetMapping
     fun getAllCampaigns(): ResponseEntity<List<CampaignEntity>> =
         ResponseEntity(
-        campaignService.getAllCampaigns(),
-        HttpStatus.OK
+            campaignService.getAllCampaignsByStatus(CampaignStatus.ACTIVE),
+            HttpStatus.OK
         )
 
 
@@ -64,5 +66,32 @@ class CampaignApiController (
     MediaTypeFactory.getMediaType(file.name)
                 .orElse(MediaType.APPLICATION_OCTET_STREAM)
             ).body(resource)
+    }
+
+    @GetMapping("/manage")
+    fun getMyCampaigns(
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+    ): List<CampaignEntity> {
+        return campaignService.getALlByUserId(authUser.userId)
+    }
+
+
+    @DeleteMapping("/manage/{campaignId}")
+    fun deleteCampaign(
+        @PathVariable campaignId: Long,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+    ): ResponseEntity<Unit> {
+
+        val campaign = campaignService.getCampaignById(campaignId)
+            ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+
+        if (campaign.createdBy != authUser.userId)
+            return ResponseEntity(HttpStatus.FORBIDDEN)
+        if (campaign.status != CampaignStatus.NEW) {
+            return ResponseEntity(HttpStatus.BAD_REQUEST)
+        }
+
+        campaignService.deleteCampaign(campaignId)
+        return ResponseEntity(HttpStatus.OK)
     }
 }

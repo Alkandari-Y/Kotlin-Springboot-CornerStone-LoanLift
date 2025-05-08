@@ -54,7 +54,7 @@ data class CampaignEntity(
     val imageUrl: String? = null,
 
     @Transient
-    var amountRaised: BigDecimal? = null
+    var amountRaised: BigDecimal = BigDecimal.ZERO,
 ) {
     constructor() : this(
         id = null,
@@ -71,7 +71,7 @@ data class CampaignEntity(
         campaignDeadline = null,
         accountId = null,
         imageUrl = null,
-        amountRaised = null
+        amountRaised = BigDecimal.ZERO,
     )
 }
 

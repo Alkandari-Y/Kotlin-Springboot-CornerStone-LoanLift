@@ -6,6 +6,7 @@ import com.project.campaignlift.campaigns.dtos.UpdateCampaignRequest
 import com.project.campaignlift.campaigns.dtos.toEntity
 import com.project.campaignlift.campaigns.utils.saveMultipartFileLocally
 import com.project.campaignlift.entities.CampaignEntity
+import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.repositories.CampaignRepositories
 import com.project.common.exceptions.APIException
 import com.project.common.exceptions.ErrorCode
@@ -59,5 +60,13 @@ class CampaignServiceImpl(
 
     override fun deleteCampaign(id: Long) {
         campaignRepository.deleteById(id)
+    }
+
+    override fun getALlByUserId(userId: Long): List<CampaignEntity> {
+        return campaignRepository.findByCreatedBy(userId)
+    }
+
+    override fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignEntity> {
+        return campaignRepository.findByStatus(status)
     }
 }

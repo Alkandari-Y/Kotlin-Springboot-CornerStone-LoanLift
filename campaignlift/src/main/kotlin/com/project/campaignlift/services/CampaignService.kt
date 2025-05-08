@@ -4,6 +4,7 @@ import com.project.campaignlift.campaigns.dtos.CampaignDto
 import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
 import com.project.campaignlift.campaigns.dtos.UpdateCampaignRequest
 import com.project.campaignlift.entities.CampaignEntity
+import com.project.campaignlift.entities.CampaignStatus
 import com.project.common.responses.authenthication.UserInfoDto
 import org.springframework.web.multipart.MultipartFile
 
@@ -17,4 +18,7 @@ interface CampaignService {
     ): CampaignEntity
     fun updateCampaign(campaignId: Long, userId: Long, campaign: UpdateCampaignRequest): CampaignEntity
     fun deleteCampaign(id: Long)
+
+    fun getALlByUserId(userId: Long): List<CampaignEntity>
+    fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignEntity>
 }

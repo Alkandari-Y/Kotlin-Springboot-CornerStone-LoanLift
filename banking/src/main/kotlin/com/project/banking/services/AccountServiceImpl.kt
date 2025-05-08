@@ -1,8 +1,8 @@
 package com.project.banking.services
 
-
 import com.project.banking.accounts.dtos.AccountResponse
 import com.project.banking.accounts.dtos.UpdateAccountRequest
+import com.project.banking.accounts.dtos.toBasicResponse
 import com.project.banking.accounts.exceptions.AccountLimitException
 import com.project.banking.accounts.exceptions.AccountNotFoundException
 import com.project.banking.accounts.exceptions.AccountVerificationException
@@ -19,8 +19,8 @@ const val MAX_ACCOUNT_LIMIT = 3
 class AccountServiceImpl(
     private val accountRepository: AccountRepository,
 ): AccountService {
-    override fun getAccountByUserId(userId: Long): List<AccountResponse> {
-        return accountRepository.findAllByOwnerId(userId)
+    override fun getActiveAccountsByUserId(userId: Long): List<AccountResponse> {
+        return accountRepository.findAllActiveByOwnerId(userId)
     }
 
     override fun createClientAccount(
@@ -75,5 +75,10 @@ class AccountServiceImpl(
 
     override fun getByAccountNumber(accountNumber: String): AccountEntity? {
         return accountRepository.findByAccountNumber(accountNumber)
+    }
+
+
+    override fun getAllAccountsByUserId(userId: Long): List<AccountEntity> {
+        return accountRepository.findAllByOwnerId(userId)
     }
 }

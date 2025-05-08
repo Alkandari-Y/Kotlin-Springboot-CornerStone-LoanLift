@@ -10,15 +10,20 @@ import com.project.banking.accounts.dtos.toEntity
 import com.project.banking.accounts.dtos.toUpdatedBalanceResponse
 import com.project.banking.accounts.exceptions.AccountNotFoundException
 import com.project.banking.entities.AccountEntity
+import com.project.banking.entities.AccountType
 import com.project.banking.services.AccountService
+import com.project.banking.services.KYCService
 import com.project.banking.services.TransactionService
 import com.project.common.exceptions.APIException
 import com.project.common.exceptions.ErrorCode
 import com.project.common.responses.authenthication.UserInfoDto
+import com.project.common.responses.banking.AccountBalanceCheck
+import com.project.common.responses.banking.UserAccountsResponse
 import com.project.common.security.RemoteUserPrincipal
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
@@ -26,14 +31,15 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/accounts")
 class AccountsControllers(
     private val accountService: AccountService,
-    private val transactionService: TransactionService
+    private val transactionService: TransactionService,
+    private val kycService: KYCService
 ) {
 
     @GetMapping
     fun getAllAccounts(
         @AuthenticationPrincipal user: RemoteUserPrincipal
     ): List<AccountResponse> {
-        return accountService.getAccountByUserId(user.getUserId())
+        return accountService.getActiveAccountsByUserId(user.getUserId())
     }
     @PostMapping
     fun createAccount(
@@ -121,5 +127,32 @@ class AccountsControllers(
         }
 
         return ResponseEntity(account.toBasicResponse(), HttpStatus.OK)
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/clients/{clientId}")
+    fun getUserAccounts(@PathVariable("clientId") clientId: Long): UserAccountsResponse {
+        val kyc = kycService.findKYCByUserId(clientId)
+            ?: throw AccountNotFoundException("User not found")
+
+        val accounts = accountService.getAllAccountsByUserId(clientId)
+            .map {
+                AccountBalanceCheck(
+                    accountId = it.id!!,
+                    accountNumber = it.accountNumber,
+                    balance = it.balance,
+                    accountType = it.ownerType.name,
+                )
+            }
+
+        return UserAccountsResponse(
+            userId = kyc.userId!!,
+            firstName = kyc.firstName,
+            lastName = kyc.lastName,
+            dateOfBirth = kyc.dateOfBirth,
+            salary = kyc.salary,
+            nationality = kyc.nationality,
+            accounts = accounts
+        )
     }
 }
