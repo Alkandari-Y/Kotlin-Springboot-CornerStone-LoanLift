@@ -1,6 +1,7 @@
 package com.project.campaignlift.repositories
 
 import com.project.campaignlift.campaigns.dtos.CommentResponseDto
+import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CommentEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -18,9 +19,14 @@ interface CommentRepository: JpaRepository<CommentEntity, Long> {
             c.createdBy,
             c.createdAt
         )
-            FROM CommentEntity c 
-            WHERE c.campaign = :campaignId
-    """
-    )
+        FROM CommentEntity c 
+        WHERE c.campaign.id = :campaignId
+    """)
     fun getAllByCampaignId(@Param("campaignId") campaignId: Long): List<CommentResponseDto>
+
+
+
+    fun findByCampaign(campaign: CampaignEntity): List<CommentEntity>
 }
+
+

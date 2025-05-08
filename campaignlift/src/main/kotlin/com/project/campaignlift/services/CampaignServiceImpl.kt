@@ -1,11 +1,15 @@
 package com.project.campaignlift.services
 
+import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
+import com.project.campaignlift.campaigns.dtos.CampaignWithCommentsDto
 import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
 import com.project.campaignlift.campaigns.dtos.UpdateCampaignRequest
+import com.project.campaignlift.campaigns.dtos.toCampaignWithCommentsDto
 import com.project.campaignlift.campaigns.dtos.toEntity
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.repositories.CampaignRepositories
+import com.project.campaignlift.repositories.CommentRepository
 import com.project.common.exceptions.APIException
 import com.project.common.exceptions.ErrorCode
 import com.project.common.responses.authenthication.UserInfoDto
@@ -14,13 +18,16 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
+import kotlin.Long
+
 @Service
 class CampaignServiceImpl(
     private val campaignRepository: CampaignRepositories,
     private val fileStorageService: FileStorageService,
+    private val commentRepository: CommentRepository,
 ): CampaignService {
-    override fun getAllCampaigns(): List<CampaignEntity> {
-        return campaignRepository.findAll()
+    override fun getAllCampaigns(): List<CampaignListItemResponse> {
+        return campaignRepository.listAllCampaigns()
     }
 
     override fun getCampaignById(id: Long): CampaignEntity? {
@@ -61,11 +68,19 @@ class CampaignServiceImpl(
         campaignRepository.deleteById(id)
     }
 
+    override fun getCampaignDetails(campaignId: Long): CampaignWithCommentsDto? {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw APIException("Campaign with id $campaignId not found", HttpStatus.NOT_FOUND, ErrorCode.ACCOUNT_NOT_FOUND)
+        val comments = commentRepository.getAllByCampaignId(campaignId)
+
+        return campaign.toCampaignWithCommentsDto(comments)
+    }
+
     override fun getALlByUserId(userId: Long): List<CampaignEntity> {
         return campaignRepository.findByCreatedBy(userId)
     }
 
-    override fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignEntity> {
+    override fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignListItemResponse> {
         return campaignRepository.findByStatus(status)
     }
 

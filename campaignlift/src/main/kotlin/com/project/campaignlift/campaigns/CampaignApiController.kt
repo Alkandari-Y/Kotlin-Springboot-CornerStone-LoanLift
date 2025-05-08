@@ -1,6 +1,10 @@
 package com.project.campaignlift.campaigns
 
+import com.project.campaignlift.campaigns.dtos.CampaignDetailResponse
+import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
+import com.project.campaignlift.campaigns.dtos.CampaignWithCommentsDto
 import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
+import com.project.campaignlift.campaigns.dtos.toDetailResponse
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.providers.BandServiceProvider
@@ -9,11 +13,7 @@ import com.project.common.exceptions.APIException
 import com.project.common.exceptions.ErrorCode
 import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.validation.Valid
-import org.springframework.core.io.Resource
-import org.springframework.core.io.UrlResource
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.MediaTypeFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.nio.file.Paths
 
 @RestController
 @RequestMapping("/api/v1/campaigns")
@@ -36,7 +35,7 @@ class CampaignApiController (
     private val bandServiceProvider: BandServiceProvider
 ) {
     @GetMapping
-    fun getAllCampaigns(): ResponseEntity<List<CampaignEntity>> =
+    fun getAllCampaigns(): ResponseEntity<List<CampaignListItemResponse>> =
         ResponseEntity(
             campaignService.getAllCampaignsByStatus(CampaignStatus.ACTIVE),
             HttpStatus.OK
@@ -56,10 +55,7 @@ class CampaignApiController (
             throw APIException("kyc not verified")
         }
 
-        println("stage 1")
-
         val token = authentication.credentials?.toString()
-        println("stage 2")
 
         if (token.isNullOrEmpty()) {
             throw APIException(
@@ -68,14 +64,11 @@ class CampaignApiController (
                 ErrorCode.INVALID_CREDENTIALS
             )
         }
-        println("stage 3")
-
         val account = bandServiceProvider.getAccount(
             campaignCreateRequest.accountId,
             token,
             authUser.userId
         )
-        println("stage 4")
         val campaign = campaignService.createCampaign(
             campaignDto = campaignCreateRequest,
             user = authUser,
@@ -86,10 +79,10 @@ class CampaignApiController (
     }
 
     @GetMapping("/details/{campaignId}")
-    fun getPublicFile(
-        @PathVariable("campaignId") campaignId: Long): CampaignEntity
+    fun getCampaignById(
+        @PathVariable("campaignId") campaignId: Long): CampaignWithCommentsDto
     {
-        val campaign = campaignService.getCampaignById(campaignId)
+        val campaign = campaignService.getCampaignDetails(campaignId)
         ?: throw APIException(
                 "Campaign with id $campaignId not found",
                 HttpStatus.NOT_FOUND,

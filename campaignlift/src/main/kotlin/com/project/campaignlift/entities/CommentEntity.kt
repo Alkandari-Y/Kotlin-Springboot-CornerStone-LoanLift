@@ -1,7 +1,6 @@
 package com.project.campaignlift.entities
 
 import jakarta.persistence.*
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -12,7 +11,7 @@ data class CommentEntity(
     @Column(name = "id")
     val id: Long? = null,
 
-    @Column(name = "created_id", nullable = false)
+    @Column(name = "created_by", nullable = false)
     val createdBy: Long? = null,
 
     @Column(name = "created_at", updatable = false)
