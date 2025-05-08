@@ -1,16 +1,14 @@
 package com.project.banking.accounts
 
 import com.project.banking.accounts.dtos.AccountCreateRequest
-import com.project.banking.accounts.dtos.AccountResponse
 import com.project.banking.accounts.dtos.TransferCreateRequest
 import com.project.banking.accounts.dtos.UpdateAccountRequest
 import com.project.banking.accounts.dtos.UpdatedBalanceResponse
-import com.project.banking.accounts.dtos.toBasicResponse
 import com.project.banking.accounts.dtos.toEntity
 import com.project.banking.accounts.dtos.toUpdatedBalanceResponse
 import com.project.banking.accounts.exceptions.AccountNotFoundException
 import com.project.banking.entities.AccountEntity
-import com.project.banking.entities.AccountType
+import com.project.banking.extensions.toBasicResponse
 import com.project.banking.services.AccountService
 import com.project.banking.services.KYCService
 import com.project.banking.services.TransactionService
@@ -18,6 +16,7 @@ import com.project.common.exceptions.APIException
 import com.project.common.exceptions.ErrorCode
 import com.project.common.responses.authenthication.UserInfoDto
 import com.project.common.responses.banking.AccountBalanceCheck
+import com.project.common.responses.banking.AccountResponse
 import com.project.common.responses.banking.UserAccountsResponse
 import com.project.common.security.RemoteUserPrincipal
 import jakarta.validation.Valid
@@ -109,7 +108,7 @@ class AccountsControllers(
         println("in controller $accountNumber")
         val account = accountService.getByAccountNumber(accountNumber)
             ?: throw AccountNotFoundException()
-        println("in controller $account")
+
         val isOwner = account.ownerId == user.getUserId()
         val isAdmin = user.authorities.any { it.authority == "ROLE_ADMIN" }
 
@@ -155,4 +154,39 @@ class AccountsControllers(
             accounts = accounts
         )
     }
+
+    @GetMapping("/clients/{clientId}/account")
+    fun getAccountDetails(
+        @PathVariable("clientId") clientId: Long,
+        @RequestParam(required = false) accountId: Long?,
+        @RequestParam(required = false) accountNumber: String?,
+        @AuthenticationPrincipal user: RemoteUserPrincipal
+    ): AccountResponse {
+        val account = when {
+            accountId != null -> accountService.getAccountById(accountId)
+            accountNumber != null -> accountService.getByAccountNumber(accountNumber)
+            else -> throw APIException("Either accountId or accountNumber must be provided")
+        }
+        val isOwner = account?.ownerId == user.getUserId()
+        val isAdmin = user.authorities.any { it.authority == "ROLE_ADMIN" }
+        if (!isOwner && !isAdmin) {
+            throw APIException(
+                "Unauthorized access to account",
+                HttpStatus.UNAUTHORIZED,
+                ErrorCode.UNAUTHORIZED
+            )
+        }
+
+        val accountResponse = AccountResponse(
+            accountNumber = account?.accountNumber!!,
+            id = account.id!!,
+            balance = account.balance,
+            name = account.name,
+            active = account.active,
+            ownerId = account.ownerId!!
+        )
+
+        return accountResponse
+    }
+
 }

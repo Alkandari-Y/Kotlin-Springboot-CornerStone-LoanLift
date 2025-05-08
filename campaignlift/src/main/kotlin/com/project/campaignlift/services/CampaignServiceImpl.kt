@@ -1,10 +1,8 @@
 package com.project.campaignlift.services
 
-import com.project.campaignlift.campaigns.dtos.CampaignDto
 import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
 import com.project.campaignlift.campaigns.dtos.UpdateCampaignRequest
 import com.project.campaignlift.campaigns.dtos.toEntity
-import com.project.campaignlift.campaigns.utils.saveMultipartFileLocally
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.repositories.CampaignRepositories
@@ -32,7 +30,8 @@ class CampaignServiceImpl(
     override fun createCampaign(
         campaignDto: CreateCampaignDto,
         user: UserInfoDto,
-        image: MultipartFile
+        image: MultipartFile,
+        accountId: Long
     ): CampaignEntity {
         if (user.isActive.not()) {
             throw APIException(
@@ -41,12 +40,11 @@ class CampaignServiceImpl(
                 httpStatus = HttpStatus.BAD_REQUEST
             )
         }
-        val account = 1L
         val imageUrl = fileStorageService.uploadFile(image)
         val campaign = campaignDto.toEntity(
             createdBy = user.userId,
             imageUrl = imageUrl,
-            accountId = account
+            accountId = accountId
         )
         return campaignRepository.save(campaign)
     }
@@ -68,5 +66,21 @@ class CampaignServiceImpl(
 
     override fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignEntity> {
         return campaignRepository.findByStatus(status)
+    }
+
+    override fun changeCampaignStatus(campaignId: Long, status: CampaignStatus) : CampaignEntity {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw APIException("Campaign with id $campaignId not found", HttpStatus.NOT_FOUND, ErrorCode.ACCOUNT_NOT_FOUND)
+
+        val updatedCampaign = campaign.copy(status = status)
+        return campaignRepository.save(updatedCampaign)
+    }
+
+    override fun approveRejectCampaignStatus(campaignId: Long, status: CampaignStatus, adminId: Long?): CampaignEntity {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw APIException("Campaign with id $campaignId not found", HttpStatus.NOT_FOUND, ErrorCode.ACCOUNT_NOT_FOUND)
+
+        val updatedCampaign = campaign.copy(status = status, approvedBy = adminId)
+        return campaignRepository.save(updatedCampaign)
     }
 }

@@ -1,11 +1,13 @@
 package com.project.campaignlift.admin
 
+import com.project.campaignlift.admin.dtos.CampaignStatusRequest
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.providers.BandServiceProvider
 import com.project.campaignlift.services.CampaignService
 import com.project.common.exceptions.APIException
 import com.project.common.exceptions.ErrorCode
+import com.project.common.responses.authenthication.UserInfoDto
 import com.project.common.responses.banking.UserAccountsResponse
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
@@ -38,7 +40,31 @@ class CampaignAdminApiController (
     fun editCampaign(campaignId: Long) = "This is a campaign with id: $campaignId"
 
     @PostMapping("/details/{campaignId}")
-    fun approveCampaign(campaignId: Long) = "This is a campaign with id: $campaignId"
+    fun approveCampaign(
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+        @PathVariable campaignId: Long,
+        @RequestBody statusRequest: CampaignStatusRequest
+    ): CampaignEntity {
+        val status = statusRequest.name
+
+        val allowedStatuses = setOf(
+            CampaignStatus.PENDING,
+            CampaignStatus.REJECTED,
+            CampaignStatus.ACTIVE
+        )
+
+        if (status !in allowedStatuses) {
+            throw APIException("Invalid status change: $status", HttpStatus.BAD_REQUEST, ErrorCode.INVALID_INPUT)
+        }
+
+        val approvedBy = if (status == CampaignStatus.PENDING) null else authUser.userId
+
+        return campaignService.approveRejectCampaignStatus(
+            campaignId = campaignId,
+            status = status,
+            adminId = approvedBy
+        )
+    }
 
 
     @GetMapping("/details/{campaignId}/owner")

@@ -1,7 +1,7 @@
 package com.project.banking.repositories
 
-import com.project.banking.accounts.dtos.AccountResponse
 import com.project.banking.entities.AccountEntity
+import com.project.common.responses.banking.AccountResponse
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository
 interface AccountRepository: JpaRepository<AccountEntity, Long> {
 
     @Query("""
-    SELECT new com.project.banking.accounts.dtos.AccountResponse(
+    SELECT new com.project.common.responses.banking.AccountResponse(
         a.id,
         a.accountNumber,
         a.name,

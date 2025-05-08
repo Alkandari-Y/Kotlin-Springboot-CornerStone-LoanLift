@@ -1,8 +1,6 @@
 package com.project.banking.services
 
-import com.project.banking.accounts.dtos.AccountResponse
 import com.project.banking.accounts.dtos.UpdateAccountRequest
-import com.project.banking.accounts.dtos.toBasicResponse
 import com.project.banking.accounts.exceptions.AccountLimitException
 import com.project.banking.accounts.exceptions.AccountNotFoundException
 import com.project.banking.accounts.exceptions.AccountVerificationException
@@ -10,7 +8,9 @@ import com.project.banking.entities.AccountEntity
 import com.project.banking.repositories.AccountRepository
 import com.project.common.exceptions.APIException
 import com.project.common.responses.authenthication.UserInfoDto
+import com.project.common.responses.banking.AccountResponse
 import jakarta.transaction.Transactional
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 const val MAX_ACCOUNT_LIMIT = 3
@@ -71,6 +71,10 @@ class AccountServiceImpl(
         )
 
         return updatedAccount
+    }
+
+    override fun getAccountById(accountId: Long): AccountEntity? {
+        return accountRepository.findByIdOrNull(accountId)
     }
 
     override fun getByAccountNumber(accountNumber: String): AccountEntity? {

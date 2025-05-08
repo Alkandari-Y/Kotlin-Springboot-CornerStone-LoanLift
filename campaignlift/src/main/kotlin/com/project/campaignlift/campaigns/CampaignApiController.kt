@@ -3,7 +3,10 @@ package com.project.campaignlift.campaigns
 import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
+import com.project.campaignlift.providers.BandServiceProvider
 import com.project.campaignlift.services.CampaignService
+import com.project.common.exceptions.APIException
+import com.project.common.exceptions.ErrorCode
 import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.validation.Valid
 import org.springframework.core.io.Resource
@@ -13,6 +16,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.MediaTypeFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -28,7 +32,8 @@ import java.nio.file.Paths
 @RestController
 @RequestMapping("/api/v1/campaigns")
 class CampaignApiController (
-    private val campaignService: CampaignService
+    private val campaignService: CampaignService,
+    private val bandServiceProvider: BandServiceProvider
 ) {
     @GetMapping
     fun getAllCampaigns(): ResponseEntity<List<CampaignEntity>> =
@@ -44,11 +49,25 @@ class CampaignApiController (
         @Valid @ModelAttribute campaignCreateRequest: CreateCampaignDto,
         @RequestPart("image", required = true) image: MultipartFile,
         @RequestAttribute("authUser") authUser: UserInfoDto,
+        authentication: Authentication
     ): ResponseEntity<CampaignEntity> {
+        val token = authentication.credentials?.toString()
+
+        if (token.isNullOrEmpty()) {
+            throw APIException(
+                "Invalid Request. Please provide admin credentials",
+                HttpStatus.UNAUTHORIZED,
+                ErrorCode.INVALID_CREDENTIALS
+            )
+        }
+        val account = bandServiceProvider.getAccount(campaignCreateRequest.accountId, token)
+            ?: throw APIException("Invalid account id", HttpStatus.BAD_REQUEST, ErrorCode.INVALID_INPUT)
+
         val campaign = campaignService.createCampaign(
             campaignDto = campaignCreateRequest,
             user = authUser,
-            image = image
+            image = image,
+            accountId = account.id
         )
         return ResponseEntity(campaign, HttpStatus.CREATED)
     }

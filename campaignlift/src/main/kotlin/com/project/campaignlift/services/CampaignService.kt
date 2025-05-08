@@ -14,11 +14,14 @@ interface CampaignService {
     fun createCampaign(
         campaignDto: CreateCampaignDto,
         user: UserInfoDto,
-        image: MultipartFile
+        image: MultipartFile,
+        accountId: Long
     ): CampaignEntity
     fun updateCampaign(campaignId: Long, userId: Long, campaign: UpdateCampaignRequest): CampaignEntity
     fun deleteCampaign(id: Long)
 
     fun getALlByUserId(userId: Long): List<CampaignEntity>
     fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignEntity>
+    fun changeCampaignStatus(campaignId: Long, status: CampaignStatus): CampaignEntity
+    fun approveRejectCampaignStatus(campaignId: Long, status: CampaignStatus, adminId: Long? = null): CampaignEntity
 }

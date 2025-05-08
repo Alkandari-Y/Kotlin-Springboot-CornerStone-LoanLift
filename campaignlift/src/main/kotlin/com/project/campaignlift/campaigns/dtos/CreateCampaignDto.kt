@@ -15,6 +15,7 @@ data class CreateCampaignDto(
     @field:NotBlank
     val title: String,
 
+    @field:NotBlank
     val description: String,
 
     @field:DecimalMin("1000.000")
@@ -23,6 +24,10 @@ data class CreateCampaignDto(
     @field:NotNull
     @field:DecimalMin("0.000")
     val interestRate: BigDecimal,
+
+    @NotNull
+    @field:Min(1)
+    val accountId: Long,
 
     @field:Min(3)
     val repaymentMonths: Int,
