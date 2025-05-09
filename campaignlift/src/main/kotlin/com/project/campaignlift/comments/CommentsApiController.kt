@@ -5,12 +5,13 @@ import com.project.campaignlift.comments.dtos.toResponseDto
 import com.project.campaignlift.comments.dtos.CommentCreateRequest
 import com.project.campaignlift.comments.dtos.ReplyCreateRequest
 import com.project.campaignlift.comments.dtos.ReplyDto
-import com.project.campaignlift.entities.ReplyEntity
 import com.project.campaignlift.services.CommentService
 import com.project.common.responses.authenthication.UserInfoDto
+import com.project.common.security.RemoteUserPrincipal
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -51,8 +52,14 @@ class CommentsApiController(
     fun deleteComment(
         @PathVariable("commentId") commentId: Long,
         @RequestAttribute("authUser") authUser: UserInfoDto,
-        ) {
-        commentService.deleteComment(commentId, authUser.userId)
+        @AuthenticationPrincipal user: RemoteUserPrincipal
+    ) {
+        val isAdmin = user.authorities.any { it.authority == "ROLE_ADMIN" }
+        if (isAdmin) {
+            commentService.deletedCommentAndReply(commentId)
+        } else {
+            commentService.deleteComment(commentId, authUser.userId)
+        }
     }
 
     @PostMapping("/reply")

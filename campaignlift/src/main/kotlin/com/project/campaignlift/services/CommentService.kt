@@ -11,4 +11,5 @@ interface CommentService {
     fun getCommentById(commentId: Long): CommentEntity?
     fun deleteComment(commentId: Long, userId: Long)
     fun createReply(commentId: Long, message: String, userId: Long): ReplyEntity
+    fun deletedCommentAndReply(commentId: Long)
 }

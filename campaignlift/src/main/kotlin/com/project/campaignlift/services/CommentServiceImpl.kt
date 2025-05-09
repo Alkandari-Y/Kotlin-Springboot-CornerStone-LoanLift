@@ -9,6 +9,7 @@ import com.project.common.exceptions.APIException
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
 import com.project.common.exceptions.comments.CommentDeleteException
 import com.project.common.exceptions.comments.CommentNotFoundException
+import com.project.common.exceptions.comments.CommentPermissionException
 import com.project.common.exceptions.comments.ReplyAlreadyExistsException
 import com.project.common.exceptions.kycs.AccountNotVerifiedException
 import com.project.common.responses.authenthication.UserInfoDto
@@ -53,17 +54,15 @@ class CommentServiceImpl (
         val comment = commentRepository.findByIdOrNull(commentId)
             ?: throw CommentNotFoundException()
 
-        if (comment.reply != null) {
+        if (replyRepository.existsByCommentId(commentId)) {
             throw CommentDeleteException()
         }
 
         if (userId != comment.createdBy) {
-            throw APIException("You can't delete this comment")
+            throw CommentPermissionException()
         }
 
-        commentRepository.deleteById(
-            commentId
-        )
+        commentRepository.deleteById(commentId)
     }
 
     override fun createReply(
@@ -89,5 +88,9 @@ class CommentServiceImpl (
             message = message
         )
         return replyRepository.save(reply)
+    }
+
+    override fun deletedCommentAndReply(commentId: Long) {
+        commentRepository.deleteById(commentId)
     }
 }

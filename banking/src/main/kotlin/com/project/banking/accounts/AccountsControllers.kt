@@ -156,9 +156,7 @@ class AccountsControllers(
     }
 
     @GetMapping("/clients")
-//    @GetMapping("/clients/{clientId}/account")
     fun getAccountDetails(
-//        @PathVariable("clientId") clientId: Long,
         @RequestParam(required = false) accountId: Long?,
         @RequestParam(required = false) accountNumber: String?,
         @AuthenticationPrincipal user: RemoteUserPrincipal

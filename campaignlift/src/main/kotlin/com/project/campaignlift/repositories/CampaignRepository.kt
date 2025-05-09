@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
-interface CampaignRepositories : JpaRepository<CampaignEntity, Long> {
+interface CampaignRepository : JpaRepository<CampaignEntity, Long> {
 
     @Query(
         """

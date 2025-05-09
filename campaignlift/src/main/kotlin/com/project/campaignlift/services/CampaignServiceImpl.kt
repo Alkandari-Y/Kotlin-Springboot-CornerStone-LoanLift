@@ -3,7 +3,7 @@ package com.project.campaignlift.services
 import com.project.campaignlift.campaigns.dtos.*
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
-import com.project.campaignlift.repositories.CampaignRepositories
+import com.project.campaignlift.repositories.CampaignRepository
 import com.project.campaignlift.repositories.CommentRepository
 import com.project.common.exceptions.campaigns.CampaignDeletionNotAllowedException
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
@@ -17,7 +17,7 @@ import java.math.BigDecimal
 
 @Service
 class CampaignServiceImpl(
-    private val campaignRepository: CampaignRepositories,
+    private val campaignRepository: CampaignRepository,
     private val fileStorageService: FileStorageService,
     private val commentRepository: CommentRepository,
 ) : CampaignService {

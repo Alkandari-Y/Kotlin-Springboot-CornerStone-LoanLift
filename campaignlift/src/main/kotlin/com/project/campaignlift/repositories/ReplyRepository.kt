@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ReplyRepository: JpaRepository<ReplyEntity, Long> {
+    fun existsByCommentId(commentId: Long): Boolean
 }

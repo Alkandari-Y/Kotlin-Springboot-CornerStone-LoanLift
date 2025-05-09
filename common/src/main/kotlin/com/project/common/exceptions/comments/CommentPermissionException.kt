@@ -6,12 +6,12 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-data class CommentDeleteException(
+@ResponseStatus(HttpStatus.UNAUTHORIZED)
+data class CommentPermissionException(
     override val cause: Throwable? = null,
-    override val message: String = "Comment cannot be deleted.",
-    override val httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
-    override val code: ErrorCode = ErrorCode.REPLY_ALREADY_EXISTS
+    override val message: String = "You lack permissions to perform this action",
+    override val httpStatus: HttpStatus = HttpStatus.UNAUTHORIZED,
+    override val code: ErrorCode = ErrorCode.INVALID_CREDENTIALS
 ) : APIException(
     message = message,
     httpStatus = httpStatus,
