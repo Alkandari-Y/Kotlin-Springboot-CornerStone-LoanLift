@@ -17,7 +17,12 @@ interface CampaignService {
     fun getCampaignDetails(campaignId: Long): CampaignWithCommentsDto?
 
     fun getCampaignById(id: Long): CampaignEntity?
-    fun updateCampaign(campaignId: Long, userId: Long, campaign: UpdateCampaignRequest): CampaignEntity
+    fun updateCampaign(
+        campaignId: Long,
+        userId: Long,
+        campaign: UpdateCampaignRequest,
+        image: MultipartFile?
+    ): CampaignEntity
     fun createCampaign(
         campaignDto: CreateCampaignDto,
         user: UserInfoDto,

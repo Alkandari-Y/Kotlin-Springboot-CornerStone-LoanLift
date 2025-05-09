@@ -8,6 +8,7 @@ import com.project.campaignlift.repositories.CommentRepository
 import com.project.common.exceptions.campaigns.CampaignDeletionNotAllowedException
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
 import com.project.common.exceptions.campaigns.CampaignPermissionDeniedException
+import com.project.common.exceptions.campaigns.CampaignUpdateNotAllowedException
 import com.project.common.exceptions.kycs.IncompleteUserRegistrationException
 import com.project.common.responses.authenthication.UserInfoDto
 import org.springframework.data.repository.findByIdOrNull
@@ -51,12 +52,32 @@ class CampaignServiceImpl(
     override fun updateCampaign(
         campaignId: Long,
         userId: Long,
-        campaign: UpdateCampaignRequest
+        campaign: UpdateCampaignRequest,
+        image: MultipartFile?
     ): CampaignEntity {
-        campaignRepository.findByIdOrNull(campaignId)
-        val updatedCampaign = CampaignEntity()
-        return updatedCampaign
+        val existing = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+
+        if (existing.createdBy != userId) {
+            throw CampaignPermissionDeniedException(userId, campaignId)
+        }
+
+        if (existing.status != CampaignStatus.NEW) {
+            throw CampaignUpdateNotAllowedException( existing.status.name)
+        }
+
+        val imageUrl = image?.let {
+            fileStorageService.uploadFilePublic(it)
+        } ?: existing.imageUrl.orEmpty()
+
+        val updatedCampaign = campaign.toEntity(
+            imageUrl = imageUrl,
+            previousCampaign = existing
+        ).copy(id = existing.id)
+
+        return campaignRepository.save(updatedCampaign)
     }
+
 
     override fun deleteCampaign(campaignId: Long, authUserId: Long) {
         val campaign = campaignRepository.findByIdOrNull(campaignId)

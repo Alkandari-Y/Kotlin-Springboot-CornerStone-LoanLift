@@ -12,7 +12,7 @@ data class CampaignPermissionDeniedException(
     val campaignId: Long,
     override val cause: Throwable? = null
 ) : APIException(
-    message = "User $userId is not allowed to delete campaign $campaignId.",
+    message = "User $userId is not allowed to update or delete campaign $campaignId.",
     httpStatus = HttpStatus.FORBIDDEN,
     code = ErrorCode.UNAUTHORIZED,
     cause = cause

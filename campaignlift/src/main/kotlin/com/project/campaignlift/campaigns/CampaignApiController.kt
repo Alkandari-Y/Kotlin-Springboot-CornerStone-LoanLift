@@ -3,6 +3,7 @@ package com.project.campaignlift.campaigns
 import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.campaigns.dtos.CampaignWithCommentsDto
 import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
+import com.project.campaignlift.campaigns.dtos.UpdateCampaignRequest
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.providers.BandServiceProvider
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
@@ -102,4 +104,23 @@ class CampaignApiController (
         campaignService.deleteCampaign(campaignId, authUser.userId)
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
+
+    @PutMapping("/manage/{campaignId}",
+        consumes = ["multipart/form-data"]
+    )
+    fun updateCampaign(
+        @PathVariable campaignId: Long,
+        @Valid @ModelAttribute campaignUpdateRequest: UpdateCampaignRequest,
+        @RequestPart("image", required = false) image: MultipartFile?,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+    ): ResponseEntity<CampaignEntity> {
+        val updated = campaignService.updateCampaign(
+            campaignId = campaignId,
+            userId = authUser.userId,
+            campaign = campaignUpdateRequest,
+            image = image
+        )
+        return ResponseEntity(updated, HttpStatus.OK)
+    }
+
 }
