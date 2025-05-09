@@ -28,6 +28,7 @@ data class AccountEntity(
     val ownerId: Long? = null,
 
     @Column(name = "owner_type")
+    @Enumerated(EnumType.ORDINAL)
     val ownerType: AccountType = AccountType.USER,
 
     @Column(name = "account_number", unique = true)
@@ -44,7 +45,9 @@ data class AccountEntity(
         ownerId = null,
         accountNumber = UUID.randomUUID().toString()
             .replace("[A-Za-z]".toRegex(), "")
-            .replace("-", ""))
+            .replace("-", ""),
+        ownerType = AccountType.USER,
+    )
 }
 
 fun AccountEntity.toAccountResponseDto() = AccountResponse(

@@ -33,6 +33,7 @@ data class TransactionEntity(
     val createdAt: Instant = Instant.now(),
 
     @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
     val type: TransactionType? = TransactionType.PAYMENT,
 
     @ManyToOne(fetch = FetchType.LAZY)

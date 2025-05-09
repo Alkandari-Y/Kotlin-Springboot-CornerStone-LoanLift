@@ -23,13 +23,13 @@ CREATE TABLE "kycs"
 
 CREATE TABLE "accounts"
 (
-    "id"             SERIAL PRIMARY KEY,
-    "name"           VARCHAR(255)  NOT NULL,
-    "balance"        DECIMAL(9, 3) NOT NULL,
-    "is_active"      BOOLEAN       NOT NULL,
-    "account_number" VARCHAR(255)  NOT NULL UNIQUE,
-    "owner_id"       INT           NOT NULL,
-    "owner_type" VARCHAR(50)       NOT NULL
+    "id"                    SERIAL PRIMARY KEY,
+    "name"                  VARCHAR(255)  NOT NULL,
+    "balance"               DECIMAL(9, 3) NOT NULL,
+    "is_active"             BOOLEAN       NOT NULL,
+    "account_number"        VARCHAR(255)  NOT NULL UNIQUE,
+    "owner_id"              INT           NOT NULL,
+    "owner_type"            INT           NOT NULL
 );
 
 CREATE TABLE "transactions"
@@ -40,7 +40,7 @@ CREATE TABLE "transactions"
     "amount"              DECIMAL(9, 3) NOT NULL,
     "created_at"          TIMESTAMP     NOT NULL,
     "category_id"         INT           NOT NULL,
-    "type"                VARCHAR(255)  NOT NULL,
+    "type"                INT           NOT NULL,
     CONSTRAINT "fk_transaction_source"
         FOREIGN KEY ("source_account")
             REFERENCES "accounts" ("id") ON DELETE CASCADE,

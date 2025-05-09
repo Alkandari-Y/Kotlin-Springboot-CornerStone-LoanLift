@@ -6,7 +6,7 @@ import java.time.LocalDate
 interface UserPledgeProjection {
     fun id(): Long
     fun amount(): BigDecimal
-    fun status(): String
+    fun status(): Int
     fun campaignTitle(): String
     fun campaignId(): Long
     fun createdAt(): LocalDate

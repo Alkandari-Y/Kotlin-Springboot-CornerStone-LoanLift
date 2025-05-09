@@ -3,6 +3,7 @@ package com.project.campaignlift.services
 import com.project.campaignlift.entities.projections.UserPledgeProjection
 import com.project.campaignlift.pledges.dtos.PledgeResultDto
 import com.project.campaignlift.pledges.dtos.UserPledgeDto
+import com.project.common.responses.authenthication.UserInfoDto
 
 import java.math.BigDecimal
 
@@ -11,7 +12,7 @@ interface PledgeService {
     fun getAllUserPledges(userId: Long): List<UserPledgeDto>
 
     fun createPledge(
-        userId: Long,
+        userInfo: UserInfoDto,
         accountId: Long,
         campaignId: Long,
         amount: BigDecimal

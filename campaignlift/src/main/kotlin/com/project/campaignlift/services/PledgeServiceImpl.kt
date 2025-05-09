@@ -1,5 +1,7 @@
 package com.project.campaignlift.services
 
+import com.project.banking.entities.AccountEntity
+import com.project.banking.entities.TransactionEntity
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.entities.PledgeEntity
@@ -10,11 +12,24 @@ import com.project.campaignlift.pledges.dtos.PledgeResultDto
 import com.project.campaignlift.pledges.dtos.UserPledgeDto
 import com.project.campaignlift.pledges.dtos.toResultDto
 import com.project.campaignlift.pledges.dtos.toUserPledgeDto
+import com.project.campaignlift.repositories.AccountRepository
 import com.project.campaignlift.repositories.CampaignRepository
+import com.project.campaignlift.repositories.CategoryRepository
 import com.project.campaignlift.repositories.PledgeRepository
 import com.project.campaignlift.repositories.PledgeTransactionRepository
+import com.project.campaignlift.repositories.TransactionRepository
+import com.project.common.enums.TransactionType
 import com.project.common.exceptions.AccessDeniedException
+import com.project.common.exceptions.accounts.AccountNotFoundException
+import com.project.common.exceptions.accounts.AccountVerificationException
+import com.project.common.exceptions.accounts.InsufficientFundsException
+import com.project.common.exceptions.campaigns.CampaignNotFoundException
+import com.project.common.exceptions.categories.CategoryNotFoundException
+import com.project.common.exceptions.kycs.AccountNotVerifiedException
 import com.project.common.exceptions.pledges.InvalidPledgeOperationException
+import com.project.common.responses.authenthication.UserInfoDto
+import jakarta.transaction.Transactional
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -25,13 +40,17 @@ class PledgeServiceImpl(
     private val pledgeRepository: PledgeRepository,
     private val campaignRepository: CampaignRepository,
     private val pledgeTransactionRepository: PledgeTransactionRepository,
+    private val accountRepository: AccountRepository,
+    private val transactionRepository: TransactionRepository,
+    private val categoryRepository: CategoryRepository,
 ): PledgeService {
     override fun getAllUserPledges(userId: Long): List<UserPledgeDto> {
         return pledgeRepository.findAllByUserIdDto(userId)
     }
 
+    @Transactional
     override fun createPledge(
-        userId: Long,
+        user: UserInfoDto,
         accountId: Long,
         campaignId: Long,
         amount: BigDecimal
@@ -40,13 +59,24 @@ class PledgeServiceImpl(
             .orElseThrow { IllegalArgumentException("Campaign not found") }
 
         validateCampaignIsPledgeable(campaign)
+        validatePledgerIsNotCampaignOwner(campaign, user.userId)
 
-        val existingPledge = pledgeRepository.findByUserIdAndCampaignId(userId, campaignId)
+        val userAccount = accountRepository.findByIdOrNull(accountId)
+            ?: throw AccountNotFoundException()
+
+        validateUserAccount(userAccount, user)
+        validateSufficientFunds(userAccount, amount)
+
+        val campaignAccount = campaign.accountId?.let { accountRepository.findById(it) }
+            ?.orElseThrow { CampaignNotFoundException() }
+            ?: throw InvalidPledgeOperationException("Campaign has no valid funding account.")
+
+        val existingPledge = pledgeRepository.findByUserIdAndCampaignId(user.userId, campaignId)
 
         val pledge = when {
             existingPledge == null -> {
                 PledgeEntity(
-                    userId = userId,
+                    userId = user.userId,
                     accountId = accountId,
                     campaign = campaign,
                     amount = amount,
@@ -66,30 +96,48 @@ class PledgeServiceImpl(
                     commitedAt = LocalDate.now()
                 )
             }
-            existingPledge.status == PledgeStatus.COMMITTED -> {
-                throw InvalidPledgeOperationException("You already have a pledge for this campaign.")
-            }
-            else -> throw InvalidPledgeOperationException("Unhandled pledge status.")
+            else -> throw InvalidPledgeOperationException("You already have an active pledge for this campaign.")
         }
+
+        val category = categoryRepository.findByIdOrNull(campaign.categoryId!!)
+            ?: throw CategoryNotFoundException()
+
+        val bankingTransaction = transactionRepository.save(
+            TransactionEntity(
+                sourceAccount = userAccount,
+                destinationAccount = campaignAccount,
+                amount = amount,
+                type = TransactionType.PLEDGE,
+                category = category
+            )
+        )
+
+        val newPledgerBalance = userAccount.balance.setScale(3).subtract(amount)
+        val newCampaignAccountBalance = campaignAccount.balance.setScale(3).add(amount)
+
+        accountRepository.saveAll(
+            listOf(
+                userAccount.copy(balance = newPledgerBalance),
+                campaignAccount.copy(balance = newCampaignAccountBalance)
+            )
+        )
 
         val savedPledge = pledgeRepository.save(pledge)
 
-        val transaction = PledgeTransactionEntity(
-            transactionId = 1L,
-            pledge = savedPledge,
-            type = PledgeTransactionType.FUNDING
+        val pledgeTransaction = pledgeTransactionRepository.save(
+            PledgeTransactionEntity(
+                transactionId = bankingTransaction.id!!,
+                pledge = savedPledge,
+                type = PledgeTransactionType.FUNDING
+            )
         )
-
-        val savedTransaction = pledgeTransactionRepository.save(transaction)
 
         return PledgeResultDto(
-            pledge = savedPledge.toUserPledgeDto(
-                title = campaign.title,
-                campaignId = campaign.id!!
-            ),
-            transaction = savedTransaction.toResultDto()
+            pledge = savedPledge.toUserPledgeDto(campaign.title, campaign.id!!),
+            transaction = pledgeTransaction.toResultDto()
         )
     }
+
 
     // update pledge uses the same old pledge finds an old one with status withdrawn and updates status
     // calls bank to perform transaction
@@ -172,5 +220,30 @@ class PledgeServiceImpl(
         if (campaign.status != CampaignStatus.ACTIVE || campaign.campaignDeadline?.isBefore(LocalDate.now()) == true) {
             throw InvalidPledgeOperationException("Campaign is not accepting pledges at this time.")
         }
+    }
+
+    private fun validateUserAccount(account: AccountEntity, user: UserInfoDto): Boolean {
+        if (account.ownerId != user.userId) {
+            throw AccountVerificationException("You do not own this account.")
+        }
+
+        if (!user.isActive) {
+            throw AccountNotVerifiedException()
+        }
+        return true
+    }
+
+    private fun validateSufficientFunds(account: AccountEntity, amount: BigDecimal): Boolean {
+        if (account.balance < amount) {
+            throw InsufficientFundsException("Insufficient funds to complete pledge.")
+        }
+        return true
+    }
+
+    private fun validatePledgerIsNotCampaignOwner(campaign: CampaignEntity, userId: Long): Boolean {
+        if (campaign.createdBy == userId) {
+            throw InvalidPledgeOperationException("Campaign creators cannot pledge to their own campaigns.")
+        }
+        return true
     }
 }

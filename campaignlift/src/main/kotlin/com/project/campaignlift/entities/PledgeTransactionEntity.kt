@@ -17,7 +17,7 @@ data class PledgeTransactionEntity(
     val pledge: PledgeEntity,
 
     @Column(name = "type", nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     val type: PledgeTransactionType
 ) {
     constructor() : this(

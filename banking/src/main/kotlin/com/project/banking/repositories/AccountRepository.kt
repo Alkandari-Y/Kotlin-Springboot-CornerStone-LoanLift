@@ -2,6 +2,7 @@ package com.project.banking.repositories
 
 import com.project.banking.entities.AccountEntity
 import com.project.banking.repositories.projections.AccountView
+import com.project.common.enums.AccountType
 import com.project.common.responses.banking.AccountResponse
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -27,13 +28,16 @@ interface AccountRepository: JpaRepository<AccountEntity, Long> {
     fun findAllByOwnerId(@Param("ownerId") ownerId: Long): List<AccountEntity>
 
     @Query("""
-        SELECT COUNT(a)
-        FROM AccountEntity a
-        WHERE a.ownerId = :userId
-          AND a.active = TRUE
-          AND a.ownerType = com.project.common.enums.AccountType.USER
+        SELECT COUNT(a) FROM AccountEntity a 
+        WHERE a.ownerId = :userId 
+        AND a.active = true 
+        AND a.ownerType = :ownerType
     """)
-    fun getAccountCountByUserId(@Param("userId") userId: Long): Long
+    fun getAccountCountByUserId(
+        @Param("userId") userId: Long,
+        @Param("ownerType") ownerType: AccountType = AccountType.USER
+    ): Long
+
 
     fun findByAccountNumber(accountNumber: String): AccountEntity?
 }

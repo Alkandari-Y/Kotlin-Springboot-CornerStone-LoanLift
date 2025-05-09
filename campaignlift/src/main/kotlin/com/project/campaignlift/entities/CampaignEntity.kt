@@ -34,7 +34,7 @@ data class CampaignEntity(
     val repaymentMonths: Int,
 
     @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     val status: CampaignStatus = CampaignStatus.NEW,
 
     @Column(name = "submitted_at", updatable = false)

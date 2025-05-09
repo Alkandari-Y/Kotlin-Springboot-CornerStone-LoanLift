@@ -32,7 +32,7 @@ data class PledgeEntity(
     val updatedAt: LocalDate = LocalDate.now(),
 
     @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     val status: PledgeStatus = PledgeStatus.COMMITTED,
 
     @Column(name = "withdrawn_at")

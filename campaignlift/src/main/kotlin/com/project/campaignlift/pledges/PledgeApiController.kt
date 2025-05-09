@@ -39,7 +39,7 @@ class PledgeApiController(
         @RequestAttribute("authUser") authUser: UserInfoDto
     ): ResponseEntity<PledgeResultDto> {
         val pledge = pledgeService.createPledge(
-            userId = authUser.userId,
+            userInfo = authUser,
             accountId = request.accountId!!,
             campaignId = request.campaignId!!,
             amount = request.amount!!

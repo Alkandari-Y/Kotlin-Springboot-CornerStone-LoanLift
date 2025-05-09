@@ -24,9 +24,11 @@ interface CampaignRepository : JpaRepository<CampaignEntity, Long> {
             c.campaignDeadline,
             c.imageUrl
         ) FROM CampaignEntity c
-            WHERE c.status != 'NEW' 
-                OR c.status != 'PENDING' 
-                OR c.status != 'REJECTED'
+            WHERE c.status NOT IN (
+                com.project.campaignlift.entities.CampaignStatus.NEW,
+                com.project.campaignlift.entities.CampaignStatus.PENDING,
+                com.project.campaignlift.entities.CampaignStatus.REJECTED
+            )
     """
     )
     fun listAllCampaigns(): List<CampaignListItemResponse>
