@@ -15,6 +15,7 @@ data class CreateCampaignDto(
     @field:NotBlank
     val title: String,
 
+    @field:NotBlank
     val description: String,
 
     @field:DecimalMin("1000.000")

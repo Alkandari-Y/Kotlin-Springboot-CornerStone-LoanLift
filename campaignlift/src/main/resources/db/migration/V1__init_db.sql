@@ -15,7 +15,7 @@ CREATE TABLE "campaigns"
     "goal_amount"       DECIMAL(9, 3)   NOT NULL,
     "interest_rate"     DECIMAL(5, 4)   NOT NULL,
     "repayment_months"  INTEGER         NOT NULL,
-    "status"            VARCHAR(255)    NOT NULL,
+    "status"            INT             NOT NULL,
     "submitted_at"      DATE            NOT NULL,
     "approved_by"       INT,
     "deadline"          DATE            NOT NULL,
@@ -43,10 +43,10 @@ CREATE TABLE "pledges"
      "user_id"          INT             NOT NULL,
      "account_id"       INT             NOT NULL,
      "campaign_id"      INT             NOT NULL,
-     "amount"           DECIMAL(8, 2)   NOT NULL,
+     "amount"           DECIMAL(9, 3)   NOT NULL,
      "created_at"       DATE            NOT NULL,
      "updated_at"       DATE            NOT NULL,
-     "status"           VARCHAR(255)    NOT NULL,
+     "status"           INT             NOT NULL,
      "withdrawn_at"     DATE            NULL,
      "commited_at"      DATE            NOT NULL,
      CONSTRAINT "pledge_campaign_id_foreign"
@@ -60,6 +60,7 @@ CREATE TABLE "pledge_transactions"
     "id"                SERIAL PRIMARY KEY,
     "transaction_id"    INT          NOT NULL,
     "pledge_id"         INT          NOT NULL,
+    "type"              INT          NOT NULL,
     CONSTRAINT "pledge_transactions_pledge_id_foreign"
         FOREIGN KEY ("pledge_id")
             REFERENCES "pledges" ("id") ON DELETE CASCADE

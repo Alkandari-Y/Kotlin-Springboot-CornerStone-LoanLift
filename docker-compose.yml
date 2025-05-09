@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:latest
+    ports:
+      - "5000:5432"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: changemelater
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"     # http://localhost:9001/browser
+    restart: always
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+volumes:
+  minio_data:

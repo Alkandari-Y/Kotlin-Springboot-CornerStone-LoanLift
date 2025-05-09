@@ -1,38 +1,43 @@
 package com.project.campaignlift.campaigns
 
+import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
+import com.project.campaignlift.campaigns.dtos.CampaignWithCommentsDto
 import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
+import com.project.campaignlift.campaigns.dtos.UpdateCampaignRequest
 import com.project.campaignlift.entities.CampaignEntity
+import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.services.CampaignService
+import com.project.common.exceptions.auth.MissingCredentialsException
+import com.project.common.exceptions.campaigns.CampaignNotFoundException
+import com.project.common.exceptions.kycs.AccountNotVerifiedException
 import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.validation.Valid
-import org.springframework.core.io.Resource
-import org.springframework.core.io.UrlResource
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.MediaTypeFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.nio.file.Paths
 
 @RestController
 @RequestMapping("/api/v1/campaigns")
 class CampaignApiController (
-    private val campaignService: CampaignService
+    private val campaignService: CampaignService,
 ) {
     @GetMapping
-    fun getAllCampaigns(): ResponseEntity<List<CampaignEntity>> =
+    fun getAllCampaigns(): ResponseEntity<List<CampaignListItemResponse>> =
         ResponseEntity(
-        campaignService.getAllCampaigns(),
-        HttpStatus.OK
+            campaignService.getAllCampaignsByStatus(CampaignStatus.ACTIVE),
+            HttpStatus.OK
         )
 
 
@@ -42,27 +47,73 @@ class CampaignApiController (
         @Valid @ModelAttribute campaignCreateRequest: CreateCampaignDto,
         @RequestPart("image", required = true) image: MultipartFile,
         @RequestAttribute("authUser") authUser: UserInfoDto,
+        authentication: Authentication
     ): ResponseEntity<CampaignEntity> {
+
+        if (authUser.isActive.not()) {
+            throw AccountNotVerifiedException()
+        }
+
+        val token = authentication.credentials?.toString()
+
+        if (token.isNullOrEmpty()) {
+            throw MissingCredentialsException()
+        }
+
         val campaign = campaignService.createCampaign(
             campaignDto = campaignCreateRequest,
             user = authUser,
-            image = image
+            image = image,
         )
         return ResponseEntity(campaign, HttpStatus.CREATED)
     }
 
-    @GetMapping("/images/{filename}")
-    fun getPublicFile(
-        @PathVariable filename: String):
-            ResponseEntity<Resource> {
-        val file = Paths.get("uploads").resolve(filename).normalize().toFile()
-        if (!file.exists()) return ResponseEntity.notFound().build()
+    @GetMapping("/details/{campaignId}")
+    fun getCampaignById(
+        @PathVariable("campaignId") campaignId: Long): CampaignWithCommentsDto
+    {
+        val campaign = campaignService.getCampaignDetails(campaignId)
+        ?: throw CampaignNotFoundException()
 
-        val resource = UrlResource(file.toURI())
-        return ResponseEntity.ok()
-            .contentType(
-    MediaTypeFactory.getMediaType(file.name)
-                .orElse(MediaType.APPLICATION_OCTET_STREAM)
-            ).body(resource)
+        if (campaign.status in listOf(CampaignStatus.NEW, CampaignStatus.REJECTED, CampaignStatus.PENDING)) {
+            throw  CampaignNotFoundException()
+        }
+        return campaign
     }
+
+    @GetMapping("/manage")
+    fun getMyCampaigns(
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+    ): List<CampaignListItemResponse> {
+        return campaignService.getAllByUserId(authUser.userId)
+    }
+
+
+    @DeleteMapping("/manage/{campaignId}")
+    fun deleteCampaign(
+        @PathVariable campaignId: Long,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+    ): ResponseEntity<Unit> {
+        campaignService.deleteCampaign(campaignId, authUser.userId)
+        return ResponseEntity(HttpStatus.NO_CONTENT)
+    }
+
+    @PutMapping("/manage/{campaignId}",
+        consumes = ["multipart/form-data"]
+    )
+    fun updateCampaign(
+        @PathVariable campaignId: Long,
+        @Valid @ModelAttribute campaignUpdateRequest: UpdateCampaignRequest,
+        @RequestPart("image", required = false) image: MultipartFile?,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+    ): ResponseEntity<CampaignEntity> {
+        val updated = campaignService.updateCampaign(
+            campaignId = campaignId,
+            userId = authUser.userId,
+            campaign = campaignUpdateRequest,
+            image = image
+        )
+        return ResponseEntity(updated, HttpStatus.OK)
+    }
+
 }

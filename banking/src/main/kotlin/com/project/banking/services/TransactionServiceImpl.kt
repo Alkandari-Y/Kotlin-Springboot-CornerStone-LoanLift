@@ -2,15 +2,15 @@ package com.project.banking.services
 
 import com.project.banking.accounts.dtos.TransactionResponse
 import com.project.banking.accounts.dtos.TransferCreateRequest
-import com.project.banking.accounts.exceptions.AccountNotFoundException
-import com.project.banking.accounts.exceptions.InsufficientFundsException
-import com.project.banking.accounts.exceptions.InvalidTransferException
-import com.project.banking.entities.AccountOwnershipEntity
+import com.project.common.exceptions.accounts.AccountNotFoundException
+import com.project.common.exceptions.accounts.InsufficientFundsException
+import com.project.common.exceptions.accounts.InvalidTransferException
 import com.project.banking.entities.TransactionEntity
 import com.project.banking.repositories.AccountRepository
 import com.project.banking.repositories.TransactionRepository
 import com.project.banking.transactions.dtos.TransactionDetails
-import com.project.common.exceptions.ErrorCode
+import com.project.common.enums.TransactionType
+import com.project.common.enums.ErrorCode
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -35,22 +35,25 @@ class TransactionServiceImpl(
             throw AccountNotFoundException("One or both accounts not found.")
         }
 
-        if (sourceAccount.isActive.not() || destinationAccount.isActive.not()) {
+        if (sourceAccount.active.not() || destinationAccount.active.not()) {
             throw InvalidTransferException(
                 "Cannot transfer with inactive account.",
-                code = ErrorCode.INVALID_ACCOUNT_TYPE
+                code = ErrorCode.INVALID_TRANSFER
             )
         }
 
-        if (sourceAccount.owner?.ownerId != userIdMakingTransfer) {
-            throw InvalidTransferException("Cannot transfer with another persons account.", code = ErrorCode.INVALID_TRANSFER)
+        if (sourceAccount.ownerId != userIdMakingTransfer) {
+            throw InvalidTransferException(
+                "Cannot transfer with another persons account.",
+                code = ErrorCode.INVALID_TRANSFER
+            )
         }
         val category = categoryService.getCategoryByName("personal")
         val newSourceBalance = sourceAccount.balance.setScale(3).subtract(newTransaction.amount)
         val newDestinationBalance = destinationAccount.balance.setScale(3).add(newTransaction.amount)
 
         if (newSourceBalance < BigDecimal.ZERO) {
-            throw InsufficientFundsException("Transfer would result in a negative balance.")
+            throw InsufficientFundsException()
         }
 
         val transaction = transactionRepository.save(
@@ -59,6 +62,7 @@ class TransactionServiceImpl(
                 destinationAccount = destinationAccount,
                 amount = newTransaction.amount.setScale(3),
                 category = category,
+                type = newTransaction.type ?: TransactionType.TRANSFER
             )
         )
 
@@ -76,15 +80,12 @@ class TransactionServiceImpl(
         )
     }
 
-    override fun getTransactionsByAccount(accountOwnership: AccountOwnershipEntity): List<TransactionDetails> {
-        return transactionRepository.findRelatedTransactions(
-            accountOwnership.ownerId!!,
-            accountOwnership.ownerType
-        )
+    override fun getTransactionsByAccount(accountNumber: String): List<TransactionDetails> {
+        return transactionRepository.findRelatedTransactions(accountNumber)
     }
 
     override fun getAllTransactionByUserId(
-        accountOwnership: AccountOwnershipEntity
+        userId: Long
     ): List<TransactionResponse> {
         TODO("Not yet implemented")
     }

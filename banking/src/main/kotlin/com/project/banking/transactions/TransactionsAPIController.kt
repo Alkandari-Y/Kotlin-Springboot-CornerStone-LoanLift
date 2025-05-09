@@ -1,7 +1,6 @@
 package com.project.banking.transactions
 
-import com.project.banking.accounts.exceptions.AccountNotFoundException
-import com.project.banking.services.AccountOwnershipService
+import com.project.common.exceptions.accounts.AccountNotFoundException
 import com.project.banking.services.AccountService
 import com.project.banking.services.TransactionService
 import com.project.banking.transactions.dtos.TransactionDetails
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/transactions")
 class TransactionsAPIController(
-    private val accountOwnershipRepository: AccountOwnershipService,
     private val transactionService: TransactionService,
     private val accountService: AccountService,
 ){
@@ -29,7 +27,7 @@ class TransactionsAPIController(
         @PathVariable("accountNumber") accountNumber: String,
         @AuthenticationPrincipal user: RemoteUserPrincipal
     ): ResponseEntity<List<TransactionDetails>> {
-        val account = accountOwnershipRepository.getByAccountNumber(accountNumber)
+        val account = accountService.getByAccountNumber(accountNumber)
             ?: throw AccountNotFoundException()
 
         val isOwner = account.ownerId == user.getUserId()
@@ -39,7 +37,7 @@ class TransactionsAPIController(
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
-        val transactions = transactionService.getTransactionsByAccount(account)
+        val transactions = transactionService.getTransactionsByAccount(account.accountNumber)
         return ResponseEntity(transactions, HttpStatus.OK)
     }
 

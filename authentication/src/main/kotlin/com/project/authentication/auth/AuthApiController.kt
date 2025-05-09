@@ -27,7 +27,6 @@ class UserController(
     private val userService: UserService,
     private val authenticationManager: AuthenticationProvider,
     private val jwtService: JwtService,
-    private val passwordEncoder: PasswordEncoder,
 ) {
     @PostMapping(path = ["/register"])
     fun register(

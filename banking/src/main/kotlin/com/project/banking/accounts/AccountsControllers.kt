@@ -1,26 +1,29 @@
 package com.project.banking.accounts
 
 import com.project.banking.accounts.dtos.AccountCreateRequest
-import com.project.banking.accounts.dtos.AccountResponse
 import com.project.banking.accounts.dtos.TransferCreateRequest
 import com.project.banking.accounts.dtos.UpdateAccountRequest
 import com.project.banking.accounts.dtos.UpdatedBalanceResponse
-import com.project.banking.accounts.dtos.toBasicResponse
 import com.project.banking.accounts.dtos.toEntity
 import com.project.banking.accounts.dtos.toUpdatedBalanceResponse
-import com.project.banking.accounts.exceptions.AccountNotFoundException
+import com.project.common.exceptions.accounts.AccountNotFoundException
 import com.project.banking.entities.AccountEntity
-import com.project.banking.entities.projections.AccountListItemProjection
-import com.project.banking.services.AccountOwnershipService
+import com.project.banking.extensions.toBasicResponse
+import com.project.banking.repositories.projections.AccountView
 import com.project.banking.services.AccountService
+import com.project.banking.services.KYCService
 import com.project.banking.services.TransactionService
 import com.project.common.exceptions.APIException
-import com.project.common.exceptions.ErrorCode
+import com.project.common.enums.ErrorCode
 import com.project.common.responses.authenthication.UserInfoDto
+import com.project.common.responses.banking.AccountBalanceCheck
+import com.project.common.responses.banking.AccountResponse
+import com.project.common.responses.banking.UserAccountsResponse
 import com.project.common.security.RemoteUserPrincipal
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
@@ -28,15 +31,15 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/accounts")
 class AccountsControllers(
     private val accountService: AccountService,
-    private val accountOwnershipService: AccountOwnershipService,
-    private val transactionService: TransactionService
+    private val transactionService: TransactionService,
+    private val kycService: KYCService
 ) {
 
     @GetMapping
     fun getAllAccounts(
         @AuthenticationPrincipal user: RemoteUserPrincipal
-    ): List<AccountListItemProjection> {
-        return accountService.getAccountByUserId(user.getUserId())
+    ): List<AccountView> {
+        return accountService.getActiveAccountsByUserId(user.getUserId())
     }
     @PostMapping
     fun createAccount(
@@ -75,7 +78,7 @@ class AccountsControllers(
             )
     }
 
-    @PostMapping(path=["/close/{accountNumber}"])
+    @DeleteMapping(path=["/close/{accountNumber}"])
     fun closeAccount(
         @PathVariable accountNumber : String,
         @RequestAttribute("authUser") authUser: UserInfoDto,
@@ -103,26 +106,79 @@ class AccountsControllers(
         @PathVariable accountNumber : String,
         @AuthenticationPrincipal user: RemoteUserPrincipal
     ): ResponseEntity<AccountResponse>{
-        val accountOwned = accountOwnershipService.getByAccountNumber(accountNumber)
+        println("in controller $accountNumber")
+        val account = accountService.getByAccountNumber(accountNumber)
             ?: throw AccountNotFoundException()
 
-        val isOwner = accountOwned.ownerId == user.getUserId()
+        val isOwner = account.ownerId == user.getUserId()
         val isAdmin = user.authorities.any { it.authority == "ROLE_ADMIN" }
 
         if (!isOwner && !isAdmin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
-        val account = accountOwned.account ?: throw AccountNotFoundException()
 
-        if (account.isDeleted || account.isActive.not()) {
+        if (account.active.not() && isAdmin.not()) {
             throw APIException(
-                message = "Account was deleted or is not active anymore",
+                message = "Account is not active anymore",
                 httpStatus = HttpStatus.BAD_REQUEST,
                 code = ErrorCode.ACCOUNT_NOT_ACTIVE,
             )
         }
 
-        return ResponseEntity(accountOwned.account?.toBasicResponse(), HttpStatus.OK)
+        return ResponseEntity(account.toBasicResponse(), HttpStatus.OK)
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/clients/{clientId}")
+    fun getUserAccounts(@PathVariable("clientId") clientId: Long): UserAccountsResponse {
+        val kyc = kycService.findKYCByUserId(clientId)
+            ?: throw AccountNotFoundException("User not found")
+
+        val accounts = accountService.getAllAccountsByUserId(clientId)
+            .map {
+                AccountBalanceCheck(
+                    accountId = it.id!!,
+                    accountNumber = it.accountNumber,
+                    balance = it.balance,
+                    accountType = it.ownerType.name,
+                )
+            }
+
+        return UserAccountsResponse(
+            userId = kyc.userId!!,
+            firstName = kyc.firstName,
+            lastName = kyc.lastName,
+            dateOfBirth = kyc.dateOfBirth,
+            salary = kyc.salary,
+            nationality = kyc.nationality,
+            accounts = accounts
+        )
+    }
+
+    @GetMapping("/clients")
+    fun getAccountDetails(
+        @RequestParam(required = false) accountId: Long?,
+        @RequestParam(required = false) accountNumber: String?,
+        @AuthenticationPrincipal user: RemoteUserPrincipal
+    ): AccountResponse {
+        val account = when {
+            accountId != null -> accountService.getAccountById(accountId)
+            accountNumber != null -> accountService.getByAccountNumber(accountNumber)
+            else -> throw APIException("Either accountId or accountNumber must be provided")
+        } ?: throw AccountNotFoundException()
+
+        val isOwner = account.ownerId == user.getUserId()
+        val isAdmin = user.authorities.any { it.authority == "ROLE_ADMIN" }
+
+        if (!isOwner && !isAdmin) {
+            throw APIException(
+                "Unauthorized access to account",
+                HttpStatus.UNAUTHORIZED,
+                ErrorCode.UNAUTHORIZED
+            )
+        }
+
+        return account.toBasicResponse()
     }
 }

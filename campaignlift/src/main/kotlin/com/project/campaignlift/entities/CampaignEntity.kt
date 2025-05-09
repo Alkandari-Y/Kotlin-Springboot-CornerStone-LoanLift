@@ -1,7 +1,6 @@
 package com.project.campaignlift.entities
 
 import jakarta.persistence.*
-import org.hibernate.annotations.CreationTimestamp
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -35,7 +34,7 @@ data class CampaignEntity(
     val repaymentMonths: Int,
 
     @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     val status: CampaignStatus = CampaignStatus.NEW,
 
     @Column(name = "submitted_at", updatable = false)
@@ -53,9 +52,14 @@ data class CampaignEntity(
     @Column(name = "image_url")
     val imageUrl: String? = null,
 
+
+    @OneToMany(mappedBy = "campaign", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    val comments: List<CommentEntity>? = null,
+
     @Transient
-    var amountRaised: BigDecimal? = null
-) {
+    var amountRaised: BigDecimal = BigDecimal.ZERO,
+
+    ) {
     constructor() : this(
         id = null,
         createdBy = 0L,
@@ -71,7 +75,7 @@ data class CampaignEntity(
         campaignDeadline = null,
         accountId = null,
         imageUrl = null,
-        amountRaised = null
+        amountRaised = BigDecimal.ZERO,
     )
 }
 

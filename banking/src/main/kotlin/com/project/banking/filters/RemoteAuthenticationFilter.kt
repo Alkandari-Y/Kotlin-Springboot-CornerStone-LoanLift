@@ -30,7 +30,7 @@ class RemoteAuthenticationFilter(
         }
 
         try {
-            val token = bearerToken.substring(7)
+            val token = bearerToken.substring(7).trim()
             val result = jwtAuthProvider.authenticateToken(token)
             val authorities = result.roles.map { SimpleGrantedAuthority( it ) }
 
@@ -50,7 +50,6 @@ class RemoteAuthenticationFilter(
                 authorities
             )
             SecurityContextHolder.getContext().authentication = authToken
-            println("Authorities: ${SecurityContextHolder.getContext().authentication.authorities}")
 
             filterChain.doFilter(request, response)
 

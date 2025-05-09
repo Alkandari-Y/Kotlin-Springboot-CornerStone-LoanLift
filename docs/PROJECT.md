@@ -75,7 +75,7 @@ Each campaign is an **investment opportunity**, where contributors (lenders/pled
 
 ---
 
-### 4. `Profile`
+### 4. `Kyc`
 * `id` (PK)
 * `user_id` (FK)
 * `first_name` (string)
@@ -94,12 +94,8 @@ Each campaign is an **investment opportunity**, where contributors (lenders/pled
 * `id` (PK)
 * `name` (string)
 * `balance` (decimal)
-* `type` (`user`, `campaign`)
-* `user_id` (FK → User, nullable)
-* `campaign_id` (FK → Campaign, nullable)
-* `is_primary` (boolean)
+* `is_deleted` (boolean)
 * `is_active` (boolean)
-* `created_at` (datetime)
 
 #### Ownership Logic:
 - If `type = personal` → `user_id` must be non-null.
@@ -118,8 +114,15 @@ Each campaign is an **investment opportunity**, where contributors (lenders/pled
 
 
 ---
+### 6. Account_OwnerShips
 
-### 6. `Category`
+* `id` (PK)
+* `user_id` (FK → User, FK → Campaign)
+* `account_id` (FK → Account)
+* `owner_type` (`user`, `campaign`)
+* `is_primary` (boolean)
+
+### 7. `Category`
 
 * `id` (PK) 
 * `name` (string)
@@ -131,7 +134,7 @@ Each campaign is an **investment opportunity**, where contributors (lenders/pled
 
 --- 
 
-### 7. `Campaign`
+### 8. `Campaign`
 
 * `id` (PK)
 * `business_category` (FK -> Category)
@@ -210,13 +213,11 @@ Each campaign is an **investment opportunity**, where contributors (lenders/pled
 ### 9. `Transaction`
 
 * `id` (PK)
-* `from_account_id` (FK)
-* `to_account_id` (FK)
+* `source_account` (FK)
+* `destination_account` (FK)
 * `amount` (decimal)
 * `type` (`pledge`, `repayment`, `fee`, `topup`, etc.)
-* `reference_id` 
-* `reference_type` (e.g., pledge, repayment)
-* `timestamp`
+* `created_at`
 * `category_id` (FK -> Category)
 
 

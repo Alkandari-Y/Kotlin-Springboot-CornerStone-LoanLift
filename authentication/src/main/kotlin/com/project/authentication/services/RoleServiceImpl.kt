@@ -1,7 +1,7 @@
 package com.project.authentication.services
 
 import com.project.authentication.entities.RoleEntity
-import com.project.authentication.exceptions.UserNotFoundException
+import com.project.common.exceptions.auth.UserNotFoundException
 import com.project.authentication.repositories.RoleRepository
 import com.project.authentication.repositories.UserRepository
 import org.springframework.data.repository.findByIdOrNull

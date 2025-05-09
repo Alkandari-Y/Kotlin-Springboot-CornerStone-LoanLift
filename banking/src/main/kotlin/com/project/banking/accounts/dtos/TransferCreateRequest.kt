@@ -1,5 +1,6 @@
 package com.project.banking.accounts.dtos
 
+import com.project.common.enums.TransactionType
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.NotBlank
 import org.jetbrains.annotations.NotNull
@@ -17,4 +18,6 @@ data class TransferCreateRequest(
         message = "amount must must be at least 1.00"
     )
     val amount: BigDecimal,
+
+    val type: TransactionType?
 )

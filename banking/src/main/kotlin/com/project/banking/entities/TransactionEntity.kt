@@ -1,6 +1,7 @@
 package com.project.banking.entities
 
 import com.fasterxml.jackson.annotation.JsonBackReference
+import com.project.common.enums.TransactionType
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import java.math.BigDecimal
@@ -31,6 +32,10 @@ data class TransactionEntity(
     @Column(name = "created_at", nullable = false)
     val createdAt: Instant = Instant.now(),
 
+    @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    val type: TransactionType? = TransactionType.PAYMENT,
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     val category: CategoryEntity? = null,
@@ -41,6 +46,8 @@ data class TransactionEntity(
         destinationAccount = null,
         amount = BigDecimal.ZERO,
         createdAt = Instant.now(),
-        category = null
+        category = null,
+        type = TransactionType.TRANSFER
     )
 }
+

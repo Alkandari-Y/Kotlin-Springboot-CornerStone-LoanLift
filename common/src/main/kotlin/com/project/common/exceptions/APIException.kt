@@ -1,5 +1,6 @@
 package com.project.common.exceptions
 
+import com.project.common.enums.ErrorCode
 import org.springframework.http.HttpStatus
 
 open class APIException(

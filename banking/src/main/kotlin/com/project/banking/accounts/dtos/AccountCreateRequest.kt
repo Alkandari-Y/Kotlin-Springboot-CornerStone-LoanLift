@@ -24,7 +24,5 @@ fun AccountCreateRequest.toEntity(): AccountEntity {
     return AccountEntity(
         name = name,
         balance = initialBalance.setScale(3, RoundingMode.HALF_UP),
-        isActive = true,
-        isDeleted = false,
     )
 }
