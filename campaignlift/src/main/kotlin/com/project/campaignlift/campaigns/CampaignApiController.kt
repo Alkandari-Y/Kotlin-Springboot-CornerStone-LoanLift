@@ -6,7 +6,6 @@ import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
 import com.project.campaignlift.campaigns.dtos.UpdateCampaignRequest
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
-import com.project.campaignlift.providers.BandServiceProvider
 import com.project.campaignlift.services.CampaignService
 import com.project.common.exceptions.auth.MissingCredentialsException
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
@@ -33,7 +32,6 @@ import org.springframework.web.multipart.MultipartFile
 @RequestMapping("/api/v1/campaigns")
 class CampaignApiController (
     private val campaignService: CampaignService,
-    private val bandServiceProvider: BandServiceProvider
 ) {
     @GetMapping
     fun getAllCampaigns(): ResponseEntity<List<CampaignListItemResponse>> =

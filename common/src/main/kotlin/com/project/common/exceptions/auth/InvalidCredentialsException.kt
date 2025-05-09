@@ -4,7 +4,7 @@ import com.project.common.exceptions.APIException
 import com.project.common.enums.ErrorCode
 import org.springframework.http.HttpStatus
 
-class InvalidCredentialsException(
+data class InvalidCredentialsException(
     override val message: String = "Invalid credentials",
     override val httpStatus: HttpStatus = HttpStatus.UNAUTHORIZED,
     override val code: ErrorCode = ErrorCode.INVALID_CREDENTIALS,

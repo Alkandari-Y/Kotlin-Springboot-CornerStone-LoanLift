@@ -14,5 +14,6 @@ data class CampaignListItemResponse(
     val submittedAt: LocalDate,
     val campaignDeadline: LocalDate,
     val imageUrl: String,
-//    var amountRaised: BigDecimal? = null
 )
+
+

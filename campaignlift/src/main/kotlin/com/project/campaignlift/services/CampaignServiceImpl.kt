@@ -7,6 +7,7 @@ import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.repositories.AccountRepository
 import com.project.campaignlift.repositories.CampaignRepository
 import com.project.campaignlift.repositories.CommentRepository
+import com.project.campaignlift.repositories.PledgeRepository
 import com.project.common.enums.AccountType
 import com.project.common.exceptions.campaigns.CampaignDeletionNotAllowedException
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
@@ -26,13 +27,21 @@ class CampaignServiceImpl(
     private val fileStorageService: FileStorageService,
     private val commentRepository: CommentRepository,
     private val accountRepository: AccountRepository,
+    private val pledgeRepository: PledgeRepository,
 ) : CampaignService {
     override fun getAllCampaigns(): List<CampaignListItemResponse> {
         return campaignRepository.listAllCampaigns()
     }
 
-    override fun getCampaignById(id: Long): CampaignEntity? {
-        return campaignRepository.findByIdOrNull(id)
+    override fun getCampaignById(id: Long): CampaignDetailResponse? {
+        val campaign = campaignRepository.findByIdOrNull(id)
+            ?: throw CampaignNotFoundException()
+
+        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(id)
+
+        return campaign.toDetailResponse(
+            amountRaised = amountRaised
+        )
     }
 
 
@@ -116,7 +125,7 @@ class CampaignServiceImpl(
             ?: throw CampaignNotFoundException()
 
         val comments = commentRepository.findByCampaignId(campaignId)
-        val amountRaised = BigDecimal.ZERO
+        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId)
         return campaign.toCampaignWithCommentsDto(amountRaised, comments)
     }
 

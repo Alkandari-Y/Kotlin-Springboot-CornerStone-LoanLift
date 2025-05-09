@@ -10,5 +10,5 @@ fun AccountEntity.toBasicResponse() = AccountResponse(
     balance = balance,
     ownerId = ownerId!!,
     active = active,
-    type = ownerType
+    ownerType = ownerType
 )

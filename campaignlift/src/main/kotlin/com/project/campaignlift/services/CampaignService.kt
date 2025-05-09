@@ -1,5 +1,6 @@
 package com.project.campaignlift.services
 
+import com.project.campaignlift.campaigns.dtos.CampaignDetailResponse
 import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.campaigns.dtos.CampaignWithCommentsDto
 import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
@@ -16,7 +17,7 @@ interface CampaignService {
 
     fun getCampaignDetails(campaignId: Long): CampaignWithCommentsDto?
 
-    fun getCampaignById(id: Long): CampaignEntity?
+    fun getCampaignById(id: Long): CampaignDetailResponse?
     fun updateCampaign(
         campaignId: Long,
         userId: Long,

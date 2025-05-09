@@ -3,10 +3,8 @@ package com.project.common.exceptions.kycs
 import com.project.common.exceptions.APIException
 import com.project.common.enums.ErrorCode
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.ResponseStatus
 
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
 data class IncompleteUserRegistrationException(
     override val message: String = "Please complete the KYC registration process.",
     override val code: ErrorCode = ErrorCode.INCOMPLETE_USER_REGISTRATION,

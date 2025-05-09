@@ -3,9 +3,7 @@ package com.project.common.exceptions.campaigns
 import com.project.common.exceptions.APIException
 import com.project.common.enums.ErrorCode
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.ResponseStatus
 
-@ResponseStatus(HttpStatus.UNAUTHORIZED)
 data class CampaignOwnerNotFoundException(
     val campaignId: Long,
     override val cause: Throwable? = null

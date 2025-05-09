@@ -3,10 +3,8 @@ package com.project.common.exceptions.accounts
 import com.project.common.exceptions.APIException
 import com.project.common.enums.ErrorCode
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.ResponseStatus
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
-class AccountNotFoundException(
+data class AccountNotFoundException(
     override val message: String = "Account not found",
     override val code: ErrorCode = ErrorCode.ACCOUNT_NOT_FOUND,
     override val httpStatus: HttpStatus = HttpStatus.NOT_FOUND,

@@ -4,7 +4,7 @@ import com.project.common.exceptions.APIException
 import com.project.common.enums.ErrorCode
 import org.springframework.http.HttpStatus
 
-class UserExistsException (
+data class UserExistsException (
     override val message: String = "User with these credentials already Exists",
     override val httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
     override val code: ErrorCode = ErrorCode.USER_ALREADY_EXISTS,

@@ -42,7 +42,7 @@ class CommentsApiController(
     ): ResponseEntity<CommentResponseDto> {
         val comment = commentService.createComment(
             campaignId = campaignId,
-            comment = commentRequest.message,
+            message = commentRequest.message,
             user = authUser
         ).toResponseDto()
         return ResponseEntity(comment, HttpStatus.CREATED)

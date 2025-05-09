@@ -12,7 +12,7 @@ import org.springframework.http.*
 import org.springframework.web.client.RestTemplate
 
 @Named
-class BandServiceProvider(
+class BankServiceProvider(
     @Value("\${bankServiceBase.url}")
     private val bankServiceBaseUrl: String
 ) {
@@ -34,7 +34,7 @@ class BandServiceProvider(
         return response.body ?: false
     }
 
-    fun getAccount(accountId: Long, token: String, clientId: Long): AccountResponse {
+    fun getAccount(accountId: Long, token: String): AccountResponse {
         val url = "$bankServiceBaseUrl/accounts/clients?accountId=$accountId"
         val account = sendRequest<AccountResponse>(url, token).body
             ?: throw AccountNotFoundException()

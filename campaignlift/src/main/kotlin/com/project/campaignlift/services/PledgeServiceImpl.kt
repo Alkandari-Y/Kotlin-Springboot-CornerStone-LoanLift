@@ -48,35 +48,41 @@ class PledgeServiceImpl(
         return pledgeRepository.findAllByUserIdDto(userId)
     }
 
+    private val MIN_PLEDGE_AMOUNT = BigDecimal.valueOf(1000).setScale(3)
+
     @Transactional
     override fun createPledge(
-        user: UserInfoDto,
+        userInfo: UserInfoDto,
         accountId: Long,
         campaignId: Long,
         amount: BigDecimal
     ): PledgeResultDto {
+        if (amount <= MIN_PLEDGE_AMOUNT) {
+            throw InvalidPledgeOperationException("Pledge amount must be greater than 0.")
+        }
+
         val campaign = campaignRepository.findById(campaignId)
             .orElseThrow { IllegalArgumentException("Campaign not found") }
 
         validateCampaignIsPledgeable(campaign)
-        validatePledgerIsNotCampaignOwner(campaign, user.userId)
+        validatePledgerIsNotCampaignOwner(campaign, userInfo.userId)
 
         val userAccount = accountRepository.findByIdOrNull(accountId)
             ?: throw AccountNotFoundException()
 
-        validateUserAccount(userAccount, user)
+        validateUserAccount(userAccount, userInfo)
         validateSufficientFunds(userAccount, amount)
 
         val campaignAccount = campaign.accountId?.let { accountRepository.findById(it) }
             ?.orElseThrow { CampaignNotFoundException() }
             ?: throw InvalidPledgeOperationException("Campaign has no valid funding account.")
 
-        val existingPledge = pledgeRepository.findByUserIdAndCampaignId(user.userId, campaignId)
+        val existingPledge = pledgeRepository.findByUserIdAndCampaignId(userInfo.userId, campaignId)
 
         val pledge = when {
             existingPledge == null -> {
                 PledgeEntity(
-                    userId = user.userId,
+                    userId = userInfo.userId,
                     accountId = accountId,
                     campaign = campaign,
                     amount = amount,
@@ -138,15 +144,15 @@ class PledgeServiceImpl(
         )
     }
 
-
-    // update pledge uses the same old pledge finds an old one with status withdrawn and updates status
-    // calls bank to perform transaction
-    //
     override fun updatePledge(
         pledgeId: Long,
         userId: Long,
         newAmount: BigDecimal
     ): PledgeResultDto {
+        if (newAmount < MIN_PLEDGE_AMOUNT) {
+            throw InvalidPledgeOperationException("Pledge amount must be greater than $MIN_PLEDGE_AMOUNT.")
+        }
+
         val pledge = pledgeRepository.findById(pledgeId)
             .orElseThrow { IllegalArgumentException("Pledge not found") }
 
@@ -154,42 +160,74 @@ class PledgeServiceImpl(
             throw AccessDeniedException("You cannot modify this pledge.")
         }
 
-        val campaign = pledge.campaign
-        validateCampaignIsPledgeable(campaign)
-
         val previousAmount = pledge.amount
         val delta = newAmount.subtract(previousAmount)
 
-        if (newAmount <= BigDecimal.ZERO) {
-            throw InvalidPledgeOperationException("Pledge amount must be greater than 0.")
+        if (delta == BigDecimal.ZERO) {
+            throw InvalidPledgeOperationException("New amount must be different from current amount.")
         }
 
-        val transactionType = when {
-            delta > BigDecimal.ZERO -> PledgeTransactionType.FUNDING
-            delta < BigDecimal.ZERO -> PledgeTransactionType.REFUND
-            else -> throw InvalidPledgeOperationException("New amount must be different from current amount.")
+        val userAccount = accountRepository.findByIdOrNull(pledge.accountId)
+            ?: throw AccountNotFoundException()
+
+        if (delta > BigDecimal.ZERO) {
+            validateSufficientFunds(userAccount, delta)
         }
 
-        val transaction = PledgeTransactionEntity(
-            transactionId = 1L,
-            pledge = pledge,
-            type = transactionType
+        val campaign = pledge.campaign
+        validateCampaignIsPledgeable(campaign)
+
+
+        val campaignAccount = campaign.accountId?.let { accountRepository.findById(it) }
+            ?.orElseThrow { CampaignNotFoundException() }
+            ?: throw InvalidPledgeOperationException("Campaign has no valid funding account.")
+
+        val transactionType = if (delta > BigDecimal.ZERO) TransactionType.PLEDGE else TransactionType.REFUND
+        val pledgeTransactionType = if (delta > BigDecimal.ZERO) PledgeTransactionType.FUNDING else PledgeTransactionType.REFUND
+
+        val category = categoryRepository.findByIdOrNull(campaign.categoryId!!)
+            ?: throw CategoryNotFoundException()
+
+        val transaction = transactionRepository.save(
+            TransactionEntity(
+                sourceAccount = userAccount,
+                destinationAccount = campaignAccount,
+                amount = delta.abs(),
+                type = transactionType,
+                category = category
+            )
         )
+
+        if (delta > BigDecimal.ZERO) {
+            accountRepository.save(userAccount.copy(balance = userAccount.balance - delta))
+            accountRepository.save(campaignAccount.copy(balance = campaignAccount.balance + delta))
+        } else {
+            accountRepository.save(userAccount.copy(balance = userAccount.balance + delta.abs()))
+            accountRepository.save(campaignAccount.copy(balance = campaignAccount.balance - delta.abs()))
+        }
+
 
         val updatedPledge = pledge.copy(
             amount = newAmount,
             updatedAt = LocalDate.now()
         )
+        val savedPledge = pledgeRepository.save(updatedPledge)
 
-        val pledgeDto = pledgeRepository.save(updatedPledge).toUserPledgeDto(
-            title = campaign.title,
-            campaignId = campaign.id!!
+        val pledgeTransaction = pledgeTransactionRepository.save(
+            PledgeTransactionEntity(
+                transactionId = transaction.id!!,
+                pledge = savedPledge,
+                type = pledgeTransactionType
+            )
         )
-        val transactionDto = pledgeTransactionRepository
-                .save(transaction)
-                .toResultDto()
 
-        return PledgeResultDto(pledgeDto, transactionDto)
+        return PledgeResultDto(
+            pledge = savedPledge.toUserPledgeDto(
+                title = campaign.title,
+                campaignId = campaign.id!!
+            ),
+            transaction = pledgeTransaction.toResultDto()
+        )
     }
 
     override fun withdrawPledge(pledgeId: Long, userId: Long) {

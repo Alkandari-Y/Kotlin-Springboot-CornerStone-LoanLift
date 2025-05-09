@@ -3,7 +3,9 @@ package com.project.campaignlift.services
 import com.project.campaignlift.entities.CommentEntity
 import com.project.campaignlift.entities.ReplyEntity
 import com.project.campaignlift.entities.projections.CommentProjection
+import com.project.campaignlift.repositories.CampaignRepository
 import com.project.campaignlift.repositories.CommentRepository
+import com.project.campaignlift.repositories.PledgeRepository
 import com.project.campaignlift.repositories.ReplyRepository
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
 import com.project.common.exceptions.comments.CommentDeleteException
@@ -18,21 +20,21 @@ import java.time.LocalDateTime
 
 @Service
 class CommentServiceImpl (
-    private val campaignService: CampaignService,
+    private val campaignRepository: CampaignRepository,
     private val commentRepository: CommentRepository,
     private val replyRepository: ReplyRepository,
 ): CommentService {
-    override fun createComment(campaignId: Long, comment: String, user: UserInfoDto): CommentEntity {
-        if (user.isActive.not() || user.userId == null) {
+    override fun createComment(campaignId: Long, message: String, user: UserInfoDto): CommentEntity {
+        if (user.isActive.not()) {
             throw AccountNotVerifiedException()
         }
 
-        val campaign = campaignService.getCampaignById(campaignId)
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
             ?: throw CampaignNotFoundException()
 
         val comment = CommentEntity(
             campaign = campaign,
-            message = comment,
+            message = message,
             createdBy = user.userId,
             createdAt = LocalDateTime.now(),
         )

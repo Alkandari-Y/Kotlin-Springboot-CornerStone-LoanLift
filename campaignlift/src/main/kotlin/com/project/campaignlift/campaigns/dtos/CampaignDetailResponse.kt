@@ -24,8 +24,7 @@ data class CampaignDetailResponse(
 
 
 fun CampaignEntity.toDetailResponse(
-    amountRaised: BigDecimal =
-    BigDecimal.ZERO
+    amountRaised: BigDecimal = BigDecimal.ZERO
 ) = CampaignDetailResponse(
     createdBy = this.createdBy!!,
     categoryId =this. categoryId!!,
