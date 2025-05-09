@@ -57,8 +57,8 @@ class PledgeServiceImpl(
         campaignId: Long,
         amount: BigDecimal
     ): PledgeResultDto {
-        if (amount <= MIN_PLEDGE_AMOUNT) {
-            throw InvalidPledgeOperationException("Pledge amount must be greater than 0.")
+        if (amount < MIN_PLEDGE_AMOUNT) {
+            throw InvalidPledgeOperationException("Pledge amount must be greater than $MIN_PLEDGE_AMOUNT.")
         }
 
         val campaign = campaignRepository.findById(campaignId)
@@ -75,7 +75,7 @@ class PledgeServiceImpl(
 
         val campaignAccount = campaign.accountId?.let { accountRepository.findById(it) }
             ?.orElseThrow { CampaignNotFoundException() }
-            ?: throw InvalidPledgeOperationException("Campaign has no valid funding account.")
+            ?: throw AccountNotFoundException("Campaign has no valid funding account.")
 
         val existingPledge = pledgeRepository.findByUserIdAndCampaignId(userInfo.userId, campaignId)
 
@@ -138,6 +138,11 @@ class PledgeServiceImpl(
             )
         )
 
+        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId = campaign.id!!)
+        if (campaign.amountRaised <= amountRaised) {
+            campaignRepository.save(campaign.copy(status = CampaignStatus.ACTIVE))
+        }
+
         return PledgeResultDto(
             pledge = savedPledge.toUserPledgeDto(campaign.title, campaign.id!!),
             transaction = pledgeTransaction.toResultDto()
@@ -167,6 +172,10 @@ class PledgeServiceImpl(
             throw InvalidPledgeOperationException("New amount must be different from current amount.")
         }
 
+        if (delta < MIN_PLEDGE_AMOUNT) {
+            throw InvalidPledgeOperationException("Pledge amount must be greater than $MIN_PLEDGE_AMOUNT.")
+        }
+
         val userAccount = accountRepository.findByIdOrNull(pledge.accountId)
             ?: throw AccountNotFoundException()
 
@@ -180,7 +189,7 @@ class PledgeServiceImpl(
 
         val campaignAccount = campaign.accountId?.let { accountRepository.findById(it) }
             ?.orElseThrow { CampaignNotFoundException() }
-            ?: throw InvalidPledgeOperationException("Campaign has no valid funding account.")
+            ?: throw AccountNotFoundException("Campaign has no valid funding account.")
 
         val transactionType = if (delta > BigDecimal.ZERO) TransactionType.PLEDGE else TransactionType.REFUND
         val pledgeTransactionType = if (delta > BigDecimal.ZERO) PledgeTransactionType.FUNDING else PledgeTransactionType.REFUND
@@ -220,7 +229,10 @@ class PledgeServiceImpl(
                 type = pledgeTransactionType
             )
         )
-
+        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId = campaign.id!!)
+        if (campaign.amountRaised <= amountRaised) {
+            campaignRepository.save(campaign.copy(status = CampaignStatus.ACTIVE))
+        }
         return PledgeResultDto(
             pledge = savedPledge.toUserPledgeDto(
                 title = campaign.title,
@@ -230,6 +242,7 @@ class PledgeServiceImpl(
         )
     }
 
+    @Transactional
     override fun withdrawPledge(pledgeId: Long, userId: Long) {
         val pledge = pledgeRepository.findById(pledgeId)
             .orElseThrow { IllegalArgumentException("Pledge not found") }
@@ -244,12 +257,50 @@ class PledgeServiceImpl(
             throw InvalidPledgeOperationException("Only pledges on Active campaigns can be withdrawn.")
         }
 
+
+        if (campaign.campaignDeadline != null && campaign.campaignDeadline!!.isBefore(LocalDate.now())) {
+            throw InvalidPledgeOperationException("Cannot withdraw pledge after campaign deadline.")
+        }
+        val campaignAccount = campaign.accountId?.let { accountRepository.findById(it) }
+            ?.orElseThrow { CampaignNotFoundException() }
+            ?: throw AccountNotFoundException("Campaign has no valid funding account.")
+        val pledgerAccount = accountRepository.findByIdOrNull(pledge.accountId)
+            ?: throw AccountNotFoundException("Campaign has no valid funding account.")
+
+        val category = categoryRepository.findByIdOrNull(campaign.categoryId!!)
+            ?: throw CategoryNotFoundException()
+
         val updated = pledge.copy(
+            amount = BigDecimal.ZERO,
             status = PledgeStatus.WITHDRAWN,
             updatedAt = LocalDate.now(),
             withdrawnAt = LocalDate.now()
         )
 
+
+        accountRepository.saveAll(
+            listOf(
+                accountRepository.save(pledgerAccount.copy(balance = pledgerAccount.balance + pledge.amount.abs())),
+                accountRepository.save(campaignAccount.copy(balance = campaignAccount.balance - pledge.amount.abs()))
+            )
+        )
+        val savedTransaction = transactionRepository.save(
+            TransactionEntity(
+                sourceAccount = campaignAccount,
+                destinationAccount = pledgerAccount,
+                amount = pledge.amount.abs(),
+                type = TransactionType.REFUND,
+                category = category
+            )
+        )
+
+        pledgeTransactionRepository.save(
+            PledgeTransactionEntity(
+                transactionId = savedTransaction.id!!,
+                pledge = updated,
+                type = PledgeTransactionType.REFUND
+            )
+        )
         pledgeRepository.save(updated)
     }
 

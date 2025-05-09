@@ -10,6 +10,7 @@ import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -60,6 +61,15 @@ class PledgeApiController(
             newAmount = request.amount!!
         )
         return ResponseEntity(pledge, HttpStatus.OK)
+    }
+
+    @DeleteMapping("/details/{pledgeId}")
+    fun withdrawPledge(
+        @PathVariable pledgeId: Long,
+        @RequestAttribute("authUser") authUser: UserInfoDto
+    ): ResponseEntity<Unit> {
+        pledgeService.withdrawPledge(pledgeId, authUser.userId)
+        return ResponseEntity(HttpStatus.NO_CONTENT)
     }
 
 }
