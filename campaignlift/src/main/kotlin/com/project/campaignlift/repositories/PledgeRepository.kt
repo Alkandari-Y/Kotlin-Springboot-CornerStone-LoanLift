@@ -54,6 +54,10 @@ interface PledgeRepository: JpaRepository<PledgeEntity, Long> {
     )
     fun getTotalCommittedAmountForCampaign(@Param("campaignId") campaignId: Long): BigDecimal
 
+
+    @Query("SELECT p FROM PledgeEntity p LEFT JOIN FETCH p.transactions WHERE p.id = :pledgeId")
+    fun findByIdWithTransactions(@Param("pledgeId") pledgeId: Long): PledgeEntity?
+
     fun findByUserIdAndCampaignIdAndStatus(userId: Long, campaignId: Long, status: PledgeStatus): PledgeEntity?
     fun existsByUserIdAndCampaignIdAndStatus(userId: Long, campaignId: Long, status: PledgeStatus): Boolean
 

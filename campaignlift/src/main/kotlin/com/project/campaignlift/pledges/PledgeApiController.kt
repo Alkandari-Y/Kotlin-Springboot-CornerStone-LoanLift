@@ -1,15 +1,13 @@
 package com.project.campaignlift.pledges
 
-import com.project.campaignlift.entities.projections.UserPledgeProjection
-import com.project.campaignlift.pledges.dtos.CreatePledgeRequest
-import com.project.campaignlift.pledges.dtos.PledgeResultDto
-import com.project.campaignlift.pledges.dtos.UpdatePledgeRequest
-import com.project.campaignlift.pledges.dtos.UserPledgeDto
+import com.project.campaignlift.pledges.dtos.*
 import com.project.campaignlift.services.PledgeService
 import com.project.common.responses.authenthication.UserInfoDto
+import com.project.common.security.RemoteUserPrincipal
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -62,6 +60,46 @@ class PledgeApiController(
         )
         return ResponseEntity(pledge, HttpStatus.OK)
     }
+
+    @GetMapping("/details/{pledgeId}")
+    fun getPledgeDetails(
+        @PathVariable pledgeId: Long,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+        @AuthenticationPrincipal principal: RemoteUserPrincipal
+    ): ResponseEntity<PledgeWithTransactionsDto> {
+        val pledge = pledgeService.getPledgeDetails(pledgeId)
+
+        val isOwner = authUser.userId == pledge.userId
+        val isAdmin = principal.authorities.any { it.authority == "ROLE_ADMIN" }
+
+        if (!isOwner && !isAdmin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+
+        return ResponseEntity(pledge.toPledgeWithTransactionsDto(), HttpStatus.OK)
+    }
+
+    @GetMapping("/details/{pledgeId}/transactions")
+    fun getPledgeDetailedTransactions(
+        @PathVariable pledgeId: Long,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+        @AuthenticationPrincipal principal: RemoteUserPrincipal
+    ): ResponseEntity<List<PledgeTransactionWithDetails>> {
+        val pledge = pledgeService.getPledgeDetails(pledgeId)
+
+        val isOwner = authUser.userId == pledge.userId
+        val isAdmin = principal.authorities.any { it.authority == "ROLE_ADMIN" }
+
+        if (!isOwner && !isAdmin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+
+        val pledgeTransactions = pledgeService.getPledgeTransactions(pledgeId)
+
+        return ResponseEntity(pledgeTransactions, HttpStatus.OK)
+    }
+
+
 
     @DeleteMapping("/details/{pledgeId}")
     fun withdrawPledge(

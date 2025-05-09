@@ -1,13 +1,20 @@
 package com.project.campaignlift.services
 
-import com.project.campaignlift.entities.projections.UserPledgeProjection
+import com.project.campaignlift.entities.PledgeEntity
 import com.project.campaignlift.pledges.dtos.PledgeResultDto
+import com.project.campaignlift.pledges.dtos.PledgeTransactionDto
+import com.project.campaignlift.pledges.dtos.PledgeTransactionWithDetails
 import com.project.campaignlift.pledges.dtos.UserPledgeDto
 import com.project.common.responses.authenthication.UserInfoDto
+import org.springframework.data.repository.query.Param
 
 import java.math.BigDecimal
 
 interface PledgeService {
+
+    fun getPledgeTransactions(pledgeId: Long): List<PledgeTransactionWithDetails>
+
+    fun getPledgeDetails(pledgeId: Long): PledgeEntity
 
     fun getAllUserPledges(userId: Long): List<UserPledgeDto>
 
