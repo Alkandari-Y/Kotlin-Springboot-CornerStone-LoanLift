@@ -6,7 +6,6 @@ import com.project.campaignlift.entities.PledgeEntity
 import com.project.campaignlift.entities.PledgeStatus
 import com.project.campaignlift.entities.PledgeTransactionEntity
 import com.project.campaignlift.entities.PledgeTransactionType
-import com.project.campaignlift.entities.projections.UserPledgeProjection
 import com.project.campaignlift.pledges.dtos.PledgeResultDto
 import com.project.campaignlift.pledges.dtos.UserPledgeDto
 import com.project.campaignlift.pledges.dtos.toResultDto

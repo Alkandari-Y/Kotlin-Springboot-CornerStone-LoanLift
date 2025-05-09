@@ -9,6 +9,7 @@ import com.project.banking.accounts.dtos.toUpdatedBalanceResponse
 import com.project.common.exceptions.accounts.AccountNotFoundException
 import com.project.banking.entities.AccountEntity
 import com.project.banking.extensions.toBasicResponse
+import com.project.banking.repositories.projections.AccountView
 import com.project.banking.services.AccountService
 import com.project.banking.services.KYCService
 import com.project.banking.services.TransactionService
@@ -37,7 +38,7 @@ class AccountsControllers(
     @GetMapping
     fun getAllAccounts(
         @AuthenticationPrincipal user: RemoteUserPrincipal
-    ): List<AccountResponse> {
+    ): List<AccountView> {
         return accountService.getActiveAccountsByUserId(user.getUserId())
     }
     @PostMapping
@@ -165,9 +166,11 @@ class AccountsControllers(
             accountId != null -> accountService.getAccountById(accountId)
             accountNumber != null -> accountService.getByAccountNumber(accountNumber)
             else -> throw APIException("Either accountId or accountNumber must be provided")
-        }
-        val isOwner = account?.ownerId == user.getUserId()
+        } ?: throw AccountNotFoundException()
+
+        val isOwner = account.ownerId == user.getUserId()
         val isAdmin = user.authorities.any { it.authority == "ROLE_ADMIN" }
+
         if (!isOwner && !isAdmin) {
             throw APIException(
                 "Unauthorized access to account",
@@ -176,16 +179,6 @@ class AccountsControllers(
             )
         }
 
-        val accountResponse = AccountResponse(
-            accountNumber = account?.accountNumber!!,
-            id = account.id!!,
-            balance = account.balance,
-            name = account.name,
-            active = account.active,
-            ownerId = account.ownerId!!
-        )
-
-        return accountResponse
+        return account.toBasicResponse()
     }
-
 }

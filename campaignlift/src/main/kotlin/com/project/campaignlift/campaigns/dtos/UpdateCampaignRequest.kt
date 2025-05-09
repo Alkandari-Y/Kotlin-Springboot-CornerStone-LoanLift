@@ -28,10 +28,6 @@ data class UpdateCampaignRequest(
     @field:DecimalMin("0.000")
     val interestRate: BigDecimal,
 
-    @NotNull
-    @field:Min(1)
-    val accountId: Long,
-
     @field:Min(3)
     val repaymentMonths: Int,
 
@@ -57,5 +53,5 @@ fun UpdateCampaignRequest.toEntity(
     status = previousCampaign.status,
     submittedAt = previousCampaign.submittedAt,
     approvedBy = previousCampaign.approvedBy,
-    accountId = accountId
+    accountId = previousCampaign.accountId
 )

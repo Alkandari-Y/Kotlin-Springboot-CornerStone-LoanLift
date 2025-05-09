@@ -25,10 +25,6 @@ data class CreateCampaignDto(
     @field:DecimalMin("0.000")
     val interestRate: BigDecimal,
 
-    @NotNull
-    @field:Min(1)
-    val accountId: Long,
-
     @field:Min(3)
     val repaymentMonths: Int,
 

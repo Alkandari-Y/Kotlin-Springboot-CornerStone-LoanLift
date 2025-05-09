@@ -1,6 +1,8 @@
 package com.project.banking.entities
 
 
+import com.project.common.enums.AccountType
+import com.project.common.responses.banking.AccountResponse
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.util.*
@@ -45,7 +47,12 @@ data class AccountEntity(
             .replace("-", ""))
 }
 
-
-enum class AccountType {
-    USER, CAMPAIGN
-}
+fun AccountEntity.toAccountResponseDto() = AccountResponse(
+    accountNumber = this.accountNumber,
+    id = this.id!!,
+    balance = this.balance,
+    name = this.name,
+    active = this.active,
+    ownerId = this.ownerId!!,
+    ownerType = this.ownerType
+)

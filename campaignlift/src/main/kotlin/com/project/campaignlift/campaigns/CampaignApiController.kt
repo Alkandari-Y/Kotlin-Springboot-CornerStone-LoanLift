@@ -61,16 +61,11 @@ class CampaignApiController (
         if (token.isNullOrEmpty()) {
             throw MissingCredentialsException()
         }
-        val account = bandServiceProvider.getAccount(
-            campaignCreateRequest.accountId,
-            token,
-            authUser.userId
-        )
+
         val campaign = campaignService.createCampaign(
             campaignDto = campaignCreateRequest,
             user = authUser,
             image = image,
-            accountId = account.id
         )
         return ResponseEntity(campaign, HttpStatus.CREATED)
     }

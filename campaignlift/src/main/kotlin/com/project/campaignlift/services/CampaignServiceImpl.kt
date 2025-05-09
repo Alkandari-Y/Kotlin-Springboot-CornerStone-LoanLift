@@ -1,16 +1,20 @@
 package com.project.campaignlift.services
 
+import com.project.banking.entities.AccountEntity
 import com.project.campaignlift.campaigns.dtos.*
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
+import com.project.campaignlift.repositories.AccountRepository
 import com.project.campaignlift.repositories.CampaignRepository
 import com.project.campaignlift.repositories.CommentRepository
+import com.project.common.enums.AccountType
 import com.project.common.exceptions.campaigns.CampaignDeletionNotAllowedException
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
 import com.project.common.exceptions.campaigns.CampaignPermissionDeniedException
 import com.project.common.exceptions.campaigns.CampaignUpdateNotAllowedException
 import com.project.common.exceptions.kycs.IncompleteUserRegistrationException
 import com.project.common.responses.authenthication.UserInfoDto
+import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -21,6 +25,7 @@ class CampaignServiceImpl(
     private val campaignRepository: CampaignRepository,
     private val fileStorageService: FileStorageService,
     private val commentRepository: CommentRepository,
+    private val accountRepository: AccountRepository,
 ) : CampaignService {
     override fun getAllCampaigns(): List<CampaignListItemResponse> {
         return campaignRepository.listAllCampaigns()
@@ -30,23 +35,35 @@ class CampaignServiceImpl(
         return campaignRepository.findByIdOrNull(id)
     }
 
+
+    @Transactional
     override fun createCampaign(
         campaignDto: CreateCampaignDto,
         user: UserInfoDto,
         image: MultipartFile,
-        accountId: Long
     ): CampaignEntity {
         if (user.isActive.not()) {
             throw IncompleteUserRegistrationException()
         }
-
-        val imageUrl = fileStorageService.uploadFilePublic(image)
-        val campaign = campaignDto.toEntity(
-            createdBy = user.userId,
-            imageUrl = imageUrl,
-            accountId = accountId
+        val campaignAccount = accountRepository.save(
+    AccountEntity(
+                name = "${campaignDto.title} Account",
+                ownerId = user.userId,
+                ownerType = AccountType.CAMPAIGN,
+                active = true,
+                balance = BigDecimal.ZERO
+            )
         )
-        return campaignRepository.save(campaign)
+        val imageUrl = fileStorageService.uploadFilePublic(image)
+
+        val campaign = campaignRepository.save(
+            campaignDto.toEntity(
+                    createdBy = user.userId,
+                    imageUrl = imageUrl,
+                    accountId = campaignAccount.id!!
+            )
+        )
+        return campaign
     }
 
     override fun updateCampaign(

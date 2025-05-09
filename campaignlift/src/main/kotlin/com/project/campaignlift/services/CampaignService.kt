@@ -27,7 +27,6 @@ interface CampaignService {
         campaignDto: CreateCampaignDto,
         user: UserInfoDto,
         image: MultipartFile,
-        accountId: Long
     ): CampaignEntity
     fun changeCampaignStatus(campaignId: Long, status: CampaignStatus): CampaignEntity
     fun approveRejectCampaignStatus(campaignId: Long, status: CampaignStatus, adminId: Long? = null): CampaignEntity

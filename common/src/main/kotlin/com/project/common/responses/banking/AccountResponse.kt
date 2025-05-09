@@ -1,6 +1,8 @@
 package com.project.common.responses.banking
 
+import com.project.common.enums.AccountType
 import java.math.BigDecimal
+
 
 data class AccountResponse(
     val id: Long,
@@ -8,5 +10,6 @@ data class AccountResponse(
     val name: String,
     val balance: BigDecimal,
     val active: Boolean,
-    val ownerId: Long
+    val ownerId: Long,
+    val ownerType: AccountType
 )
