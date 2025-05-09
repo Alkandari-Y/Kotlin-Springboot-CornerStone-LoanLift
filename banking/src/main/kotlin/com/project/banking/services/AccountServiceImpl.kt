@@ -6,7 +6,6 @@ import com.project.common.exceptions.accounts.AccountNotFoundException
 import com.project.common.exceptions.accounts.AccountVerificationException
 import com.project.banking.entities.AccountEntity
 import com.project.banking.repositories.AccountRepository
-import com.project.common.exceptions.APIException
 import com.project.common.exceptions.accounts.AccountNotActiveException
 import com.project.common.responses.authenthication.UserInfoDto
 import com.project.common.responses.banking.AccountResponse

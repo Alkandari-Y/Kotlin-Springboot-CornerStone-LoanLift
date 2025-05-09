@@ -43,7 +43,7 @@ CREATE TABLE "pledges"
      "user_id"          INT             NOT NULL,
      "account_id"       INT             NOT NULL,
      "campaign_id"      INT             NOT NULL,
-     "amount"           DECIMAL(8, 2)   NOT NULL,
+     "amount"           DECIMAL(9, 3)   NOT NULL,
      "created_at"       DATE            NOT NULL,
      "updated_at"       DATE            NOT NULL,
      "status"           VARCHAR(255)    NOT NULL,
@@ -60,6 +60,7 @@ CREATE TABLE "pledge_transactions"
     "id"                SERIAL PRIMARY KEY,
     "transaction_id"    INT          NOT NULL,
     "pledge_id"         INT          NOT NULL,
+    "type"              VARCHAR(255) NOT NULL,
     CONSTRAINT "pledge_transactions_pledge_id_foreign"
         FOREIGN KEY ("pledge_id")
             REFERENCES "pledges" ("id") ON DELETE CASCADE

@@ -21,19 +21,24 @@ interface AccountRepository: JpaRepository<AccountEntity, Long> {
     )
     FROM AccountEntity a
     WHERE a.ownerId = :ownerId AND a.active = true
-""")
+    """)
     fun findAllActiveByOwnerId(@Param("ownerId") ownerId: Long): List<AccountResponse>
 
     @Query("""
     SELECT a
     FROM AccountEntity a
     WHERE a.ownerId = :ownerId
-""")
+    """)
     fun findAllByOwnerId(@Param("ownerId") ownerId: Long): List<AccountEntity>
 
-    @Query("SELECT COUNT(a) FROM AccountEntity a WHERE a.ownerId = :userId AND a.active = TRUE")
+    @Query("""
+        SELECT COUNT(a)
+        FROM AccountEntity a
+        WHERE a.ownerId = :userId
+          AND a.active = TRUE
+          AND a.ownerType = com.project.banking.entities.AccountType.USER
+    """)
     fun getAccountCountByUserId(@Param("userId") userId: Long): Long
 
     fun findByAccountNumber(accountNumber: String): AccountEntity?
-
 }
