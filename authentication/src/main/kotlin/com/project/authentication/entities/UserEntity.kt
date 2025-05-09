@@ -46,8 +46,7 @@ data class UserEntity(
         joinColumns = [JoinColumn(name = "user_id")],
         inverseJoinColumns = [JoinColumn(name = "role_id")]
     )
-    val roles: Set<RoleEntity> = emptySet(),
-
+    var roles: MutableSet<RoleEntity> = mutableSetOf(),
 ) {
     constructor() : this(
         id = null,
@@ -58,7 +57,7 @@ data class UserEntity(
         isActive = false,
         createdAt = Instant.now(),
         updatedAt = Instant.now(),
-        roles = emptySet(),
+        roles = mutableSetOf(),
     )
 }
 

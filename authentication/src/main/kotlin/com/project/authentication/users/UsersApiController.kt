@@ -34,8 +34,7 @@ class UsersApiController(
         return ResponseEntity(HttpStatus.OK)
     }
 
-    // TODO: SWITCH THIS TO API KEY AUTH
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/set-active/{userId}")
     fun setActiveUser(
         @PathVariable("userId") userId: Long
@@ -57,6 +56,18 @@ class UsersApiController(
                 newRole.toEntity()
             ),
             HttpStatus.CREATED)
+    }
+
+    @PreAuthorize("hasRole('ROLE_DEVELOPER')")
+    @PostMapping("/remove-role/{userId}")
+    fun removeRole(
+        @PathVariable("userId") userId: Long,
+        @Valid @RequestBody roleRequest: RolesAssignmentRequest,
+    ): ResponseEntity<Unit> {
+        roleRequest.roles.forEach { roleName ->
+            roleService.removeRoleFromUser(userId, roleName)
+        }
+        return ResponseEntity(HttpStatus.OK)
     }
 }
 

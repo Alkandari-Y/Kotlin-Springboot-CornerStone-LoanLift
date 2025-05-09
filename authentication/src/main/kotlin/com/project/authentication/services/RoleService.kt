@@ -6,4 +6,5 @@ interface RoleService {
     fun getDefaultRole(): RoleEntity
     fun createRole(role: RoleEntity): RoleEntity
     fun assignRolesToUser(userId: Long, roles: Collection<String>)
+    fun removeRoleFromUser(userId: Long, role: String)
 }

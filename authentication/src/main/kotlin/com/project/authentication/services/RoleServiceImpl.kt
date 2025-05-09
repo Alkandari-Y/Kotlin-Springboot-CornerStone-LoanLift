@@ -4,7 +4,11 @@ import com.project.authentication.entities.RoleEntity
 import com.project.common.exceptions.auth.UserNotFoundException
 import com.project.authentication.repositories.RoleRepository
 import com.project.authentication.repositories.UserRepository
+import com.project.common.enums.ErrorCode
+import com.project.common.exceptions.APIException
+import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
@@ -32,8 +36,30 @@ class RoleServiceImpl(
         val fetchedRoles = roleRepository.findAllByNameIn(roles)
 
         val updatedRoles = user.roles.toMutableSet()
-        updatedRoles.addAll(fetchedRoles) // Add new roles
-        userRepository.save(user.copy(roles = updatedRoles.toSet()))
+        updatedRoles.addAll(fetchedRoles)
+        userRepository.save(user.copy(roles = updatedRoles))
 
     }
+    @Transactional
+    override fun removeRoleFromUser(userId: Long, role: String) {
+        val user = userRepository.findById(userId)
+            .orElseThrow { APIException(
+                "User not found",
+                code = ErrorCode.USER_NOT_FOUND,
+                httpStatus = HttpStatus.NOT_FOUND) }
+
+        val roleToRemove = roleRepository.findByName(role)
+            ?: throw APIException(
+                "Role not found",
+                code = ErrorCode.ROLE_NOT_FOUND,
+                httpStatus = HttpStatus.NOT_FOUND
+            )
+
+        if (user.roles.contains(roleToRemove)) {
+            user.roles.remove(roleToRemove)
+            userRepository.save(user)
+        }
+    }
 }
+
+
