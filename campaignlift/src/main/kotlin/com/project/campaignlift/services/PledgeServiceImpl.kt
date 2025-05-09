@@ -8,10 +8,7 @@ import com.project.campaignlift.entities.PledgeEntity
 import com.project.campaignlift.entities.PledgeStatus
 import com.project.campaignlift.entities.PledgeTransactionEntity
 import com.project.campaignlift.entities.PledgeTransactionType
-import com.project.campaignlift.pledges.dtos.PledgeResultDto
-import com.project.campaignlift.pledges.dtos.UserPledgeDto
-import com.project.campaignlift.pledges.dtos.toResultDto
-import com.project.campaignlift.pledges.dtos.toUserPledgeDto
+import com.project.campaignlift.pledges.dtos.*
 import com.project.campaignlift.repositories.AccountRepository
 import com.project.campaignlift.repositories.CampaignRepository
 import com.project.campaignlift.repositories.CategoryRepository
@@ -27,6 +24,7 @@ import com.project.common.exceptions.campaigns.CampaignNotFoundException
 import com.project.common.exceptions.categories.CategoryNotFoundException
 import com.project.common.exceptions.kycs.AccountNotVerifiedException
 import com.project.common.exceptions.pledges.InvalidPledgeOperationException
+import com.project.common.exceptions.pledges.PledgeNotFoundException
 import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
@@ -44,6 +42,16 @@ class PledgeServiceImpl(
     private val transactionRepository: TransactionRepository,
     private val categoryRepository: CategoryRepository,
 ): PledgeService {
+    override fun getPledgeTransactions(pledgeId: Long): List<PledgeTransactionWithDetails> {
+        return pledgeTransactionRepository.findDetailsByPledgeId(pledgeId)
+    }
+
+    override fun getPledgeDetails(pledgeId: Long): PledgeEntity {
+        return pledgeRepository.findByIdWithTransactions(pledgeId) ?: throw PledgeNotFoundException()
+    }
+
+
+
     override fun getAllUserPledges(userId: Long): List<UserPledgeDto> {
         return pledgeRepository.findAllByUserIdDto(userId)
     }
