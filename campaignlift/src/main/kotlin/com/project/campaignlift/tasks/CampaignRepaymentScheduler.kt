@@ -1,13 +1,21 @@
 package com.project.campaignlift.tasks
 
+import com.project.campaignlift.services.RepaymentService
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
-class CampaignRepaymentScheduler {
+class CampaignRepaymentScheduler(
+    private val repaymentService: RepaymentService
+) {
 
-    @Scheduled(cron = "0 0 2 5 * ?", zone = "UTC")
+    // Runs at 2:00 AM on the 22nd day of every month (UTC time)
+    // Second Minute Hours DayOfMonth Month DayOfWeek
+    //   0      0       0       0       0       ?
+//    @Scheduled(cron = "0 30 14 13 5 ?", zone = "UTC") // for demo
+    @Scheduled(cron = "0 0 2 22 * ?", zone = "UTC")
     fun processMonthlyRepayments() {
-        println("Running monthly repayment logic...")
+        println("[Scheduler] Running monthly repayment")
+        repaymentService.processMonthlyRepayments()
     }
 }

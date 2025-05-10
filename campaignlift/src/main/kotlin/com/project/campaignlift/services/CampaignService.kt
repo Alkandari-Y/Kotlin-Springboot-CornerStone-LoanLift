@@ -16,7 +16,7 @@ interface CampaignService {
     fun getAllByUserId(userId: Long): List<CampaignListItemResponse>
 
     fun getCampaignDetails(campaignId: Long): CampaignWithCommentsDto?
-
+    fun getCampaignEntityById(campaignId: Long): CampaignEntity?
     fun getCampaignById(id: Long): CampaignDetailResponse?
     fun updateCampaign(
         campaignId: Long,
