@@ -69,5 +69,10 @@ interface CampaignRepository : JpaRepository<CampaignEntity, Long> {
     )
     fun findByCreatedId(@Param("userId") userId: Long): List<CampaignListItemResponse>
 
+    @Query("""
+        SELECT c FROM CampaignEntity c
+        WHERE c.status = com.project.campaignlift.entities.CampaignStatus.FUNDED
+    """)
+    fun findAllFundedCampaigns(): List<CampaignEntity>
 
 }

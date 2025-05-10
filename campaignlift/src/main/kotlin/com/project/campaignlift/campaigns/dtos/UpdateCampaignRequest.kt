@@ -24,13 +24,6 @@ data class UpdateCampaignRequest(
     @field:DecimalMin("1000.000")
     val goalAmount: BigDecimal,
 
-    @field:NotNull
-    @field:DecimalMin("0.000")
-    val interestRate: BigDecimal,
-
-    @field:Min(3)
-    val repaymentMonths: Int,
-
     @field:DateTimeFormat(pattern = "dd-MM-yyyy")
     @field:NotBlank
     val campaignDeadline: String,
@@ -38,15 +31,17 @@ data class UpdateCampaignRequest(
 
 fun UpdateCampaignRequest.toEntity(
     imageUrl: String,
-    previousCampaign: CampaignEntity
+    previousCampaign: CampaignEntity,
+    interestRate: BigDecimal = BigDecimal("0.02").setScale(3),
+    repaymentMonths: Int = 10 * 12
 ): CampaignEntity = CampaignEntity(
     id = previousCampaign.id,
     createdBy = previousCampaign.createdBy,
     title = this.title,
     description = this.description,
     goalAmount = this.goalAmount,
-    interestRate = this.interestRate,
-    repaymentMonths = this.repaymentMonths,
+    interestRate = interestRate,
+    repaymentMonths = repaymentMonths,
     categoryId = this.categoryId,
     campaignDeadline = LocalDate.parse(campaignDeadline, dateFormatter),
     imageUrl = imageUrl,

@@ -148,7 +148,7 @@ class PledgeServiceImpl(
 
         val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId = campaign.id!!)
         if (campaign.amountRaised <= amountRaised) {
-            campaignRepository.save(campaign.copy(status = CampaignStatus.ACTIVE))
+            campaignRepository.save(campaign.copy(status = CampaignStatus.FUNDED))
         }
 
         return PledgeResultDto(
@@ -239,7 +239,7 @@ class PledgeServiceImpl(
         )
         val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId = campaign.id!!)
         if (campaign.amountRaised <= amountRaised) {
-            campaignRepository.save(campaign.copy(status = CampaignStatus.ACTIVE))
+            campaignRepository.save(campaign.copy(status = CampaignStatus.FUNDED))
         }
         return PledgeResultDto(
             pledge = savedPledge.toUserPledgeDto(

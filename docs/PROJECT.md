@@ -637,18 +637,10 @@ The `Portfolio` and `PortfolioEntry` models ensure that investment tracking is t
 | Service Name           | Responsibility Summary                               |
 | ---------------------- | ---------------------------------------------------- |
 | `auth-service`         | User & admin authentication, registration, JWTs      |
-| `profile-service`      | User profile management and KYC data                 |
 | `account-service`      | Account creation, balance management, transfers      |
 | `campaign-service`     | Campaign creation, status tracking, admin approval   |
-| `pledge-service`       | Pledge management, validation, linking to accounts   |
-| `repayment-service`    | Monthly repayment processing, fund distribution      |
-| `portfolio-service`    | Tracks user earnings per campaign/pledge             |
-| `transaction-service`  | Records all financial activity and references        |
-| `notification-service` | Email/SMS/in-app alerts, status updates, error flags |
 | `log-service`          | System-wide structured logging and traceability      |
 | `file-service`         | Campaign/user file uploads and metadata management   |
-| `scheduler-service`    | Cronjob-triggered events like monthly repayment due  |
-
 
 ---
 
@@ -657,15 +649,7 @@ The `Portfolio` and `PortfolioEntry` models ensure that investment tracking is t
 
 | Event                   | Emitted By        | Consumed By                             | Notes                                     |
 | ----------------------- | ----------------- | --------------------------------------- | ----------------------------------------- |
-| `campaign.created`      | campaign-service  | file-service                            | Attachments, approval routing             |
-| `campaign.fully_funded` | pledge-service    | repayment-service                       | Starts repayment scheduling               |
-| `repayment.due`         | scheduler-service | repayment-service                       | Triggers monthly repayment cycle          |
-| `repayment.successful`  | repayment-service | portfolio-service, transaction-service  | Update portfolio and record transactions  |
-| `repayment.failed`      | repayment-service | notification-service, log-service       | Trigger alert to campaign owner           |
 | `campaign.defaulted`    | repayment-service | notification-service, portfolio-service | Notify lenders, flag entries              |
-| `pledge.confirmed`      | pledge-service    | transaction-service, portfolio-service  | Tracks pledge and creates portfolio entry |
-| `account.balance_low`   | account-service   | notification-service                    | Warn user of low balance                  |
-| `file.uploaded`         | file-service      | campaign-service                        | Attach to campaign and verify             |
 | `user.registered`       | auth-service      | profile-service                         | Auto-generate profile on signup           |
 | `log.error`             | any service       | log-service                             | Captures traceable structured error logs  |
 

@@ -54,7 +54,11 @@ data class CampaignEntity(
 
 
     @OneToMany(mappedBy = "campaign", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-    val comments: List<CommentEntity>? = null,
+    val comments: List<CommentEntity> = listOf(),
+
+    @OneToMany(mappedBy = "campaign", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    val pledges: List<PledgeEntity> = listOf(),
+
 
     @Transient
     var amountRaised: BigDecimal = BigDecimal.ZERO,
