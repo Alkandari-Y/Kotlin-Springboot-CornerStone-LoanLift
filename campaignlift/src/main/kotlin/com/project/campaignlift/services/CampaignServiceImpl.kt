@@ -2,17 +2,16 @@ package com.project.campaignlift.services
 
 import com.project.banking.entities.AccountEntity
 import com.project.campaignlift.campaigns.dtos.*
+import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
-import com.project.campaignlift.repositories.AccountRepository
-import com.project.campaignlift.repositories.CampaignRepository
-import com.project.campaignlift.repositories.CommentRepository
-import com.project.campaignlift.repositories.PledgeRepository
+import com.project.campaignlift.repositories.*
 import com.project.common.enums.AccountType
 import com.project.common.exceptions.campaigns.CampaignDeletionNotAllowedException
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
 import com.project.common.exceptions.campaigns.CampaignPermissionDeniedException
 import com.project.common.exceptions.campaigns.CampaignUpdateNotAllowedException
+import com.project.common.exceptions.categories.CategoryNotFoundException
 import com.project.common.exceptions.kycs.IncompleteUserRegistrationException
 import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.transaction.Transactional
@@ -25,6 +24,7 @@ import java.math.BigDecimal
 @Service
 class CampaignServiceImpl(
     private val campaignRepository: CampaignRepository,
+    private val categoryRepository: CategoryRepository,
     private val fileStorageService: FileStorageService,
     private val commentRepository: CommentRepository,
     private val accountRepository: AccountRepository,
@@ -33,9 +33,6 @@ class CampaignServiceImpl(
     @Value("\${aws.endpoint}")
      val endpoint: String
 ) : CampaignService {
-    override fun getAllCampaigns(): List<CampaignListItemResponse> {
-        return campaignRepository.listAllCampaigns()
-    }
 
     override fun getCampaignById(id: Long): CampaignDetailResponse? {
         val campaign = campaignRepository.findByIdOrNull(id)
@@ -68,12 +65,15 @@ class CampaignServiceImpl(
             )
         )
         val (publicBucket, imageUrl) = fileStorageService.uploadFile(image, true)
+        val category = categoryRepository.findByIdOrNull(campaignDto.categoryId)
+            ?: throw CategoryNotFoundException()
 
         val campaign = campaignRepository.save(
             campaignDto.toEntity(
-                    createdBy = user.userId,
-                    imageUrl = "$endpoint/$publicBucket/$imageUrl",
-                    accountId = campaignAccount.id!!,
+                createdBy = user.userId,
+                imageUrl = "$endpoint/$publicBucket/$imageUrl",
+                accountId = campaignAccount.id!!,
+                category = category
             )
         )
         mailService.sendHtmlEmail(
@@ -102,6 +102,9 @@ class CampaignServiceImpl(
             throw CampaignUpdateNotAllowedException( existing.status.name)
         }
 
+        val category = categoryRepository.findByIdOrNull(campaign.categoryId)
+            ?: throw CategoryNotFoundException()
+
         val imageUrl = image?.let {
             val (_, url) = fileStorageService.uploadFile(it, true)
             url
@@ -109,7 +112,8 @@ class CampaignServiceImpl(
 
         val updatedCampaign = campaign.toEntity(
             imageUrl = imageUrl,
-            previousCampaign = existing
+            previousCampaign = existing,
+            category = category
         ).copy(id = existing.id)
         mailService.sendHtmlEmail(
             to = user.email,
@@ -156,11 +160,15 @@ class CampaignServiceImpl(
     }
 
     override fun getAllByUserId(userId: Long): List<CampaignListItemResponse> {
-        return campaignRepository.findByCreatedId(userId)
+        return campaignRepository.listAllCampaignsByUserId(userId)
     }
 
     override fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignListItemResponse> {
-        return campaignRepository.findByStatus(status)
+        return campaignRepository.listAllCampaignsByStatus(status)
+    }
+
+    override fun getAllApprovedCampaigns(): List<CampaignListItemResponse> {
+        return campaignRepository.listAllApprovedCampaigns()
     }
 
     override fun changeCampaignStatus(campaignId: Long, status: CampaignStatus): CampaignEntity {

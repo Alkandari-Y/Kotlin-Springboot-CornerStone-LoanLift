@@ -1,6 +1,7 @@
 package com.project.campaignlift.campaigns
 
 import com.project.campaignlift.campaigns.dtos.*
+import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.services.CampaignService
@@ -33,7 +34,7 @@ class CampaignApiController (
     @GetMapping
     fun getAllCampaigns(): ResponseEntity<List<CampaignListItemResponse>> =
         ResponseEntity(
-            campaignService.getAllCampaignsByStatus(CampaignStatus.ACTIVE),
+            campaignService.getAllApprovedCampaigns(),
             HttpStatus.OK
         )
 

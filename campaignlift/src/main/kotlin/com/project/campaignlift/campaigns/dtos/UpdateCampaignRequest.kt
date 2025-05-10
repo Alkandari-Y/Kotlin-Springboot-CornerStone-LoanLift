@@ -1,5 +1,6 @@
 package com.project.campaignlift.campaigns.dtos
 
+import com.project.banking.entities.CategoryEntity
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.common.utils.dateFormatter
 import jakarta.validation.constraints.DecimalMin
@@ -33,7 +34,8 @@ fun UpdateCampaignRequest.toEntity(
     imageUrl: String,
     previousCampaign: CampaignEntity,
     interestRate: BigDecimal = BigDecimal("0.02").setScale(3),
-    repaymentMonths: Int = 10 * 12
+    repaymentMonths: Int = 10 * 12,
+    category: CategoryEntity
 ): CampaignEntity = CampaignEntity(
     id = previousCampaign.id,
     createdBy = previousCampaign.createdBy,
@@ -42,7 +44,7 @@ fun UpdateCampaignRequest.toEntity(
     goalAmount = this.goalAmount,
     interestRate = interestRate,
     repaymentMonths = repaymentMonths,
-    categoryId = this.categoryId,
+    category = category,
     campaignDeadline = LocalDate.parse(campaignDeadline, dateFormatter),
     imageUrl = imageUrl,
     status = previousCampaign.status,

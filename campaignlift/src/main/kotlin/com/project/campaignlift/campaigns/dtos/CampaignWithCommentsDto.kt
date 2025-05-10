@@ -38,7 +38,7 @@ fun CampaignEntity.toCampaignWithCommentsDto(
         status = this.status,
         campaignDeadline = this.campaignDeadline,
         createdBy = this.createdBy,
-        categoryId = this.categoryId,
+        categoryId = this.category?.id,
         imageUrl = this.imageUrl,
         amountRaised = amountRaised,
         comments = comments,

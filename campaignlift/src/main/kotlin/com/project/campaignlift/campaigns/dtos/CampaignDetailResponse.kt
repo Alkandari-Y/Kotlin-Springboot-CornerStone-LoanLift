@@ -27,7 +27,7 @@ fun CampaignEntity.toDetailResponse(
     amountRaised: BigDecimal = BigDecimal.ZERO
 ) = CampaignDetailResponse(
     createdBy = this.createdBy!!,
-    categoryId =this. categoryId!!,
+    categoryId =this.category?.id!!,
     title = this.title,
     description = this.description!!,
     goalAmount = this.goalAmount!!,

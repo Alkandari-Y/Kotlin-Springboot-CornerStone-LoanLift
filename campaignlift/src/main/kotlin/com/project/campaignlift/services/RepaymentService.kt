@@ -30,7 +30,7 @@ class RepaymentService(
     @Transactional
     fun processMonthlyRepayments() {
         val campaigns = campaignRepository.findAllFundedCampaigns()
-        val categoryMap = preloadCategoryMap(campaigns)
+        val categoryMap = preloadCategoryMap()
 
         campaigns.forEach { campaign ->
             processSingleCampaignRepayment(campaign, categoryMap)
@@ -44,7 +44,7 @@ class RepaymentService(
         val campaignAccount = campaign.accountId?.let { accountRepository.findById(it).orElse(null) }
             ?: return
 
-        val category = categoryMap[campaign.categoryId] ?: return
+        val category = categoryMap[campaign.category?.id] ?: return
 
         val raisedAmount = pledgeRepository.getTotalCommittedAmountForCampaign(campaign.id!!)
         campaign.amountRaised = raisedAmount.setScale(scale, roundingMode)
@@ -99,8 +99,7 @@ class RepaymentService(
         }
     }
 
-    private fun preloadCategoryMap(campaigns: List<CampaignEntity>): Map<Long?, CategoryEntity> {
-        val categoryIds = campaigns.mapNotNull { it.categoryId }.distinct()
-        return categoryRepository.findAllById(categoryIds).associateBy { it.id }
+    private fun preloadCategoryMap(): Map<Long?, CategoryEntity> {
+        return categoryRepository.findAll().associateBy { it.id }
     }
 }

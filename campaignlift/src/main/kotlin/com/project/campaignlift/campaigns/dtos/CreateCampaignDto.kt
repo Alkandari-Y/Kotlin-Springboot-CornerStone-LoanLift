@@ -1,6 +1,7 @@
 package com.project.campaignlift.campaigns.dtos
 
 import com.project.campaignlift.entities.CampaignEntity
+import com.project.banking.entities.CategoryEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.common.utils.dateFormatter
 import java.math.BigDecimal
@@ -32,7 +33,8 @@ fun CreateCampaignDto.toEntity(
     accountId: Long,
     approvedBy: Long? = null,
     interestRate: BigDecimal = BigDecimal("0.02").setScale(3),
-    repaymentMonths: Int = 10 * 12
+    repaymentMonths: Int = 10 * 12,
+    category: CategoryEntity
 ) = CampaignEntity(
     createdBy = createdBy,
     title = this.title,
@@ -40,8 +42,8 @@ fun CreateCampaignDto.toEntity(
     goalAmount = this.goalAmount,
     interestRate = interestRate,
     repaymentMonths = repaymentMonths,
-    categoryId = this.categoryId,
-    campaignDeadline = LocalDate.parse(campaignDeadline, dateFormatter),
+    category = category,
+    campaignDeadline = LocalDate.parse(this.campaignDeadline, dateFormatter),
     imageUrl = imageUrl,
     status = CampaignStatus.NEW,
     submittedAt = LocalDate.now(),

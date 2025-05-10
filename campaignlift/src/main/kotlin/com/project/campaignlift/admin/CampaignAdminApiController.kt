@@ -43,7 +43,7 @@ class CampaignAdminApiController(
         if (status != null) {
             return campaignService.getAllCampaignsByStatus(status)
         }
-        return campaignService.getAllCampaigns()
+        return campaignService.getAllApprovedCampaigns()
     }
 
     @GetMapping("/details/{campaignId}")
@@ -131,9 +131,9 @@ class CampaignAdminApiController(
         val campaign = campaignService.getCampaignEntityById(campaignId)
             ?: throw CampaignNotFoundException()
 
-        val category = categoryRepository.findByIdOrNull(campaign.categoryId)
+        val category = campaign.category
             ?: throw CategoryNotFoundException()
-        repaymentService.processSingleCampaignRepayment(campaign, mapOf(campaign.categoryId to category))
+        repaymentService.processSingleCampaignRepayment(campaign, mapOf(category.id to category))
         return ResponseEntity.ok("Triggered repayment")
     }
 

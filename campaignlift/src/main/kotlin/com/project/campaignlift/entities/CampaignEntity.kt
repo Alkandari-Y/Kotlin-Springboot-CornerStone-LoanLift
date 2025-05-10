@@ -1,5 +1,6 @@
 package com.project.campaignlift.entities
 
+import com.project.banking.entities.CategoryEntity
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -15,8 +16,8 @@ data class CampaignEntity(
     @Column(name = "created_by", nullable = false)
     val createdBy: Long?,
 
-    @Column(name = "category_id", nullable = false)
-    val categoryId: Long?,
+//    @Column(name = "category_id", nullable = false)
+//    val categoryId: Long?,
 
     @Column(name = "title", nullable = false)
     val title: String,
@@ -62,6 +63,10 @@ data class CampaignEntity(
     @OneToMany(mappedBy = "campaign", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     val files: List<FileEntity> = listOf(),
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    val category: CategoryEntity? = null,
+
     @Transient
     var amountRaised: BigDecimal = BigDecimal.ZERO,
 
@@ -69,7 +74,7 @@ data class CampaignEntity(
     constructor() : this(
         id = null,
         createdBy = 0L,
-        categoryId = 0L,
+//        categoryId = 0L,
         title = "",
         description = null,
         goalAmount = null,
@@ -81,6 +86,7 @@ data class CampaignEntity(
         campaignDeadline = null,
         accountId = null,
         imageUrl = null,
+        category = null,
         amountRaised = BigDecimal.ZERO,
     )
 }
