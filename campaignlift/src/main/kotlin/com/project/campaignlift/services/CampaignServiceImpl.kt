@@ -28,6 +28,7 @@ class CampaignServiceImpl(
     private val commentRepository: CommentRepository,
     private val accountRepository: AccountRepository,
     private val pledgeRepository: PledgeRepository,
+    private val mailService: MailService,
 ) : CampaignService {
     override fun getAllCampaigns(): List<CampaignListItemResponse> {
         return campaignRepository.listAllCampaigns()
@@ -72,20 +73,26 @@ class CampaignServiceImpl(
                     accountId = campaignAccount.id!!,
             )
         )
+        mailService.sendHtmlEmail(
+            to = user.email,
+            subject = "${campaignDto.title}",
+            bodyText = "Your ${campaignDto.title} has been create successfully and is pending review",
+            username = user.username,
+        )
         return campaign
     }
 
     override fun updateCampaign(
         campaignId: Long,
-        userId: Long,
+        user: UserInfoDto,
         campaign: UpdateCampaignRequest,
         image: MultipartFile?
     ): CampaignEntity {
         val existing = campaignRepository.findByIdOrNull(campaignId)
             ?: throw CampaignNotFoundException()
 
-        if (existing.createdBy != userId) {
-            throw CampaignPermissionDeniedException(userId, campaignId)
+        if (existing.createdBy != user.userId) {
+            throw CampaignPermissionDeniedException(user.userId, campaignId)
         }
 
         if (existing.status != CampaignStatus.NEW) {
@@ -100,17 +107,22 @@ class CampaignServiceImpl(
             imageUrl = imageUrl,
             previousCampaign = existing
         ).copy(id = existing.id)
-
+        mailService.sendHtmlEmail(
+            to = user.email,
+            subject = "${campaign.title} Updated",
+            bodyText = "Your ${campaign.title} has been updated successfully and is pending review",
+            username = user.username,
+        )
         return campaignRepository.save(updatedCampaign)
     }
 
 
-    override fun deleteCampaign(campaignId: Long, authUserId: Long) {
+    override fun deleteCampaign(campaignId: Long, user: UserInfoDto) {
         val campaign = campaignRepository.findByIdOrNull(campaignId)
             ?: throw CampaignNotFoundException()
 
-        if (campaign.createdBy != authUserId) {
-            throw CampaignPermissionDeniedException(authUserId, campaignId)
+        if (campaign.createdBy != user.userId) {
+            throw CampaignPermissionDeniedException(user.userId, campaignId)
         }
 
         if (campaign.status != CampaignStatus.NEW) {
@@ -118,6 +130,12 @@ class CampaignServiceImpl(
         }
 
         campaignRepository.deleteById(campaignId)
+        mailService.sendHtmlEmail(
+            to = user.email,
+            subject = "${campaign.title} Removed",
+            bodyText = "Your ${campaign.title} has been deleted successfully",
+            username = user.username,
+        )
     }
 
     override fun getCampaignDetails(campaignId: Long): CampaignWithCommentsDto? {

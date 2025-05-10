@@ -19,6 +19,7 @@ const val MAX_ACCOUNT_LIMIT = 3
 @Service
 class AccountServiceImpl(
     private val accountRepository: AccountRepository,
+    private val mailService: MailService
 ): AccountService {
     override fun getActiveAccountsByUserId(userId: Long): List<AccountView> {
         return accountRepository.findByOwnerIdActive(userId)
@@ -37,12 +38,19 @@ class AccountServiceImpl(
             throw AccountLimitException()
         }
 
-        return accountRepository.save(accountEntity.copy(ownerId = userInfoDto.userId))
+        val account = accountRepository.save(accountEntity.copy(ownerId = userInfoDto.userId))
+        mailService.sendHtmlEmail(
+            to = userInfoDto.username,
+            subject = "Your bank account has been created",
+            username = userInfoDto.username,
+            bodyText = "Your account has been successfully created."
+        )
+        return account
     }
 
-    override fun closeAccount(accountNumber: String, userId: Long) {
+    override fun closeAccount(accountNumber: String, user: UserInfoDto) {
         accountRepository.findByAccountNumber(accountNumber)?.apply {
-            if (this.ownerId != userId) {
+            if (this.ownerId != user.userId) {
                 throw AccountVerificationException()
             }
             if (this.ownerType != AccountType.USER) {
@@ -51,6 +59,12 @@ class AccountServiceImpl(
             if (this.active) {
                 accountRepository.save(this.copy(active = false))
             }
+            mailService.sendHtmlEmail(
+                to = user.email,
+                subject = "Your bank account has been closed",
+                username = user.username,
+                bodyText = "Your account has been successfully closed"
+            )
         }
     }
 

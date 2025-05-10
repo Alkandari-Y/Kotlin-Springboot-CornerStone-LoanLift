@@ -11,25 +11,26 @@ import com.project.common.responses.authenthication.UserInfoDto
 import org.springframework.web.multipart.MultipartFile
 
 interface CampaignService {
-    fun getAllCampaigns(): List<CampaignListItemResponse>
-    fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignListItemResponse>
-    fun getAllByUserId(userId: Long): List<CampaignListItemResponse>
-
-    fun getCampaignDetails(campaignId: Long): CampaignWithCommentsDto?
-    fun getCampaignEntityById(campaignId: Long): CampaignEntity?
-    fun getCampaignById(id: Long): CampaignDetailResponse?
-    fun updateCampaign(
-        campaignId: Long,
-        userId: Long,
-        campaign: UpdateCampaignRequest,
-        image: MultipartFile?
-    ): CampaignEntity
     fun createCampaign(
         campaignDto: CreateCampaignDto,
         user: UserInfoDto,
         image: MultipartFile,
     ): CampaignEntity
-    fun changeCampaignStatus(campaignId: Long, status: CampaignStatus): CampaignEntity
+    fun updateCampaign(
+        campaignId: Long,
+        user: UserInfoDto,
+        campaign: UpdateCampaignRequest,
+        image: MultipartFile?
+    ): CampaignEntity
+    fun deleteCampaign(campaignId: Long, user: UserInfoDto)
     fun approveRejectCampaignStatus(campaignId: Long, status: CampaignStatus, adminId: Long? = null): CampaignEntity
-    fun deleteCampaign(campaignId: Long, authUserId: Long)
+
+
+    fun getAllCampaigns(): List<CampaignListItemResponse>
+    fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignListItemResponse>
+    fun getAllByUserId(userId: Long): List<CampaignListItemResponse>
+    fun getCampaignDetails(campaignId: Long): CampaignWithCommentsDto?
+    fun getCampaignEntityById(campaignId: Long): CampaignEntity?
+    fun getCampaignById(id: Long): CampaignDetailResponse?
+    fun changeCampaignStatus(campaignId: Long, status: CampaignStatus): CampaignEntity
 }

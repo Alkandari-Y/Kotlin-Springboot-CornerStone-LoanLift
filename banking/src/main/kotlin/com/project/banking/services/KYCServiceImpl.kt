@@ -7,6 +7,7 @@ import com.project.banking.kycs.dtos.KYCRequest
 import com.project.banking.kycs.dtos.toEntity
 import com.project.banking.repositories.KYCRepository
 import com.project.common.enums.ErrorCode
+import com.project.common.responses.authenthication.UserInfoDto
 import com.project.common.utils.dateFormatter
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -16,15 +17,15 @@ import java.time.Period
 @Service
 class KYCServiceImpl(
     private val kycRepository: KYCRepository,
-    private val applicationEventPublisher: ApplicationEventPublisher
-
+    private val applicationEventPublisher: ApplicationEventPublisher,
+    private val mailService: MailService
 ): KYCService {
 
     override fun createKYCOrUpdate(
         kycRequest: KYCRequest,
-        userId: Long
+        user: UserInfoDto
     ): KYCEntity {
-        val existingKYC = kycRepository.findByUserId(userId)
+        val existingKYC = kycRepository.findByUserId(user.userId)
 
         val newKycEntity  = existingKYC?.copy(
             firstName= kycRequest.firstName,
@@ -35,7 +36,7 @@ class KYCServiceImpl(
             nationality= kycRequest.nationality,
             salary= kycRequest.salary,
         )
-            ?: kycRequest.toEntity(userId)
+            ?: kycRequest.toEntity(user.userId)
 
         val currentDate = LocalDate.now()
         val yearsOfAge = Period.between(newKycEntity.dateOfBirth, currentDate).years
@@ -46,6 +47,12 @@ class KYCServiceImpl(
 
         val savedKyc = kycRepository.save(newKycEntity)
         applicationEventPublisher.publishEvent(KycCreatedEvent(savedKyc))
+        mailService.sendHtmlEmail(
+            to = user.email,
+            subject = "Account Activated",
+            username = user.username,
+            bodyText = "Your account has been activated! Please enjoy our services"
+        )
         return savedKyc
     }
 

@@ -34,7 +34,8 @@ class UsersApiController(
         return ResponseEntity(HttpStatus.OK)
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    // TODO: SWITCH THIS TO API KEY AUTH
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/set-active/{userId}")
     fun setActiveUser(
         @PathVariable("userId") userId: Long

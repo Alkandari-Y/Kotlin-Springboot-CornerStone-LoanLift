@@ -24,7 +24,7 @@ class KycApiController(
     ): ResponseEntity<KYCResponse> {
         val kyc = kycService.createKYCOrUpdate(
             kycRequest = kycRequest,
-            userId = authUser.userId,
+            user = authUser,
         ).toResponse()
 
         return ResponseEntity(
