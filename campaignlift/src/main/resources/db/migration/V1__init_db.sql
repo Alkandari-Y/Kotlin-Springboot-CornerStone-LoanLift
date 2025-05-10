@@ -28,6 +28,7 @@ CREATE TABLE "files"(
     "campaign_id"       INT             NOT NULL,
     "media_type"        VARCHAR(255)    NOT NULL,
     "url"               VARCHAR(255)    NOT NULL,
+    "bucket"            VARCHAR(255)    NOT NULL,
     "created_at"        DATE            NOT NULL,
     "is_public"         BOOLEAN         NOT NULL,
     "verified_by"       INT,

@@ -3,30 +3,55 @@ package com.project.campaignlift.config
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import software.amazon.awssdk.services.s3.S3Configuration
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import java.net.URI
 
 @Configuration
-class S3Config (
-    @Value("\${aws.secret-access-key}") private val secretAccessKey: String,
-    @Value("\${aws.username-accessId}") private val accessKeyId: String,
-    @Value("fileStorageBase.url") private val fileStorageUrl: String,
-){
+class S3Config {
+    @Value("\${aws.access-key}")
+    lateinit var accessKey: String
+
+    @Value("\${aws.secret-key}")
+    lateinit var secretKey: String
+
+    @Value("\${aws.endpoint}")
+    lateinit var endpoint: String
+
+    @Value("\${aws.region}")
+    lateinit var region: String
+
+    private fun credentialsProvider() = StaticCredentialsProvider.create(
+        AwsBasicCredentials.create(accessKey, secretKey)
+    )
 
     @Bean
-    fun s3Client(): S3Client {
-        return S3Client.builder()
-            .endpointOverride(URI("http://localhost:9000"))
-            .region(Region.US_EAST_1)
-            .credentialsProvider(
-                StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create("minioadmin", "minioadmin")
-                )
+    fun s3Client(): S3Client =
+        S3Client.builder()
+            .region(Region.of(region))
+            .credentialsProvider(credentialsProvider())
+            .endpointOverride(URI.create(endpoint))
+            .serviceConfiguration(
+                S3Configuration.builder()
+                    .pathStyleAccessEnabled(true)
+                    .build()
             )
-            .forcePathStyle(true)
             .build()
-    }
+
+    @Bean
+    fun s3Presigner(): S3Presigner =
+        S3Presigner.builder()
+            .region(Region.of(region))
+            .credentialsProvider(credentialsProvider())
+            .endpointOverride(URI.create(endpoint))
+            .serviceConfiguration(
+                S3Configuration.builder()
+                    .pathStyleAccessEnabled(true)
+                    .build()
+            )
+            .build()
 }

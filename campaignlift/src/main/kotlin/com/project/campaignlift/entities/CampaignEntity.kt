@@ -59,6 +59,8 @@ data class CampaignEntity(
     @OneToMany(mappedBy = "campaign", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     val pledges: List<PledgeEntity> = listOf(),
 
+    @OneToMany(mappedBy = "campaign", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val files: List<FileEntity> = listOf(),
 
     @Transient
     var amountRaised: BigDecimal = BigDecimal.ZERO,
