@@ -212,7 +212,7 @@ class PledgeServiceImpl(
             )
         )
 
-        var campaignAccountUpdated: AccountEntity? = null
+        var campaignAccountUpdated: AccountEntity?
 
         if (delta > BigDecimal.ZERO) {
             accountRepository.save(userAccount.copy(balance = userAccount.balance - delta))

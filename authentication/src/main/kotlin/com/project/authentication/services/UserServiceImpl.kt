@@ -26,16 +26,16 @@ class UserServiceImpl(
         }
         val defaultRole = roleService.getDefaultRole()
 
-        val user = userRepository.save(user.toEntity(
+        val newUser = userRepository.save(user.toEntity(
             hashedPassword = passwordEncoder.encode(user.password),
             roles = setOf(defaultRole)
         ))
         mailService.sendHtmlEmail(
-            to = user.email,
+            to = newUser.email,
             subject = "Account Activation",
             username = user.username,
             bodyText = "Your account has been created, please update your account information or reach out to one of our representatives")
-        return user
+        return newUser
     }
 
     override fun findUserById(userId: Long): UserEntity? {

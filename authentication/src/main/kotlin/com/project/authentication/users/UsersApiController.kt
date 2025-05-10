@@ -1,20 +1,20 @@
 package com.project.authentication.users
 
 import com.project.authentication.entities.RoleEntity
+import com.project.authentication.entities.toUserDetails
 import com.project.authentication.services.RoleService
 import com.project.authentication.services.UserService
 import com.project.authentication.users.dtos.RoleCreateRequest
 import com.project.authentication.users.dtos.RolesAssignmentRequest
 import com.project.authentication.users.dtos.toEntity
+import com.project.common.exceptions.auth.UserNotFoundException
+import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.web.bind.annotation.*
 
 
 @RestController
@@ -23,6 +23,24 @@ class UsersApiController(
     private val userService: UserService,
     private val roleService: RoleService
 ) {
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/details/{userId}")
+    fun getUserDetails(
+        @PathVariable("userId") userId: Long,
+    ): ResponseEntity<UserInfoDto> {
+        val user = userService.findUserById(userId)
+            ?: throw UserNotFoundException()
+        return ResponseEntity(
+            UserInfoDto(
+                userId = user.id!!,
+                username = user.username,
+                email = user.email,
+                isActive = user.isActive
+            ),
+            HttpStatus.OK
+        )
+    }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/add-role/{userId}")

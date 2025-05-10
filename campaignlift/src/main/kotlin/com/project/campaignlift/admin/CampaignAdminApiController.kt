@@ -1,14 +1,15 @@
 package com.project.campaignlift.admin
 
-import com.project.banking.entities.CategoryEntity
 import com.project.campaignlift.admin.dtos.CampaignStatusRequest
 import com.project.campaignlift.campaigns.dtos.CampaignDetailResponse
 import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
+import com.project.campaignlift.providers.AuthDetailsProvider
 import com.project.campaignlift.providers.BankServiceProvider
 import com.project.campaignlift.repositories.CategoryRepository
 import com.project.campaignlift.services.CampaignService
+import com.project.campaignlift.services.MailService
 import com.project.campaignlift.services.RepaymentService
 import com.project.common.exceptions.auth.MissingCredentialsException
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
@@ -31,6 +32,8 @@ class CampaignAdminApiController(
     private val bankServiceProvider: BankServiceProvider,
     private val repaymentService: RepaymentService,
     private val categoryRepository: CategoryRepository,
+    private val authDetailsProvider: AuthDetailsProvider,
+    private val mailService: MailService,
 ){
 
     @GetMapping("/list")
@@ -59,10 +62,13 @@ class CampaignAdminApiController(
     fun approveCampaign(
         @RequestAttribute("authUser") authUser: UserInfoDto,
         @PathVariable campaignId: Long,
-        @RequestBody statusRequest: CampaignStatusRequest
+        @RequestBody statusRequest: CampaignStatusRequest,
+        authentication: Authentication
     ): CampaignEntity {
-        val status = statusRequest.name
+        val adminToken = authentication.credentials?.toString()
+            ?: throw MissingCredentialsException()
 
+        val status = statusRequest.name
         val allowedStatuses = setOf(
             CampaignStatus.PENDING,
             CampaignStatus.REJECTED,
@@ -75,11 +81,24 @@ class CampaignAdminApiController(
 
         val approvedBy = if (status == CampaignStatus.PENDING) null else authUser.userId
 
-        return campaignService.approveRejectCampaignStatus(
+        val updatedCampaign = campaignService.approveRejectCampaignStatus(
             campaignId = campaignId,
             status = status,
             adminId = approvedBy
         )
+
+        val ownerDetails = authDetailsProvider.getUserDetailsFromAuth(
+            adminToken = adminToken,
+            userId = updatedCampaign.createdBy!!
+        )
+        mailService.sendHtmlEmail(
+            to = ownerDetails.email,
+            subject = "Campaign - ${status.name}",
+            bodyText = "Your ${updatedCampaign.title} has been set to ${status.name}",
+            username = ownerDetails.username,
+        )
+
+        return updatedCampaign
     }
 
 

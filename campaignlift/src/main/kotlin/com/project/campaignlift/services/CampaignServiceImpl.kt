@@ -172,6 +172,8 @@ class CampaignServiceImpl(
             ?: throw CampaignNotFoundException()
 
         val updatedCampaign = campaign.copy(status = status, approvedBy = adminId)
-        return campaignRepository.save(updatedCampaign)
+        val campaignUpdated = campaignRepository.save(updatedCampaign)
+
+        return campaignUpdated
     }
 }
