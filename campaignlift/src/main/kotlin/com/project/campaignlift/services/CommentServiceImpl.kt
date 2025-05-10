@@ -5,7 +5,6 @@ import com.project.campaignlift.entities.ReplyEntity
 import com.project.campaignlift.entities.projections.CommentProjection
 import com.project.campaignlift.repositories.CampaignRepository
 import com.project.campaignlift.repositories.CommentRepository
-import com.project.campaignlift.repositories.PledgeRepository
 import com.project.campaignlift.repositories.ReplyRepository
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
 import com.project.common.exceptions.comments.CommentDeleteException

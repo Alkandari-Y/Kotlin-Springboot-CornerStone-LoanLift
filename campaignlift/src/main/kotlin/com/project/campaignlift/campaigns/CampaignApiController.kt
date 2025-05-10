@@ -1,37 +1,34 @@
 package com.project.campaignlift.campaigns
 
-import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
-import com.project.campaignlift.campaigns.dtos.CampaignWithCommentsDto
-import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
-import com.project.campaignlift.campaigns.dtos.UpdateCampaignRequest
+import com.project.campaignlift.campaigns.dtos.*
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.services.CampaignService
+import com.project.campaignlift.services.FileStorageService
 import com.project.common.exceptions.auth.MissingCredentialsException
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
+import com.project.common.exceptions.campaigns.CampaignPermissionDeniedException
+import com.project.common.exceptions.campaigns.CampaignUpdateNotAllowedException
 import com.project.common.exceptions.kycs.AccountNotVerifiedException
 import com.project.common.responses.authenthication.UserInfoDto
+import com.project.common.security.RemoteUserPrincipal
 import jakarta.validation.Valid
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestAttribute
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestPart
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/v1/campaigns")
 class CampaignApiController (
     private val campaignService: CampaignService,
+    private val fileStorageService: FileStorageService,
+    @Value("\${aws.endpoint}")
+    val endpoint: String
 ) {
     @GetMapping
     fun getAllCampaigns(): ResponseEntity<List<CampaignListItemResponse>> =
@@ -124,5 +121,62 @@ class CampaignApiController (
             image = image
         )
         return ResponseEntity(updated, HttpStatus.OK)
+    }
+
+
+    @PostMapping("/manage/files")
+    fun uploadFile(
+        @Valid @ModelAttribute fileUploadRequest: FileUploadRequest,
+        @RequestPart("file", required = true) file: MultipartFile,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+    ): ResponseEntity<FileDto> {
+
+        val campaign: CampaignEntity = campaignService.getCampaignEntityById(
+            fileUploadRequest.campaignId
+        ) ?: throw CampaignNotFoundException()
+
+        if (campaign.status !in listOf(CampaignStatus.NEW, CampaignStatus.PENDING)) {
+            throw CampaignUpdateNotAllowedException(campaign.status.name)
+        }
+
+        if (campaign.createdBy != authUser.userId) {
+            throw CampaignPermissionDeniedException(authUser.userId, campaign.id!!)
+        }
+
+        val uploadedFile = fileStorageService.submitFileForCampaign(
+            file,
+            campaign,
+            authUser,
+            fileUploadRequest.isPublic
+        ).toDto()
+
+        return ResponseEntity(uploadedFile, HttpStatus.CREATED)
+    }
+
+    @GetMapping("/manage/files/{fileId}/download")
+    fun downloadFile(
+        @PathVariable fileId: Long,
+        @AuthenticationPrincipal user: RemoteUserPrincipal,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+    ): ResponseEntity<DownloadDto> {
+        val file = fileStorageService.findFile(fileId) ?: return ResponseEntity.notFound().build()
+
+        if (!file.isPublic) {
+            val isOwner = file.campaign?.createdBy == authUser.userId
+            val isAdmin = user.authorities.any { it.authority == "ROLE_ADMIN" }
+
+            if (!isOwner && !isAdmin) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+            }
+
+            val url = fileStorageService.generatePreSignedUrl(file.bucket, file.url)
+            return ResponseEntity.ok(
+                DownloadDto(url = url)
+            )
+        }
+
+        return ResponseEntity.ok(
+            DownloadDto(url = "$endpoint/${file.bucket}/${file.url}")
+        )
     }
 }

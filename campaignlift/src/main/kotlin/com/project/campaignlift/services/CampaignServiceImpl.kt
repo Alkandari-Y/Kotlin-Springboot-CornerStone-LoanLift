@@ -16,6 +16,7 @@ import com.project.common.exceptions.campaigns.CampaignUpdateNotAllowedException
 import com.project.common.exceptions.kycs.IncompleteUserRegistrationException
 import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.transaction.Transactional
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -29,6 +30,8 @@ class CampaignServiceImpl(
     private val accountRepository: AccountRepository,
     private val pledgeRepository: PledgeRepository,
     private val mailService: MailService,
+    @Value("\${aws.endpoint}")
+     val endpoint: String
 ) : CampaignService {
     override fun getAllCampaigns(): List<CampaignListItemResponse> {
         return campaignRepository.listAllCampaigns()
@@ -64,18 +67,18 @@ class CampaignServiceImpl(
                 balance = BigDecimal.ZERO
             )
         )
-        val imageUrl = fileStorageService.uploadFilePublic(image)
+        val (publicBucket, imageUrl) = fileStorageService.uploadFile(image, true)
 
         val campaign = campaignRepository.save(
             campaignDto.toEntity(
                     createdBy = user.userId,
-                    imageUrl = imageUrl,
+                    imageUrl = "$endpoint/$publicBucket/$imageUrl",
                     accountId = campaignAccount.id!!,
             )
         )
         mailService.sendHtmlEmail(
             to = user.email,
-            subject = "${campaignDto.title}",
+            subject = campaignDto.title,
             bodyText = "Your ${campaignDto.title} has been create successfully and is pending review",
             username = user.username,
         )
@@ -100,7 +103,8 @@ class CampaignServiceImpl(
         }
 
         val imageUrl = image?.let {
-            fileStorageService.uploadFilePublic(it)
+            val (_, url) = fileStorageService.uploadFile(it, true)
+            url
         } ?: existing.imageUrl.orEmpty()
 
         val updatedCampaign = campaign.toEntity(

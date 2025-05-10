@@ -705,3 +705,16 @@ Use **structured logs** in JSON format for parsing and indexing. Example:
 ````
 
 Logs should include `trace_id` headers passed between services for distributed tracing (OpenTelemetry or similar recommended).
+
+```
+## ALlowed File Types
+
+| File Type               | MIME Type                                                                 | Common Extensions |
+| ----------------------- | ------------------------------------------------------------------------- | ----------------- |
+| PDF Document            | `application/pdf`                                                         | `.pdf`            |
+| JPEG Image              | `image/jpeg`                                                              | `.jpg`, `.jpeg`   |
+| PNG Image               | `image/png`                                                               | `.png`            |
+| Microsoft Word (legacy) | `application/msword`                                                      | `.doc`            |
+| Microsoft Word (modern) | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` | `.docx`           |
+| Microsoft Excel         | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`       | `.xlsx`           |
+| Plain Text File         | `text/plain`                                                              | `.txt`            |
