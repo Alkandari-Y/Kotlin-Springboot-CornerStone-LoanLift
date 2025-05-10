@@ -60,6 +60,16 @@ class CampaignApiController (
             throw MissingCredentialsException()
         }
 
+        val allowedTypes = listOf("image/jpeg", "image/png", "image/jpg", "image/webp")
+        if (image.contentType !in allowedTypes) {
+            throw IllegalArgumentException("Only JPEG, PNG, or WEBP images are allowed.")
+        }
+
+        val maxSizeInBytes = 2 * 1024 * 1024 // 2 MB
+        if (image.size > maxSizeInBytes) {
+            throw IllegalArgumentException("File size must not exceed 2MB.")
+        }
+
         val campaign = campaignService.createCampaign(
             campaignDto = campaignCreateRequest,
             user = authUser,
