@@ -15,6 +15,7 @@ import com.project.banking.services.KYCService
 import com.project.banking.services.TransactionService
 import com.project.common.exceptions.APIException
 import com.project.common.enums.ErrorCode
+import com.project.common.exceptions.kycs.IncompleteUserRegistrationException
 import com.project.common.responses.authenthication.UserInfoDto
 import com.project.common.responses.banking.AccountBalanceCheck
 import com.project.common.responses.banking.AccountResponse
@@ -48,12 +49,7 @@ class AccountsControllers(
     ) : ResponseEntity<AccountEntity>
     {
         if (authUser.isActive.not()) {
-            throw APIException(
-                message = "User must complete KYC registration",
-                httpStatus = HttpStatus.BAD_REQUEST,
-                code = ErrorCode.INCOMPLETE_USER_REGISTRATION,
-                cause = null
-            )
+            throw IncompleteUserRegistrationException()
         }
         val account = accountService.createClientAccount(
             accountCreateRequestDto.toEntity(),
@@ -83,7 +79,7 @@ class AccountsControllers(
         @PathVariable accountNumber : String,
         @RequestAttribute("authUser") authUser: UserInfoDto,
         ): ResponseEntity<Unit> {
-        accountService.closeAccount(accountNumber, authUser.userId)
+        accountService.closeAccount(accountNumber, authUser)
         return ResponseEntity(HttpStatus.OK)
     }
 

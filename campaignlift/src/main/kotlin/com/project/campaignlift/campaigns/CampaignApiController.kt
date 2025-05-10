@@ -94,7 +94,7 @@ class CampaignApiController (
         @PathVariable campaignId: Long,
         @RequestAttribute("authUser") authUser: UserInfoDto,
     ): ResponseEntity<Unit> {
-        campaignService.deleteCampaign(campaignId, authUser.userId)
+        campaignService.deleteCampaign(campaignId, authUser)
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
 
@@ -109,7 +109,7 @@ class CampaignApiController (
     ): ResponseEntity<CampaignEntity> {
         val updated = campaignService.updateCampaign(
             campaignId = campaignId,
-            userId = authUser.userId,
+            user = authUser,
             campaign = campaignUpdateRequest,
             image = image
         )

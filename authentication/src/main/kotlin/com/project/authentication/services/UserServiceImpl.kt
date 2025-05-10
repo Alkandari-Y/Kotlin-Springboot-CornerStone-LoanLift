@@ -15,7 +15,8 @@ import org.springframework.stereotype.Service
 class UserServiceImpl(
     private val userRepository: UserRepository,
     private val roleService: RoleService,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val mailService: MailService
 ): UserService {
     override fun createUser(user: RegisterCreateRequest): UserEntity {
         val usernameExists = userRepository.existsByUsernameOrCivilIdOrEmail(user.username, user.civilId, user.email)
@@ -25,10 +26,16 @@ class UserServiceImpl(
         }
         val defaultRole = roleService.getDefaultRole()
 
-        return userRepository.save(user.toEntity(
+        val user = userRepository.save(user.toEntity(
             hashedPassword = passwordEncoder.encode(user.password),
             roles = setOf(defaultRole)
         ))
+        mailService.sendHtmlEmail(
+            to = user.email,
+            subject = "Account Activation",
+            username = user.username,
+            bodyText = "Your account has been created, please update your account information or reach out to one of our representatives")
+        return user
     }
 
     override fun findUserById(userId: Long): UserEntity? {
