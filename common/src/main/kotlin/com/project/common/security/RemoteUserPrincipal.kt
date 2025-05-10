@@ -23,8 +23,6 @@ class RemoteUserPrincipal(
 
     override fun isCredentialsNonExpired(): Boolean = true
 
-//    override fun isEnabled(): Boolean = isActive
-
     fun getUserId(): Long = userId
     fun getEmail(): String = email
 }

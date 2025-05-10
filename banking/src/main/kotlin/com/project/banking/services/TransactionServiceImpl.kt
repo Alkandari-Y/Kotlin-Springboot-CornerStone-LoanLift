@@ -86,7 +86,7 @@ class TransactionServiceImpl(
 
     override fun getAllTransactionByUserId(
         userId: Long
-    ): List<TransactionResponse> {
-        TODO("Not yet implemented")
+    ): List<TransactionDetails> {
+        return transactionRepository.findAllByUserId(userId)
     }
 }

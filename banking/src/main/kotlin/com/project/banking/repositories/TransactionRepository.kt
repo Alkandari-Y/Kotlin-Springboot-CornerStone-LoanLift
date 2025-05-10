@@ -1,5 +1,6 @@
 package com.project.banking.repositories
 
+import com.project.banking.accounts.dtos.TransactionResponse
 import com.project.banking.entities.TransactionEntity
 import com.project.banking.transactions.dtos.TransactionDetails
 import org.springframework.data.jpa.repository.JpaRepository
@@ -31,4 +32,20 @@ interface TransactionRepository: JpaRepository<TransactionEntity, Long> {
         @Param("accountNumber") accountNumber: String,
     ): List<TransactionDetails>
 
+
+    @Query("""
+        SELECT new com.project.banking.transactions.dtos.TransactionDetails(
+            t.sourceAccount.accountNumber,
+            t.destinationAccount.accountNumber,
+            t.amount,
+            t.createdAt,
+            c.name
+        )
+        FROM TransactionEntity t
+        JOIN t.sourceAccount sa
+        JOIN t.destinationAccount da
+        JOIN t.category c
+        WHERE sa.ownerId = :userId OR da.ownerId = :userId
+    """)
+    fun findAllByUserId(@Param("userId") userId: Long): List<TransactionDetails>
 }

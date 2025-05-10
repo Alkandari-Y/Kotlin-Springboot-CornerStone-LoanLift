@@ -1,5 +1,6 @@
 package com.project.banking.transactions
 
+import com.project.banking.accounts.dtos.TransactionResponse
 import com.project.common.exceptions.accounts.AccountNotFoundException
 import com.project.banking.services.AccountService
 import com.project.banking.services.TransactionService
@@ -39,6 +40,25 @@ class TransactionsAPIController(
 
         val transactions = transactionService.getTransactionsByAccount(account.accountNumber)
         return ResponseEntity(transactions, HttpStatus.OK)
+    }
+
+    @GetMapping("/clients/{clientId}")
+    fun getTransactionsByClientId(
+        @PathVariable("clientId") clientId: Long,
+        @AuthenticationPrincipal user: RemoteUserPrincipal
+    ): ResponseEntity<List<TransactionDetails>> {
+
+        val isOwner = user.getUserId() == clientId
+        val isAdmin = user.authorities.any { it.authority == "ROLE_ADMIN" }
+
+        if (!isOwner && !isAdmin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+
+        return ResponseEntity(
+            transactionService.getAllTransactionByUserId(clientId),
+            HttpStatus.OK
+        )
     }
 
 }

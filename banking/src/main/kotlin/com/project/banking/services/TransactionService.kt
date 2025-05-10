@@ -13,5 +13,5 @@ interface TransactionService {
     fun getTransactionsByAccount(accountNumber: String): List<TransactionDetails>
     fun getAllTransactionByUserId(
         userId: Long
-    ): List<TransactionResponse>
+    ): List<TransactionDetails>
 }
