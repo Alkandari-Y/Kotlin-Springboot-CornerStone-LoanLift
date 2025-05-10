@@ -3,11 +3,7 @@ package com.project.authentication.entities
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
-import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.userdetails.UserDetails
 import java.time.Instant
-import java.util.UUID
 
 @Entity
 @Table(name = "users")
@@ -59,20 +55,4 @@ data class UserEntity(
         updatedAt = Instant.now(),
         roles = mutableSetOf(),
     )
-}
-
-fun UserEntity.toUserDetails(): UserDetails {
-    val authorities: Collection<GrantedAuthority> = this.roles.map {
-        SimpleGrantedAuthority(it.name)
-    }
-
-    return object : UserDetails {
-        override fun getAuthorities(): Collection<GrantedAuthority> = authorities
-        override fun getUsername(): String = this@toUserDetails.username
-        override fun getPassword(): String = this@toUserDetails.password
-        override fun isAccountNonExpired(): Boolean = true
-        override fun isAccountNonLocked(): Boolean = true
-        override fun isCredentialsNonExpired(): Boolean = true
-        override fun isEnabled(): Boolean = this@toUserDetails.isActive
-    }
 }

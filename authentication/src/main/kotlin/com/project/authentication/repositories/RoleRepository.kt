@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository
 interface RoleRepository : JpaRepository<RoleEntity, Long> {
     fun findByName(name: String): RoleEntity?
     fun findAllByNameIn(names: Collection<String>): List<RoleEntity>
+
+    fun existsByName(name: String): Boolean
 }

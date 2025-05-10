@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.userdetails.UsernameNotFoundException
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -23,7 +22,7 @@ import java.security.Principal
 
 @RestController
 @RequestMapping("/api/v1/auth")
-class UserController(
+class AuthApiController(
     private val userService: UserService,
     private val authenticationManager: AuthenticationProvider,
     private val jwtService: JwtService,
@@ -51,9 +50,8 @@ class UserController(
         val authentication = authenticationManager.authenticate(authToken)
         val userDetails = authentication.principal as? AuthUserDetails
             ?: throw UsernameNotFoundException("User not found")
-        val user =
-            userService.findUserByUsername(userDetails.username)
-                ?: throw UsernameNotFoundException("User not found")
+        val user = userService.findUserByUsername(userDetails.username)
+            ?: throw UsernameNotFoundException("User not found")
 
         val (access, refresh) = jwtService.generateTokenPair(user, user.roles.map { it.name })
         return ResponseEntity(JwtResponse(access, refresh), HttpStatus.OK)

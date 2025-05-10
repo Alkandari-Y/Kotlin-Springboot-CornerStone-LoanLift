@@ -46,7 +46,7 @@ class JwtService (
 
         return Jwts.builder()
             .setSubject(user.username)
-            .claim("userId", user.id.toString())
+            .claim("userId", user.id)
             .claim("roles", authorities)
             .claim("isActive", user.isActive)
             .claim("type", type)
@@ -59,9 +59,6 @@ class JwtService (
 
     fun extractUsername(token: String): String =
         parseToken(token).subject
-
-    fun extractUserId(token: String): Long =
-        parseToken(token).get("userId", Long::class.java)
 
 
     fun extractRoles(token: String): List<String> =

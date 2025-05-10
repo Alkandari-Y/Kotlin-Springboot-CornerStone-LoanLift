@@ -1,7 +1,6 @@
 package com.project.authentication.users
 
 import com.project.authentication.entities.RoleEntity
-import com.project.authentication.entities.toUserDetails
 import com.project.authentication.services.RoleService
 import com.project.authentication.services.UserService
 import com.project.authentication.users.dtos.RoleCreateRequest
@@ -13,7 +12,6 @@ import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
 
 
