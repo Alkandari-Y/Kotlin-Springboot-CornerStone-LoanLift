@@ -21,13 +21,6 @@ data class CreateCampaignDto(
     @field:DecimalMin("1000.000")
     val goalAmount: BigDecimal,
 
-    @field:NotNull
-    @field:DecimalMin("0.000")
-    val interestRate: BigDecimal,
-
-    @field:Min(3)
-    val repaymentMonths: Int,
-
     @field:DateTimeFormat(pattern = "dd-MM-yyyy")
     @field:NotBlank
     val campaignDeadline: String,
@@ -37,14 +30,16 @@ fun CreateCampaignDto.toEntity(
     createdBy: Long,
     imageUrl: String,
     accountId: Long,
-    approvedBy: Long? = null
+    approvedBy: Long? = null,
+    interestRate: BigDecimal = BigDecimal("0.02").setScale(3),
+    repaymentMonths: Int = 10 * 12
 ) = CampaignEntity(
     createdBy = createdBy,
     title = this.title,
     description = this.description,
     goalAmount = this.goalAmount,
-    interestRate = this.interestRate,
-    repaymentMonths = this.repaymentMonths,
+    interestRate = interestRate,
+    repaymentMonths = repaymentMonths,
     categoryId = this.categoryId,
     campaignDeadline = LocalDate.parse(campaignDeadline, dateFormatter),
     imageUrl = imageUrl,

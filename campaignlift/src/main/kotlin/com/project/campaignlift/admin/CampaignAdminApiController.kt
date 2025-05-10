@@ -1,17 +1,23 @@
 package com.project.campaignlift.admin
 
+import com.project.banking.entities.CategoryEntity
 import com.project.campaignlift.admin.dtos.CampaignStatusRequest
 import com.project.campaignlift.campaigns.dtos.CampaignDetailResponse
 import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.providers.BankServiceProvider
+import com.project.campaignlift.repositories.CategoryRepository
 import com.project.campaignlift.services.CampaignService
+import com.project.campaignlift.services.RepaymentService
 import com.project.common.exceptions.auth.MissingCredentialsException
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
 import com.project.common.exceptions.campaigns.InvalidCampaignStatusChangeException
+import com.project.common.exceptions.categories.CategoryNotFoundException
 import com.project.common.responses.authenthication.UserInfoDto
 import com.project.common.responses.banking.UserAccountsResponse
+import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
@@ -20,9 +26,11 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/v1/admin/campaigns")
 @PreAuthorize("hasRole('ROLE_ADMIN')")
-class CampaignAdminApiController (
+class CampaignAdminApiController(
     private val campaignService: CampaignService,
     private val bankServiceProvider: BankServiceProvider,
+    private val repaymentService: RepaymentService,
+    private val categoryRepository: CategoryRepository,
 ){
 
     @GetMapping("/list")
@@ -90,4 +98,24 @@ class CampaignAdminApiController (
 
         return bankServiceProvider.getUserAccountsAndProfile(owner, adminToken)
     }
+
+    @PostMapping("/demo/run-repayment")
+    fun triggerRepayment(): ResponseEntity<String> {
+        repaymentService.processMonthlyRepayments()
+        return ResponseEntity.ok("Triggered repayment")
+    }
+
+    @PostMapping("/demo/run-repayment/{campaignId}")
+    fun triggerRepaymentForCampgign(
+        @PathVariable("campaignId") campaignId: Long,
+    ): ResponseEntity<String> {
+        val campaign = campaignService.getCampaignEntityById(campaignId)
+            ?: throw CampaignNotFoundException()
+
+        val category = categoryRepository.findByIdOrNull(campaign.categoryId)
+            ?: throw CategoryNotFoundException()
+        repaymentService.processSingleCampaignRepayment(campaign, mapOf(campaign.categoryId to category))
+        return ResponseEntity.ok("Triggered repayment")
+    }
+
 }

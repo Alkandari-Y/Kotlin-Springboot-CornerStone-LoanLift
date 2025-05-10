@@ -70,7 +70,7 @@ class PledgeServiceImpl(
         }
 
         val campaign = campaignRepository.findById(campaignId)
-            .orElseThrow { IllegalArgumentException("Campaign not found") }
+            .orElseThrow { CampaignNotFoundException("Campaign not found") }
 
         validateCampaignIsPledgeable(campaign)
         validatePledgerIsNotCampaignOwner(campaign, userInfo.userId)
@@ -129,12 +129,8 @@ class PledgeServiceImpl(
         val newPledgerBalance = userAccount.balance.setScale(3).subtract(amount)
         val newCampaignAccountBalance = campaignAccount.balance.setScale(3).add(amount)
 
-        accountRepository.saveAll(
-            listOf(
-                userAccount.copy(balance = newPledgerBalance),
-                campaignAccount.copy(balance = newCampaignAccountBalance)
-            )
-        )
+        val campaignAccountUpdated = accountRepository.save(campaignAccount.copy(balance = newCampaignAccountBalance))
+        accountRepository.save(userAccount.copy(balance = newPledgerBalance))
 
         val savedPledge = pledgeRepository.save(pledge)
 
@@ -147,8 +143,9 @@ class PledgeServiceImpl(
         )
 
         val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId = campaign.id!!)
-        if (campaign.amountRaised <= amountRaised) {
-            campaignRepository.save(campaign.copy(status = CampaignStatus.ACTIVE))
+        if (amountRaised >= campaign.goalAmount) {
+            campaignRepository.save(campaign.copy(status = CampaignStatus.FUNDED))
+            accountRepository.save(campaignAccountUpdated.copy(active = true))
         }
 
         return PledgeResultDto(
@@ -167,7 +164,7 @@ class PledgeServiceImpl(
         }
 
         val pledge = pledgeRepository.findById(pledgeId)
-            .orElseThrow { IllegalArgumentException("Pledge not found") }
+            .orElseThrow { PledgeNotFoundException("Pledge not found") }
 
         if (pledge.userId != userId) {
             throw AccessDeniedException("You cannot modify this pledge.")
@@ -215,12 +212,14 @@ class PledgeServiceImpl(
             )
         )
 
+        var campaignAccountUpdated: AccountEntity? = null
+
         if (delta > BigDecimal.ZERO) {
             accountRepository.save(userAccount.copy(balance = userAccount.balance - delta))
-            accountRepository.save(campaignAccount.copy(balance = campaignAccount.balance + delta))
+            campaignAccountUpdated = accountRepository.save(campaignAccount.copy(balance = campaignAccount.balance + delta))
         } else {
             accountRepository.save(userAccount.copy(balance = userAccount.balance + delta.abs()))
-            accountRepository.save(campaignAccount.copy(balance = campaignAccount.balance - delta.abs()))
+            campaignAccountUpdated = accountRepository.save(campaignAccount.copy(balance = campaignAccount.balance - delta.abs()))
         }
 
 
@@ -238,9 +237,11 @@ class PledgeServiceImpl(
             )
         )
         val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId = campaign.id!!)
-        if (campaign.amountRaised <= amountRaised) {
-            campaignRepository.save(campaign.copy(status = CampaignStatus.ACTIVE))
+        if (amountRaised >= campaign.goalAmount) {
+            campaignRepository.save(campaign.copy(status = CampaignStatus.FUNDED))
+            accountRepository.save(campaignAccountUpdated.copy(active = true))
         }
+
         return PledgeResultDto(
             pledge = savedPledge.toUserPledgeDto(
                 title = campaign.title,
@@ -253,7 +254,7 @@ class PledgeServiceImpl(
     @Transactional
     override fun withdrawPledge(pledgeId: Long, userId: Long) {
         val pledge = pledgeRepository.findById(pledgeId)
-            .orElseThrow { IllegalArgumentException("Pledge not found") }
+            .orElseThrow { PledgeNotFoundException("Pledge not found") }
 
         if (pledge.userId != userId) {
             throw AccessDeniedException("You cannot withdraw someone else's pledge.")

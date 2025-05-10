@@ -23,10 +23,14 @@ data class RegisterCreateRequest(
 )
 
 
-fun RegisterCreateRequest.toEntity(hashedPassword: String, roles: Set<RoleEntity>) = UserEntity(
-    username = username,
+fun RegisterCreateRequest.toEntity(
+    hashedPassword: String,
+    roles: Set<RoleEntity>
+) = UserEntity(
+    username = this.username,
     password = hashedPassword,
-    civilId = civilId,
-    email = email,
-    roles = roles
+    civilId = this.civilId,
+    email = this.email,
+    isActive = false,
+    roles = roles.toMutableSet()
 )

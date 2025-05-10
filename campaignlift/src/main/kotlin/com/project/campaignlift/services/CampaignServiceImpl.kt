@@ -59,7 +59,7 @@ class CampaignServiceImpl(
                 name = "${campaignDto.title} Account",
                 ownerId = user.userId,
                 ownerType = AccountType.CAMPAIGN,
-                active = true,
+                active = false,
                 balance = BigDecimal.ZERO
             )
         )
@@ -69,7 +69,7 @@ class CampaignServiceImpl(
             campaignDto.toEntity(
                     createdBy = user.userId,
                     imageUrl = imageUrl,
-                    accountId = campaignAccount.id!!
+                    accountId = campaignAccount.id!!,
             )
         )
         return campaign
@@ -127,6 +127,10 @@ class CampaignServiceImpl(
         val comments = commentRepository.findByCampaignId(campaignId)
         val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId)
         return campaign.toCampaignWithCommentsDto(amountRaised, comments)
+    }
+
+    override fun getCampaignEntityById(campaignId: Long): CampaignEntity? {
+        return campaignRepository.findByIdOrNull(campaignId)
     }
 
     override fun getAllByUserId(userId: Long): List<CampaignListItemResponse> {
