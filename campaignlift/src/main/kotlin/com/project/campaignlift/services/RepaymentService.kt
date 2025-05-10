@@ -1,7 +1,6 @@
 package com.project.campaignlift.services
 
 import com.project.banking.entities.CategoryEntity
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import com.project.banking.entities.TransactionEntity
 import com.project.campaignlift.entities.*
