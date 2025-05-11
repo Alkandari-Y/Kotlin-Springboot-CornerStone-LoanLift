@@ -145,8 +145,8 @@ class RepaymentService(
                 val campaignAccount = campaign.accountId?.let { accountRepository.findByIdOrNull(it) } ?: return@forEach
                 val category = categoryMap[campaign.category?.id] ?: return@forEach
 
-                pledges.forEach { pledge ->
-                    val pledgerAccount = accountsById[pledge.accountId] ?: return@forEach
+                pledges.forEach loop@{ pledge ->
+                    val pledgerAccount = accountsById[pledge.accountId] ?: return@loop
                     val updatedPledgerBalance = pledgerAccount.balance + pledge.amount
                     accountRepository.save(pledgerAccount.copy(balance = updatedPledgerBalance))
 

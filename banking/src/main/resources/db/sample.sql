@@ -1,11 +1,17 @@
-INSERT INTO public.categories (name)
-VALUES
-    ('health'),
+INSERT INTO "categories" ("name") VALUES
     ('personal'),
-    ('retails'),
-    ('fitness'),
-    ('luxury'),
+    ('retail'),
+    ('manufacturing'),
+    ('healthcare'),
+    ('financial services'),
+    ('real estate'),
+    ('technology'),
+    ('hospitality'),
     ('education'),
-    ('utilities'),
-    ('electronics');
-
+    ('logistics'),
+    ('construction'),
+    ('agriculture'),
+    ('automotive'),
+    ('consulting'),
+    ('wholesale'),
+    ('energy');

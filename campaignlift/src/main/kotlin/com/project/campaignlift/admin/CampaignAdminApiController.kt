@@ -104,6 +104,11 @@ class CampaignAdminApiController(
     }
 
 
+    @GetMapping("/details/{campaignId}/transactions")
+    fun getTransactionsByCampaignId(@PathVariable("campaignId") campaignId: Long)
+            = "get CampaignWithTransactionsListAdminDto"
+
+
     @GetMapping("/details/{campaignId}/owner")
     fun getCampaignOwnerDetails(
         @PathVariable("campaignId") campaignId: Long,
