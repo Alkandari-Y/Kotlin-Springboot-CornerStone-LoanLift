@@ -1,0 +1,1148 @@
+{
+	"info": {
+		"_postman_id": "33864466-caf0-4505-b4d0-e248fb7f541f",
+		"name": "Campaign Service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13380578",
+		"_collection_link": "https://blue-trinity-17335.postman.co/workspace/Kotlin-Spring-LoanLift~ea5b6b28-2a4a-466a-9480-eb762d8e4c9f/collection/13380578-33864466-caf0-4505-b4d0-e248fb7f541f?action=share&source=collection_link&creator=13380578"
+	},
+	"item": [
+		{
+			"name": "Campaigns",
+			"item": [
+				{
+					"name": "Get all Campaigns",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{campaignServiceUrl}}/campaigns",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"campaigns"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Campaign Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{campaignOwnerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{campaignServiceUrl}}/campaigns/details/1",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"campaigns",
+								"details",
+								"1"
+							],
+							"query": [
+								{
+									"key": "includeComments",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Get User Summary - Admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{bankingServiceUrl}}/accounts/clients/3",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"accounts",
+								"clients",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All Campaigns",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{campaignServiceUrl}}/admin/campaigns/list?status=NEW",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"admin",
+								"campaigns",
+								"list"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "NEW"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Campaign Details",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"ACTIVE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/admin/campaigns/details/3",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"admin",
+								"campaigns",
+								"details",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Approve or Reject",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"ACTIVE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/admin/campaigns/details/4",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"admin",
+								"campaigns",
+								"details",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a comment and reply",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"this is a test\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/comments/edit/5",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"comments",
+								"edit",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "trigger repayments",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{campaignServiceUrl}}/admin/campaigns/demo/run-repayment",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"admin",
+								"campaigns",
+								"demo",
+								"run-repayment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "trigger failure",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{campaignServiceUrl}}/admin/campaigns/demo/run-failure",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"admin",
+								"campaigns",
+								"demo",
+								"run-failure"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Comments",
+			"item": [
+				{
+					"name": "Get All Comments By Campaign",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{campaignServiceUrl}}/comments/campaign/1",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"comments",
+								"campaign",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a Comment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"this is a test\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/comments/campaign/6",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"comments",
+								"campaign",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete A comment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"this is a test\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/comments/edit/8",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"comments",
+								"edit",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reply To comment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{campaignOwnerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"we will launch soon\",\n    \"commentId\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/comments/reply",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"comments",
+								"reply"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pledges",
+			"item": [
+				{
+					"name": "Get All my Pledges",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{campaignServiceUrl}}/pledges",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"pledges"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Pledge",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accountId\": 2,\n    \"campaignId\": 4,\n    \"amount\": 10000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/pledges",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"pledges"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update a pledge",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accountId\": 3,\n    \"campaignId\": 1,\n    \"amount\": 2000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/pledges/details/1",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"pledges",
+								"details",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pledge Details",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accountId\": 3,\n    \"campaignId\": 1,\n    \"amount\": 2000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/pledges/details/3",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"pledges",
+								"details",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pledge Detailed Transactions",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accountId\": 3,\n    \"campaignId\": 1,\n    \"amount\": 2000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/pledges/details/3/transactions",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"pledges",
+								"details",
+								"3",
+								"transactions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Withdraw Pledge",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/pledges/details/9",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"pledges",
+								"details",
+								"9"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User - Manage Campaign",
+			"item": [
+				{
+					"name": "Get All My Campaigns",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{campaignOwnerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "test campaign",
+									"type": "text"
+								},
+								{
+									"key": "categoryId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "this is a test for form data",
+									"type": "text"
+								},
+								{
+									"key": "goalAmount",
+									"value": "10000",
+									"type": "text"
+								},
+								{
+									"key": "interestRate",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "repaymentMonths",
+									"value": "6",
+									"type": "text"
+								},
+								{
+									"key": "campaignDeadline",
+									"value": "01-09-2025",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/Users/alkandari-y/Desktop/Screenshot 2025-05-06 at 8.44.27 PM.png"
+								},
+								{
+									"key": "categoryId",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/campaigns/manage",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"campaigns",
+								"manage"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get my campaign details",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{campaignOwnerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "test campaign update",
+									"type": "text"
+								},
+								{
+									"key": "categoryId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "this is a test for form data datata atata",
+									"type": "text"
+								},
+								{
+									"key": "goalAmount",
+									"value": "10000",
+									"type": "text"
+								},
+								{
+									"key": "interestRate",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "repaymentMonths",
+									"value": "6",
+									"type": "text"
+								},
+								{
+									"key": "campaignDeadline",
+									"value": "01-09-2025",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "postman-cloud:///1f02c1f9-1dd4-4090-8738-fcb4f957957e"
+								},
+								{
+									"key": "accountId",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/campaigns/manage/29",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"campaigns",
+								"manage",
+								"29"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Campaign",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{campaignOwnerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "other campaign 1k",
+									"type": "text"
+								},
+								{
+									"key": "categoryId",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "this is a test for form data",
+									"type": "text"
+								},
+								{
+									"key": "goalAmount",
+									"value": "200000",
+									"type": "text"
+								},
+								{
+									"key": "campaignDeadline",
+									"value": "12-05-2025",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "postman-cloud:///1f02c1f9-1dd4-4090-8738-fcb4f957957e"
+								},
+								{
+									"key": "accountId",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/campaigns",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"campaigns"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Campaign",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{campaignOwnerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "test campaign update",
+									"type": "text"
+								},
+								{
+									"key": "categoryId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "this is a test for form data datata atata",
+									"type": "text"
+								},
+								{
+									"key": "goalAmount",
+									"value": "10000",
+									"type": "text"
+								},
+								{
+									"key": "interestRate",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "repaymentMonths",
+									"value": "6",
+									"type": "text"
+								},
+								{
+									"key": "campaignDeadline",
+									"value": "01-09-2025",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "postman-cloud:///1f02c1f9-1dd4-4090-8738-fcb4f957957e"
+								},
+								{
+									"key": "accountId",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/campaigns/manage/1",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"campaigns",
+								"manage",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Campaign",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{campaignOwnerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "test campaign",
+									"type": "text"
+								},
+								{
+									"key": "categoryId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "this is a test for form data",
+									"type": "text"
+								},
+								{
+									"key": "goalAmount",
+									"value": "10000",
+									"type": "text"
+								},
+								{
+									"key": "interestRate",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "repaymentMonths",
+									"value": "6",
+									"type": "text"
+								},
+								{
+									"key": "campaignDeadline",
+									"value": "01-09-2025",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/Users/alkandari-y/Desktop/Screenshot 2025-05-06 at 8.44.27 PM.png"
+								},
+								{
+									"key": "categoryId",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/campaigns/manage/7",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"campaigns",
+								"manage",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload file",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{campaignOwnerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "campaignId",
+									"value": "23",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "postman-cloud:///1f02ddeb-ac6d-4d70-90b3-fdedd7ae90d7"
+								},
+								{
+									"key": "isPublic",
+									"value": "false",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/campaigns/manage/files",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"campaigns",
+								"manage",
+								"files"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

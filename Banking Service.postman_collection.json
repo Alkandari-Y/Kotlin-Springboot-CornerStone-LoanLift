@@ -1,0 +1,480 @@
+{
+	"info": {
+		"_postman_id": "4dcc523a-b331-4c89-89d9-b8bab33879bd",
+		"name": "Banking Service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13380578",
+		"_collection_link": "https://blue-trinity-17335.postman.co/workspace/Kotlin-Spring-LoanLift~ea5b6b28-2a4a-466a-9480-eb762d8e4c9f/collection/13380578-4dcc523a-b331-4c89-89d9-b8bab33879bd?action=share&source=collection_link&creator=13380578"
+	},
+	"item": [
+		{
+			"name": "KYC",
+			"item": [
+				{
+					"name": "Get My KYC",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bankingServiceUrl}}/kyc",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"kyc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User KYC",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bankingServiceUrl}}/kyc/client/3",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"kyc",
+								"client",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Update KYC",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Sultan\",\n    \"lastName\": \"AlAbdullah\",\n    \"dateOfBirth\": \"19-01-1992\",\n    \"salary\": 11110,\n    \"nationality\": \"Kuwaiti\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bankingServiceUrl}}/kyc",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"kyc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "accounts",
+			"item": [
+				{
+					"name": "Get all my accounts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{bankingServiceUrl}}/accounts",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"initialBalance\": 20000.00,\n    \"name\": \"user ACcount\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bankingServiceUrl}}/accounts",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Transfer",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sourceAccountNumber\": \"6340135448962211011701\",\n    \"destinationAccountNumber\": \"1381862194398884596\",\n    \"amount\": 11.532\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bankingServiceUrl}}/accounts/transfer",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"accounts",
+								"transfer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Close my accounts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"initialBalance\": 500.00,\n    \"name\": \"Totally Not Thief Account\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bankingServiceUrl}}/accounts/close/40682684296322214",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"accounts",
+								"close",
+								"40682684296322214"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"asPrimary\": true,\n    \"name\": \"Cool Account\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bankingServiceUrl}}/accounts/details/539224085857836124",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"accounts",
+								"details",
+								"539224085857836124"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Basic Account Details",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bankingServiceUrl}}/accounts/details/539224085857836124",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"accounts",
+								"details",
+								"539224085857836124"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Transactions by account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{bankingServiceUrl}}/transactions/account/138633995411886528264",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"transactions",
+								"account",
+								"138633995411886528264"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Transactions by user id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{campaignOwnerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{bankingServiceUrl}}/transactions/clients/1",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"transactions",
+								"clients",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "All Categories",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{bankingServiceUrl}}/categories",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"coded\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bankingServiceUrl}}/categories",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
