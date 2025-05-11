@@ -16,9 +16,6 @@ data class CampaignEntity(
     @Column(name = "created_by", nullable = false)
     val createdBy: Long?,
 
-//    @Column(name = "category_id", nullable = false)
-//    val categoryId: Long?,
-
     @Column(name = "title", nullable = false)
     val title: String,
 
@@ -74,7 +71,6 @@ data class CampaignEntity(
     constructor() : this(
         id = null,
         createdBy = 0L,
-//        categoryId = 0L,
         title = "",
         description = null,
         goalAmount = null,

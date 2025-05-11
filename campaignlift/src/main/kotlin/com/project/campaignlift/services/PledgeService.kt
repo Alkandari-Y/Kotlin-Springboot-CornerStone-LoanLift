@@ -9,6 +9,7 @@ import com.project.common.responses.authenthication.UserInfoDto
 import java.math.BigDecimal
 
 interface PledgeService {
+    fun getAmountRaised(campaignId: Long): BigDecimal
 
     fun getPledgeTransactions(pledgeId: Long): List<PledgeTransactionWithDetails>
 

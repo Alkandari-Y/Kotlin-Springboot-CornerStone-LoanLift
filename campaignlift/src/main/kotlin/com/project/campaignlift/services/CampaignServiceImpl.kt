@@ -34,17 +34,6 @@ class CampaignServiceImpl(
      val endpoint: String
 ) : CampaignService {
 
-    override fun getCampaignById(id: Long): CampaignDetailResponse? {
-        val campaign = campaignRepository.findByIdOrNull(id)
-            ?: throw CampaignNotFoundException()
-
-        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(id)
-
-        return campaign.toDetailResponse(
-            amountRaised = amountRaised
-        )
-    }
-
 
     @Transactional
     override fun createCampaign(
@@ -84,6 +73,7 @@ class CampaignServiceImpl(
         )
         return campaign
     }
+
 
     override fun updateCampaign(
         campaignId: Long,
@@ -125,6 +115,66 @@ class CampaignServiceImpl(
     }
 
 
+    override fun approveRejectCampaignStatus(campaignId: Long, status: CampaignStatus, adminId: Long?): CampaignEntity {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+
+        val updatedCampaign = campaign.copy(status = status, approvedBy = adminId)
+        val campaignUpdated = campaignRepository.save(updatedCampaign)
+
+        return campaignUpdated
+    }
+
+
+    override fun getAllByUserId(userId: Long): List<CampaignListItemResponse> {
+        return campaignRepository.listAllCampaignsByUserId(userId)
+    }
+
+
+    override fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignListItemResponse> {
+        return campaignRepository.listAllCampaignsByStatus(status)
+    }
+
+
+    override fun getAllApprovedCampaigns(): List<CampaignListItemResponse> {
+        return campaignRepository.listAllApprovedCampaigns()
+    }
+
+
+    override fun getPublicCampaignDetailsById(campaignId: Long): CampaignPublicDetails? {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+
+        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId)
+
+        return campaign.toPublicDetails(
+            amountRaised = amountRaised
+        )
+    }
+
+    override fun getPublicCampaignDetailsWithCommentsById(campaignId: Long): CampaignPublicDetailsWithComments? {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+
+        val comments = commentRepository.findByCampaignId(campaignId)
+        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId)
+        return campaign.toPublicDetailsWithComments(amountRaised, comments)
+    }
+
+    override fun getCampaignById(campaignId: Long): CampaignEntity? {
+        return campaignRepository.findByIdOrNull(campaignId)
+    }
+
+
+    override fun changeCampaignStatus(campaignId: Long, status: CampaignStatus): CampaignEntity {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+
+        val updatedCampaign = campaign.copy(status = status)
+        return campaignRepository.save(updatedCampaign)
+    }
+
+
     override fun deleteCampaign(campaignId: Long, user: UserInfoDto) {
         val campaign = campaignRepository.findByIdOrNull(campaignId)
             ?: throw CampaignNotFoundException()
@@ -144,48 +194,5 @@ class CampaignServiceImpl(
             bodyText = "Your ${campaign.title} has been deleted successfully",
             username = user.username,
         )
-    }
-
-    override fun getCampaignDetails(campaignId: Long): CampaignWithCommentsDto? {
-        val campaign = campaignRepository.findByIdOrNull(campaignId)
-            ?: throw CampaignNotFoundException()
-
-        val comments = commentRepository.findByCampaignId(campaignId)
-        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId)
-        return campaign.toCampaignWithCommentsDto(amountRaised, comments)
-    }
-
-    override fun getCampaignEntityById(campaignId: Long): CampaignEntity? {
-        return campaignRepository.findByIdOrNull(campaignId)
-    }
-
-    override fun getAllByUserId(userId: Long): List<CampaignListItemResponse> {
-        return campaignRepository.listAllCampaignsByUserId(userId)
-    }
-
-    override fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignListItemResponse> {
-        return campaignRepository.listAllCampaignsByStatus(status)
-    }
-
-    override fun getAllApprovedCampaigns(): List<CampaignListItemResponse> {
-        return campaignRepository.listAllApprovedCampaigns()
-    }
-
-    override fun changeCampaignStatus(campaignId: Long, status: CampaignStatus): CampaignEntity {
-        val campaign = campaignRepository.findByIdOrNull(campaignId)
-            ?: throw CampaignNotFoundException()
-
-        val updatedCampaign = campaign.copy(status = status)
-        return campaignRepository.save(updatedCampaign)
-    }
-
-    override fun approveRejectCampaignStatus(campaignId: Long, status: CampaignStatus, adminId: Long?): CampaignEntity {
-        val campaign = campaignRepository.findByIdOrNull(campaignId)
-            ?: throw CampaignNotFoundException()
-
-        val updatedCampaign = campaign.copy(status = status, approvedBy = adminId)
-        val campaignUpdated = campaignRepository.save(updatedCampaign)
-
-        return campaignUpdated
     }
 }

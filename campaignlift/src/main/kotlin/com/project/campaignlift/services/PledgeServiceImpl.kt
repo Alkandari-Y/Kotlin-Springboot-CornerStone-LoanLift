@@ -42,6 +42,10 @@ class PledgeServiceImpl(
     private val transactionRepository: TransactionRepository,
     private val categoryRepository: CategoryRepository,
 ): PledgeService {
+    override fun getAmountRaised(campaignId: Long): BigDecimal {
+        return pledgeRepository.getTotalCommittedAmountForCampaign(campaignId)
+    }
+
     override fun getPledgeTransactions(pledgeId: Long): List<PledgeTransactionWithDetails> {
         return pledgeTransactionRepository.findDetailsByPledgeId(pledgeId)
     }

@@ -66,7 +66,7 @@ class PledgeApiController(
         @PathVariable pledgeId: Long,
         @RequestAttribute("authUser") authUser: UserInfoDto,
         @AuthenticationPrincipal principal: RemoteUserPrincipal
-    ): ResponseEntity<PledgeWithTransactionsDto> {
+    ): ResponseEntity<PledgeWithPledgeTransactionsDto> {
         val pledge = pledgeService.getPledgeDetails(pledgeId)
 
         val isOwner = authUser.userId == pledge.userId

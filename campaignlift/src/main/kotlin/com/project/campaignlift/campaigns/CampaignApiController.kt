@@ -1,7 +1,6 @@
 package com.project.campaignlift.campaigns
 
 import com.project.campaignlift.campaigns.dtos.*
-import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.services.CampaignService
@@ -10,6 +9,7 @@ import com.project.common.exceptions.auth.MissingCredentialsException
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
 import com.project.common.exceptions.campaigns.CampaignPermissionDeniedException
 import com.project.common.exceptions.campaigns.CampaignUpdateNotAllowedException
+import com.project.common.exceptions.campaigns.InvalidCampaignStatusChangeException
 import com.project.common.exceptions.kycs.AccountNotVerifiedException
 import com.project.common.responses.authenthication.UserInfoDto
 import com.project.common.security.RemoteUserPrincipal
@@ -25,18 +25,31 @@ import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/v1/campaigns")
-class CampaignApiController (
+class CampaignApiController(
     private val campaignService: CampaignService,
     private val fileStorageService: FileStorageService,
     @Value("\${aws.endpoint}")
-    val endpoint: String
+    val endpoint: String,
 ) {
     @GetMapping
-    fun getAllCampaigns(): ResponseEntity<List<CampaignListItemResponse>> =
-        ResponseEntity(
-            campaignService.getAllApprovedCampaigns(),
-            HttpStatus.OK
+    fun getAllCampaigns(
+        @RequestParam(required = false) status: CampaignStatus?
+    ): ResponseEntity<List<CampaignListItemResponse>> {
+
+        val allowedStatuses = setOf(
+            CampaignStatus.PENDING,
+            CampaignStatus.REJECTED,
+            CampaignStatus.ACTIVE
         )
+
+        val campaigns = when (status) {
+            null -> campaignService.getAllApprovedCampaigns()
+            !in allowedStatuses -> throw InvalidCampaignStatusChangeException(status.name)
+            else -> campaignService.getAllCampaignsByStatus(status)
+        }
+
+        return ResponseEntity.ok(campaigns)
+    }
 
 
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -76,18 +89,21 @@ class CampaignApiController (
         return ResponseEntity(campaign, HttpStatus.CREATED)
     }
 
-    @GetMapping("/details/{campaignId}")
-    fun getCampaignById(
-        @PathVariable("campaignId") campaignId: Long): CampaignWithCommentsDto
-    {
-        val campaign = campaignService.getCampaignDetails(campaignId)
-        ?: throw CampaignNotFoundException()
 
-        if (campaign.status in listOf(CampaignStatus.NEW, CampaignStatus.REJECTED, CampaignStatus.PENDING)) {
-            throw  CampaignNotFoundException()
+    @GetMapping("/details/{campaignId}")
+    fun getCampaignDetails(
+        @PathVariable campaignId: Long,
+        @RequestParam(required = false, defaultValue = "false") includeComments: Boolean
+    ): CampaignDetailResponse {
+        val details = if (includeComments) {
+            campaignService.getPublicCampaignDetailsWithCommentsById(campaignId)
+        } else {
+            campaignService.getPublicCampaignDetailsById(campaignId)
         }
-        return campaign
+
+        return details ?: throw CampaignNotFoundException()
     }
+
 
     @GetMapping("/manage")
     fun getMyCampaigns(
@@ -105,6 +121,7 @@ class CampaignApiController (
         campaignService.deleteCampaign(campaignId, authUser)
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
+
 
     @PutMapping("/manage/{campaignId}",
         consumes = ["multipart/form-data"]
@@ -132,7 +149,7 @@ class CampaignApiController (
         @RequestAttribute("authUser") authUser: UserInfoDto,
     ): ResponseEntity<FileDto> {
 
-        val campaign: CampaignEntity = campaignService.getCampaignEntityById(
+        val campaign: CampaignEntity = campaignService.getCampaignById(
             fileUploadRequest.campaignId
         ) ?: throw CampaignNotFoundException()
 
@@ -153,6 +170,7 @@ class CampaignApiController (
 
         return ResponseEntity(uploadedFile, HttpStatus.CREATED)
     }
+
 
     @GetMapping("/manage/files/{fileId}/download")
     fun downloadFile(
