@@ -40,7 +40,7 @@ class RepaymentService(
 
     fun processSingleCampaignRepayment(
         campaign: CampaignEntity,
-        categoryMap: Map<Long?, CategoryEntity>
+        categoryMap: Map<Long, CategoryEntity>
     ) {
         val campaignAccount = campaign.accountId?.let { accountRepository.findById(it).orElse(null) }
             ?: return
@@ -82,7 +82,6 @@ class RepaymentService(
             val ratio = pledge.amount.divide(totalPledged, 6, roundingMode)
             val amountToDistribute = distributable.multiply(ratio).setScale(scale, roundingMode)
 
-//            val pledgerAccount = accountRepository.findByIdOrNull(pledge.accountId) ?: return@forEach
             val pledgerAccount = accountsById[pledge.accountId] ?: return@forEach
             val updatedPledgerBalance = pledgerAccount.balance + amountToDistribute
             accountRepository.save(pledgerAccount.copy(balance = updatedPledgerBalance))
@@ -128,14 +127,18 @@ class RepaymentService(
 
     @Transactional
     fun processCampaignFailures() {
+        println("here in failures")
         val tomorrow = LocalDate.now().plusDays(1)
+        logger.info(tomorrow.toString())
         val campaigns = campaignRepository.findAllByCampaignDeadline(tomorrow)
 
         val categoryMap = preloadCategoryMap()
 
         campaigns.forEach { campaign ->
+            logger.info("Processing campaign id=${campaign.id}, title=${campaign.title}")
+
             val totalPledged = pledgeRepository.getTotalCommittedAmountForCampaign(campaign.id!!)
-            if (totalPledged < (campaign.goalAmount ?: BigDecimal.ZERO)) {
+            if (totalPledged < campaign.goalAmount) {
                 logger.info("Campaign ${campaign.id} did not meet its goal. Refundnig pledges...")
 
                 val pledges = pledgeRepository.findAllByCampaignIdAndStatus(campaign.id!!, PledgeStatus.COMMITTED)
@@ -179,7 +182,7 @@ class RepaymentService(
         }
     }
 
-    private fun preloadCategoryMap(): Map<Long?, CategoryEntity> {
-        return categoryRepository.findAll().associateBy { it.id }
+    private fun preloadCategoryMap(): Map<Long, CategoryEntity> {
+        return categoryRepository.findAll().associateBy { it.id!! }
     }
 }

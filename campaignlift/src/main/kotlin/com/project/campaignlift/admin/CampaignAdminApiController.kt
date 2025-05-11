@@ -132,8 +132,14 @@ class CampaignAdminApiController(
         return ResponseEntity.ok("Triggered repayment")
     }
 
+    @PostMapping("/demo/run-failure")
+    fun triggerFailure(): ResponseEntity<String> {
+        repaymentService.processCampaignFailures()
+        return ResponseEntity.ok("Triggered Failure")
+    }
+
     @PostMapping("/demo/run-repayment/{campaignId}")
-    fun triggerRepaymentForCampgign(
+    fun triggerRepaymentForCampaign(
         @PathVariable("campaignId") campaignId: Long,
     ): ResponseEntity<String> {
         val campaign = campaignService.getCampaignById(campaignId)
@@ -141,7 +147,7 @@ class CampaignAdminApiController(
 
         val category = campaign.category
             ?: throw CategoryNotFoundException()
-        repaymentService.processSingleCampaignRepayment(campaign, mapOf(category.id to category))
+        repaymentService.processSingleCampaignRepayment(campaign, mapOf(category.id!! to category))
         return ResponseEntity.ok("Triggered repayment")
     }
 

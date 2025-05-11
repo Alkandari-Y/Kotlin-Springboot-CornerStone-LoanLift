@@ -20,10 +20,10 @@ class CampaignRepaymentScheduler(
         repaymentService.processMonthlyRepayments()
     }
 
-    @Scheduled(cron = "0 0 6 * * *") // Runs daily at 2 AM
+    @Scheduled(cron = "0 29 23 * * *", zone = "Asia/Kuwait") // Runs daily at 2 AM
     @Transactional
     fun processMonthlyCampaignFundingDeadlines() {
         println("[Scheduler] Running monthly repayment")
-        repaymentService.processMonthlyRepayments()
+        repaymentService.processCampaignFailures()
     }
 }

@@ -13,7 +13,7 @@ import kotlin.String
 
 @Component
 class JwtService (
-    @Value("\${jwt.secret}") private val secretKeyString: String, // Ensure consistency
+    @Value("\${jwt.secret}") private val secretKeyString: String,
 ){
     private val key: SecretKey = Keys.hmacShaKeyFor(secretKeyString.encodeToByteArray())
 
