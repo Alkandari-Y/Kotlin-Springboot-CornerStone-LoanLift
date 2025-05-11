@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface AccountRepository: JpaRepository<AccountEntity, Long> {
+    fun findAllByIdIn(ids: Set<Long>): List<AccountEntity>
 
 }

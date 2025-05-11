@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 
 @Repository
 interface CampaignRepository : JpaRepository<CampaignEntity, Long> {
@@ -112,4 +113,7 @@ interface CampaignRepository : JpaRepository<CampaignEntity, Long> {
         WHERE c.status = com.project.campaignlift.entities.CampaignStatus.FUNDED
     """)
     fun findAllFundedCampaigns(): List<CampaignEntity>
+
+    fun findAllByCampaignDeadline(deadline: LocalDate): List<CampaignEntity>
+
 }
