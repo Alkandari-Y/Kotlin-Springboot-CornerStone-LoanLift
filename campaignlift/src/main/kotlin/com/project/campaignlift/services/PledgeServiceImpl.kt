@@ -42,6 +42,10 @@ class PledgeServiceImpl(
     private val transactionRepository: TransactionRepository,
     private val categoryRepository: CategoryRepository,
 ): PledgeService {
+    override fun getAmountRaised(campaignId: Long): BigDecimal {
+        return pledgeRepository.getTotalCommittedAmountForCampaign(campaignId)
+    }
+
     override fun getPledgeTransactions(pledgeId: Long): List<PledgeTransactionWithDetails> {
         return pledgeTransactionRepository.findDetailsByPledgeId(pledgeId)
     }
@@ -113,7 +117,7 @@ class PledgeServiceImpl(
             else -> throw InvalidPledgeOperationException("You already have an active pledge for this campaign.")
         }
 
-        val category = categoryRepository.findByIdOrNull(campaign.categoryId!!)
+        val category = categoryRepository.findByIdOrNull(campaign.category?.id!!)
             ?: throw CategoryNotFoundException()
 
         val bankingTransaction = transactionRepository.save(
@@ -199,7 +203,7 @@ class PledgeServiceImpl(
         val transactionType = if (delta > BigDecimal.ZERO) TransactionType.PLEDGE else TransactionType.REFUND
         val pledgeTransactionType = if (delta > BigDecimal.ZERO) PledgeTransactionType.FUNDING else PledgeTransactionType.REFUND
 
-        val category = categoryRepository.findByIdOrNull(campaign.categoryId!!)
+        val category = campaign.category
             ?: throw CategoryNotFoundException()
 
         val transaction = transactionRepository.save(
@@ -276,7 +280,7 @@ class PledgeServiceImpl(
         val pledgerAccount = accountRepository.findByIdOrNull(pledge.accountId)
             ?: throw AccountNotFoundException("Campaign has no valid funding account.")
 
-        val category = categoryRepository.findByIdOrNull(campaign.categoryId!!)
+        val category = campaign.category
             ?: throw CategoryNotFoundException()
 
         val updated = pledge.copy(

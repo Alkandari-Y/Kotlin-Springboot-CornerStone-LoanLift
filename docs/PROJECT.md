@@ -164,7 +164,7 @@ Each campaign is an **investment opportunity**, where contributors (lenders/pled
 #### Status Enums
 
 | Status        | Description                                        |
-| ------------- | -------------------------------------------------- |
+| ------------- |----------------------------------------------------|
 | `new`         | Draft, editable by creator                         |
 | `pending`     | Submitted, awaiting admin approval                 |
 | `rejected`    | Rejected by admin                                  |
@@ -172,7 +172,7 @@ Each campaign is an **investment opportunity**, where contributors (lenders/pled
 | `funded`      | Goal reached or deadline hit with goal met         |
 | `failed`      | Deadline hit, but goal not met — refunds triggered |
 | `completed`   | All repayments finished                            |
-| `defaulted`   | Missed 3+ repayments                               |
+| `defaulted`   | Missed repayments                                  |
 | `deactivated` | Manually deactivated                               |
 
 

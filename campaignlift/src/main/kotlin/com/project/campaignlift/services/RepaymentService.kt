@@ -11,6 +11,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.LocalDate
 
 @Service
 class RepaymentService(
@@ -30,7 +31,7 @@ class RepaymentService(
     @Transactional
     fun processMonthlyRepayments() {
         val campaigns = campaignRepository.findAllFundedCampaigns()
-        val categoryMap = preloadCategoryMap(campaigns)
+        val categoryMap = preloadCategoryMap()
 
         campaigns.forEach { campaign ->
             processSingleCampaignRepayment(campaign, categoryMap)
@@ -44,7 +45,7 @@ class RepaymentService(
         val campaignAccount = campaign.accountId?.let { accountRepository.findById(it).orElse(null) }
             ?: return
 
-        val category = categoryMap[campaign.categoryId] ?: return
+        val category = categoryMap[campaign.category?.id] ?: return
 
         val raisedAmount = pledgeRepository.getTotalCommittedAmountForCampaign(campaign.id!!)
         campaign.amountRaised = raisedAmount.setScale(scale, roundingMode)
@@ -65,7 +66,13 @@ class RepaymentService(
             return
         }
 
-        val pledges = campaign.pledges.filter { it.status == PledgeStatus.COMMITTED }
+
+        //        val pledges = campaign.pledges.filter { it.status == PledgeStatus.COMMITTED }
+        val pledges = pledgeRepository.findAllByCampaignIdAndStatus(campaign.id!!, PledgeStatus.COMMITTED)
+        val accountIds = pledges.map { it.accountId }.toSet()
+        val accountsById = accountRepository.findAllByIdIn(accountIds)
+            .associateBy { it.id }
+
         val totalPledged = pledges.sumOf { it.amount }
 
         val newCampaignBalance = campaignAccount.balance - monthlyInstallment
@@ -75,7 +82,8 @@ class RepaymentService(
             val ratio = pledge.amount.divide(totalPledged, 6, roundingMode)
             val amountToDistribute = distributable.multiply(ratio).setScale(scale, roundingMode)
 
-            val pledgerAccount = accountRepository.findByIdOrNull(pledge.accountId) ?: return@forEach
+//            val pledgerAccount = accountRepository.findByIdOrNull(pledge.accountId) ?: return@forEach
+            val pledgerAccount = accountsById[pledge.accountId] ?: return@forEach
             val updatedPledgerBalance = pledgerAccount.balance + amountToDistribute
             accountRepository.save(pledgerAccount.copy(balance = updatedPledgerBalance))
 
@@ -97,10 +105,81 @@ class RepaymentService(
                 )
             )
         }
+        val expectedTotalRepayment = campaign.amountRaised
+            .add(campaign.amountRaised.multiply(campaign.interestRate.divide(BigDecimal(100), scale, roundingMode)))
+            .setScale(scale, roundingMode)
+
+        val transactionIds = pledges.flatMap { it.transactions }
+            .filter { it.type == PledgeTransactionType.REPAYMENT }
+            .map { it.transactionId }
+
+        val repaidThisRound = transactionRepository
+            .sumByIdInAndType(transactionIds, TransactionType.REPAYMENT)
+            ?.setScale(scale, roundingMode) ?: BigDecimal.ZERO
+
+        val totalPaidToDate = repaidThisRound + distributable
+
+        if (totalPaidToDate >= expectedTotalRepayment) {
+            campaignRepository.save(campaign.copy(status = CampaignStatus.COMPLETED))
+            logger.info("Campaign ${campaign.id} completed all repayments.")
+        }
     }
 
-    private fun preloadCategoryMap(campaigns: List<CampaignEntity>): Map<Long?, CategoryEntity> {
-        val categoryIds = campaigns.mapNotNull { it.categoryId }.distinct()
-        return categoryRepository.findAllById(categoryIds).associateBy { it.id }
+
+    @Transactional
+    fun processCampaignFailures() {
+        val tomorrow = LocalDate.now().plusDays(1)
+        val campaigns = campaignRepository.findAllByCampaignDeadline(tomorrow)
+
+        val categoryMap = preloadCategoryMap()
+
+        campaigns.forEach { campaign ->
+            val totalPledged = pledgeRepository.getTotalCommittedAmountForCampaign(campaign.id!!)
+            if (totalPledged < (campaign.goalAmount ?: BigDecimal.ZERO)) {
+                logger.info("Campaign ${campaign.id} did not meet its goal. Refundnig pledges...")
+
+                val pledges = pledgeRepository.findAllByCampaignIdAndStatus(campaign.id!!, PledgeStatus.COMMITTED)
+                val accountIds = pledges.map { it.accountId }.toSet()
+                val accountsById = accountRepository.findAllByIdIn(accountIds).associateBy { it.id }
+
+                val campaignAccount = campaign.accountId?.let { accountRepository.findByIdOrNull(it) } ?: return@forEach
+                val category = categoryMap[campaign.category?.id] ?: return@forEach
+
+                pledges.forEach loop@{ pledge ->
+                    val pledgerAccount = accountsById[pledge.accountId] ?: return@loop
+                    val updatedPledgerBalance = pledgerAccount.balance + pledge.amount
+                    accountRepository.save(pledgerAccount.copy(balance = updatedPledgerBalance))
+
+                    val updatedCampaignBalance = campaignAccount.balance - pledge.amount
+                    accountRepository.save(campaignAccount.copy(balance = updatedCampaignBalance))
+
+                    val tx = transactionRepository.save(
+                        TransactionEntity(
+                            sourceAccount = campaignAccount,
+                            destinationAccount = pledgerAccount,
+                            amount = pledge.amount,
+                            type = TransactionType.REFUND,
+                            category = category
+                        )
+                    )
+
+                    pledgeTransactionRepository.save(
+                        PledgeTransactionEntity(
+                            transactionId = tx.id!!,
+                            pledge = pledge,
+                            type = PledgeTransactionType.REFUND
+                        )
+                    )
+
+                    pledgeRepository.save(pledge.copy(status = PledgeStatus.WITHDRAWN))
+                }
+
+                campaignRepository.save(campaign.copy(status = CampaignStatus.FAILED))
+            }
+        }
+    }
+
+    private fun preloadCategoryMap(): Map<Long?, CategoryEntity> {
+        return categoryRepository.findAll().associateBy { it.id }
     }
 }

@@ -2,9 +2,10 @@ services:
   db:
     image: postgres:latest
     ports:
-      - "5000:5432"
+      - "8080:5432"
     restart: always
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: changemelater
 
   minio:

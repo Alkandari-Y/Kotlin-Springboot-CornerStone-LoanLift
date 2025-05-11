@@ -2,17 +2,16 @@ package com.project.campaignlift.services
 
 import com.project.banking.entities.AccountEntity
 import com.project.campaignlift.campaigns.dtos.*
+import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
-import com.project.campaignlift.repositories.AccountRepository
-import com.project.campaignlift.repositories.CampaignRepository
-import com.project.campaignlift.repositories.CommentRepository
-import com.project.campaignlift.repositories.PledgeRepository
+import com.project.campaignlift.repositories.*
 import com.project.common.enums.AccountType
 import com.project.common.exceptions.campaigns.CampaignDeletionNotAllowedException
 import com.project.common.exceptions.campaigns.CampaignNotFoundException
 import com.project.common.exceptions.campaigns.CampaignPermissionDeniedException
 import com.project.common.exceptions.campaigns.CampaignUpdateNotAllowedException
+import com.project.common.exceptions.categories.CategoryNotFoundException
 import com.project.common.exceptions.kycs.IncompleteUserRegistrationException
 import com.project.common.responses.authenthication.UserInfoDto
 import jakarta.transaction.Transactional
@@ -21,10 +20,12 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Service
 class CampaignServiceImpl(
     private val campaignRepository: CampaignRepository,
+    private val categoryRepository: CategoryRepository,
     private val fileStorageService: FileStorageService,
     private val commentRepository: CommentRepository,
     private val accountRepository: AccountRepository,
@@ -33,20 +34,6 @@ class CampaignServiceImpl(
     @Value("\${aws.endpoint}")
      val endpoint: String
 ) : CampaignService {
-    override fun getAllCampaigns(): List<CampaignListItemResponse> {
-        return campaignRepository.listAllCampaigns()
-    }
-
-    override fun getCampaignById(id: Long): CampaignDetailResponse? {
-        val campaign = campaignRepository.findByIdOrNull(id)
-            ?: throw CampaignNotFoundException()
-
-        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(id)
-
-        return campaign.toDetailResponse(
-            amountRaised = amountRaised
-        )
-    }
 
 
     @Transactional
@@ -68,12 +55,15 @@ class CampaignServiceImpl(
             )
         )
         val (publicBucket, imageUrl) = fileStorageService.uploadFile(image, true)
+        val category = categoryRepository.findByIdOrNull(campaignDto.categoryId)
+            ?: throw CategoryNotFoundException()
 
         val campaign = campaignRepository.save(
             campaignDto.toEntity(
-                    createdBy = user.userId,
-                    imageUrl = "$endpoint/$publicBucket/$imageUrl",
-                    accountId = campaignAccount.id!!,
+                createdBy = user.userId,
+                imageUrl = "$endpoint/$publicBucket/$imageUrl",
+                accountId = campaignAccount.id!!,
+                category = category
             )
         )
         mailService.sendHtmlEmail(
@@ -84,6 +74,7 @@ class CampaignServiceImpl(
         )
         return campaign
     }
+
 
     override fun updateCampaign(
         campaignId: Long,
@@ -102,6 +93,9 @@ class CampaignServiceImpl(
             throw CampaignUpdateNotAllowedException( existing.status.name)
         }
 
+        val category = categoryRepository.findByIdOrNull(campaign.categoryId)
+            ?: throw CategoryNotFoundException()
+
         val imageUrl = image?.let {
             val (_, url) = fileStorageService.uploadFile(it, true)
             url
@@ -109,7 +103,8 @@ class CampaignServiceImpl(
 
         val updatedCampaign = campaign.toEntity(
             imageUrl = imageUrl,
-            previousCampaign = existing
+            previousCampaign = existing,
+            category = category
         ).copy(id = existing.id)
         mailService.sendHtmlEmail(
             to = user.email,
@@ -117,6 +112,88 @@ class CampaignServiceImpl(
             bodyText = "Your ${campaign.title} has been updated successfully and is pending review",
             username = user.username,
         )
+        return campaignRepository.save(updatedCampaign)
+    }
+
+
+    override fun approveRejectCampaignStatus(campaignId: Long, status: CampaignStatus, adminId: Long?): CampaignEntity {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+
+        val updatedCampaign = campaign.copy(status = status, approvedBy = adminId)
+        val campaignUpdated = campaignRepository.save(updatedCampaign)
+
+        return campaignUpdated
+    }
+
+
+    override fun getAllByUserId(userId: Long): List<CampaignListItemResponse> {
+        return campaignRepository.listAllCampaignsByUserId(userId)
+    }
+
+
+    override fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignListItemResponse> {
+        return campaignRepository.listAllCampaignsByStatus(status)
+    }
+
+
+    override fun getAllApprovedCampaigns(): List<CampaignListItemResponse> {
+        return campaignRepository.listAllApprovedCampaigns()
+    }
+
+
+    override fun getPublicCampaignDetailsById(campaignId: Long): CampaignPublicDetails? {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+
+        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId)
+
+        return campaign.toPublicDetails(
+            amountRaised = amountRaised
+        )
+    }
+
+    override fun getPublicCampaignDetailsWithCommentsById(campaignId: Long): CampaignPublicDetailsWithComments? {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+
+        val comments = commentRepository.findByCampaignId(campaignId)
+        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId)
+        return campaign.toPublicDetailsWithComments(amountRaised, comments)
+    }
+
+
+    override fun getCampaignDetailsByIdForOwner(campaignId: Long, user: UserInfoDto): CampaignOwnerDetails {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+        val amountRaised = campaign.amountRaised.takeIf { it > BigDecimal.ZERO } ?: campaign.goalAmount ?: BigDecimal.ZERO
+        val interest = amountRaised.multiply(campaign.interestRate.divide(BigDecimal(100), 3, RoundingMode.HALF_UP))
+        val total = amountRaised + interest
+        // monthly installment
+        val grossInstallment = total.divide(BigDecimal(campaign.repaymentMonths), 3, RoundingMode.HALF_UP)
+        // only used for distribution - system fees
+        val bankFee = grossInstallment.multiply(BigDecimal("0.002")).setScale(3, RoundingMode.HALF_UP)
+        // for borrowers to recieve
+        val netToLenders = grossInstallment - bankFee
+
+        return campaign.toOwnerDetails(
+            amountRaised = amountRaised,
+            monthlyInstallment = grossInstallment,
+            bankFee = bankFee,
+            netToLenders = netToLenders,
+        )
+    }
+
+    override fun getCampaignById(campaignId: Long): CampaignEntity? {
+        return campaignRepository.findByIdOrNull(campaignId)
+    }
+
+
+    override fun changeCampaignStatus(campaignId: Long, status: CampaignStatus): CampaignEntity {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+
+        val updatedCampaign = campaign.copy(status = status)
         return campaignRepository.save(updatedCampaign)
     }
 
@@ -140,44 +217,5 @@ class CampaignServiceImpl(
             bodyText = "Your ${campaign.title} has been deleted successfully",
             username = user.username,
         )
-    }
-
-    override fun getCampaignDetails(campaignId: Long): CampaignWithCommentsDto? {
-        val campaign = campaignRepository.findByIdOrNull(campaignId)
-            ?: throw CampaignNotFoundException()
-
-        val comments = commentRepository.findByCampaignId(campaignId)
-        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId)
-        return campaign.toCampaignWithCommentsDto(amountRaised, comments)
-    }
-
-    override fun getCampaignEntityById(campaignId: Long): CampaignEntity? {
-        return campaignRepository.findByIdOrNull(campaignId)
-    }
-
-    override fun getAllByUserId(userId: Long): List<CampaignListItemResponse> {
-        return campaignRepository.findByCreatedId(userId)
-    }
-
-    override fun getAllCampaignsByStatus(status: CampaignStatus): List<CampaignListItemResponse> {
-        return campaignRepository.findByStatus(status)
-    }
-
-    override fun changeCampaignStatus(campaignId: Long, status: CampaignStatus): CampaignEntity {
-        val campaign = campaignRepository.findByIdOrNull(campaignId)
-            ?: throw CampaignNotFoundException()
-
-        val updatedCampaign = campaign.copy(status = status)
-        return campaignRepository.save(updatedCampaign)
-    }
-
-    override fun approveRejectCampaignStatus(campaignId: Long, status: CampaignStatus, adminId: Long?): CampaignEntity {
-        val campaign = campaignRepository.findByIdOrNull(campaignId)
-            ?: throw CampaignNotFoundException()
-
-        val updatedCampaign = campaign.copy(status = status, approvedBy = adminId)
-        val campaignUpdated = campaignRepository.save(updatedCampaign)
-
-        return campaignUpdated
     }
 }

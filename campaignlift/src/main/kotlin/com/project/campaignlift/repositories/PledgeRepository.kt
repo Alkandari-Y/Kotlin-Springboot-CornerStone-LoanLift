@@ -60,5 +60,5 @@ interface PledgeRepository: JpaRepository<PledgeEntity, Long> {
 
     fun findByUserIdAndCampaignIdAndStatus(userId: Long, campaignId: Long, status: PledgeStatus): PledgeEntity?
     fun existsByUserIdAndCampaignIdAndStatus(userId: Long, campaignId: Long, status: PledgeStatus): Boolean
-
+    fun findAllByCampaignIdAndStatus(campaignId: Long, status: PledgeStatus): List<PledgeEntity>
 }

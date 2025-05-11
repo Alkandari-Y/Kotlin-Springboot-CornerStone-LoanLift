@@ -30,10 +30,3 @@ CREATE TABLE "user_roles" (
         FOREIGN KEY ("role_id")
             REFERENCES "roles"("id") ON DELETE CASCADE
 );
-
-INSERT INTO public.roles (name)
-VALUES
-    ('ROLE_USER'),
-    ('ROLE_ADMIN'),
-    ('ROLE_DEVELOPER');
-
