@@ -21,7 +21,7 @@ data class CampaignPublicDetails(
     val status: CampaignStatus,
     val submittedAt: LocalDate,
     val campaignDeadline: LocalDate,
-    val imageUrl: String,
+    val imageUrl: String?,
     var amountRaised: BigDecimal,
 )  : CampaignDetailResponse
 

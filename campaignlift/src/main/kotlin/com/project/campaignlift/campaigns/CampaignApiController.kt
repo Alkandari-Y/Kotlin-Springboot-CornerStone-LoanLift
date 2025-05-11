@@ -113,6 +113,18 @@ class CampaignApiController(
     }
 
 
+    @GetMapping("/manage/{campaignId}")
+    fun getMyCampaignById(
+        @PathVariable campaignId: Long,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+    ): CampaignOwnerDetails {
+        return campaignService.getCampaignDetailsByIdForOwner(
+            campaignId,
+            authUser
+        )
+    }
+
+
     @DeleteMapping("/manage/{campaignId}")
     fun deleteCampaign(
         @PathVariable campaignId: Long,

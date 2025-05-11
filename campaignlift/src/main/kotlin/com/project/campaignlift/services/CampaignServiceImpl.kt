@@ -20,6 +20,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Service
 class CampaignServiceImpl(
@@ -159,6 +160,28 @@ class CampaignServiceImpl(
         val comments = commentRepository.findByCampaignId(campaignId)
         val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId)
         return campaign.toPublicDetailsWithComments(amountRaised, comments)
+    }
+
+
+    override fun getCampaignDetailsByIdForOwner(campaignId: Long, user: UserInfoDto): CampaignOwnerDetails {
+        val campaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+        val amountRaised = campaign.amountRaised.takeIf { it > BigDecimal.ZERO } ?: campaign.goalAmount ?: BigDecimal.ZERO
+        val interest = amountRaised.multiply(campaign.interestRate.divide(BigDecimal(100), 3, RoundingMode.HALF_UP))
+        val total = amountRaised + interest
+        // monthly installment
+        val grossInstallment = total.divide(BigDecimal(campaign.repaymentMonths), 3, RoundingMode.HALF_UP)
+        // only used for distribution - system fees
+        val bankFee = grossInstallment.multiply(BigDecimal("0.002")).setScale(3, RoundingMode.HALF_UP)
+        // for borrowers to recieve
+        val netToLenders = grossInstallment - bankFee
+
+        return campaign.toOwnerDetails(
+            amountRaised = amountRaised,
+            monthlyInstallment = grossInstallment,
+            bankFee = bankFee,
+            netToLenders = netToLenders,
+        )
     }
 
     override fun getCampaignById(campaignId: Long): CampaignEntity? {

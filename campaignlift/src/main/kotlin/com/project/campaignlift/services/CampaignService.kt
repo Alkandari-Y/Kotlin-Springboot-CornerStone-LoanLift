@@ -1,10 +1,6 @@
 package com.project.campaignlift.services
 
-import com.project.campaignlift.campaigns.dtos.CampaignPublicDetails
-import com.project.campaignlift.campaigns.dtos.CampaignPublicDetailsWithComments
-import com.project.campaignlift.campaigns.dtos.CreateCampaignDto
-import com.project.campaignlift.campaigns.dtos.UpdateCampaignRequest
-import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
+import com.project.campaignlift.campaigns.dtos.*
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.common.responses.authenthication.UserInfoDto
@@ -45,6 +41,10 @@ interface CampaignService {
 
     fun getPublicCampaignDetailsById(campaignId: Long): CampaignPublicDetails?
     fun getPublicCampaignDetailsWithCommentsById(campaignId: Long): CampaignPublicDetailsWithComments?
+    fun getCampaignDetailsByIdForOwner(
+        campaignId: Long,
+        user: UserInfoDto
+    ): CampaignOwnerDetails
 
     fun deleteCampaign(campaignId: Long, user: UserInfoDto)
 }
