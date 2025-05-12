@@ -178,6 +178,8 @@ class RepaymentService(
                 }
 
                 campaignRepository.save(campaign.copy(status = CampaignStatus.FAILED))
+            } else {
+                campaignRepository.save(campaign.copy(status = CampaignStatus.FUNDED))
             }
         }
     }

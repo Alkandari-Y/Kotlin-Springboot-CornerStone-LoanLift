@@ -1,5 +1,7 @@
 package com.project.campaignlift.admin.dtos
 
+import com.project.campaignlift.campaigns.dtos.FileDto
+import com.project.campaignlift.campaigns.dtos.toDto
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import java.math.BigDecimal
@@ -20,6 +22,7 @@ data class CampaignDetailsBasicAdmin(
     val submittedAt: LocalDate,
     val campaignDeadline: LocalDate,
     val imageUrl: String,
+    val files: List<FileDto> = emptyList(),
 )
 
 
@@ -39,5 +42,6 @@ fun CampaignEntity.toCampaignDetailsBasicAdmin(): CampaignDetailsBasicAdmin {
         submittedAt = this.submittedAt!!,
         campaignDeadline = this.campaignDeadline!!,
         imageUrl = this.imageUrl!!,
+        files = this.files.map { it.toDto() }
     )
 }
