@@ -37,7 +37,7 @@ VALUES (5, -- created_by (Moudhi)
         1, -- approved_by (admin)
         '2025-06-01', -- deadline
         7, -- account_id
-        'http://localhost:9000/loanlift-public/3a5fa2bf-8737-41d3-bd36-4f17ab4efd13' -- image_url
+        'http://localhost:9000/loanlift-public/4c0d604b-3544-4605-94a8-9f786be8a7cd' -- image_url
        );
 
 
@@ -52,14 +52,6 @@ VALUES
 -- Comment 3: By user 5 (Omar) on campaign 1 — will receive replies
 (5, 1, '2025-05-12', 'How will the funds be used specifically?');
 
-
-INSERT INTO "replies" ("comment_id", "created_at", "message")
-VALUES
--- Replies to comment 3 (Omar's question)
-(3, '2025-05-12', 'Great question! Most of the funds will go toward tuition.'),
-(3, '2025-05-12', 'We also plan to invest in software tools and certifications.');
-
-
 -- Comment 4: by admin on campaign 2
 INSERT INTO "comments" ("created_by", "campaign_id", "created_at", "message")
 VALUES (1, 2, '2025-05-12', 'What sets this campaign apart from others in the same category?');
@@ -72,6 +64,13 @@ VALUES (3, 1, '2025-05-12', 'Will there be regular updates on progress?');
 INSERT INTO "comments" ("created_by", "campaign_id", "created_at", "message")
 VALUES (2, 1, '2025-05-12', 'Happy to support a fellow tech enthusiast!');
 
+INSERT INTO "replies" ("comment_id", "created_at", "message")
+VALUES
+-- Replies to comment 3 (Omar's question)
+(1, '2025-05-12', 'Great question! Most of the funds will go toward creating new solutions.'),
+(2, '2025-05-12', 'We also plan to invest in software tools and certifications.');
+
+
 -- Reply to comment 3 (Omar's question)
 INSERT INTO "replies" ("comment_id", "created_at", "message")
 VALUES (3, '2025-05-12', 'Most of the funds will go toward tuition and tools.');
@@ -83,31 +82,33 @@ VALUES (4, '2025-05-12', 'We’re targeting underserved rural tech support with 
 -- Reply to comment 5 (owner’s question)
 INSERT INTO "replies" ("comment_id", "created_at", "message")
 VALUES (5, '2025-05-12', 'Yes, monthly updates will be shared on the platform.');
+
+
 -- Pledges to Moudhi’s Startup Fund (campaign_id = 1)
-INSERT INTO "pledges" ("id", "user_id", "account_id", "campaign_id", "amount", "created_at", "updated_at", "status", "withdrawn_at", "commited_at")
+INSERT INTO "pledges" ( "user_id", "account_id", "campaign_id", "amount", "created_at", "updated_at", "status", "withdrawn_at", "commited_at")
 VALUES
-    (1, 1, 1, 1, 1000.000, '2025-05-11', '2025-05-11', 0, NULL, '2025-05-11'), -- Admin
-    (2, 2, 2, 1, 1000.000, '2025-05-11', '2025-05-11', 0, NULL, '2025-05-11'), -- Testuser
-    (3, 5, 5, 1, 1000.000, '2025-05-11', '2025-05-11', 0, NULL, '2025-05-11'); -- Omar
+    (1, 1, 1, 1000.000, '2025-05-11', '2025-05-11', 0, NULL, '2025-05-11'), -- Admin
+    ( 2, 2, 1, 1000.000, '2025-05-11', '2025-05-11', 0, NULL, '2025-05-11'), -- Testuser
+    ( 5, 5, 1, 1000.000, '2025-05-11', '2025-05-11', 0, NULL, '2025-05-11'); -- Omar
 
 -- For Moudhi’s Startup Fund (campaign_id = 1)
-INSERT INTO "pledge_transactions" ("id", "transaction_id", "pledge_id", "type")
+INSERT INTO "pledge_transactions" ( "transaction_id", "pledge_id", "type")
 VALUES
-    (1, 1, 1, 0),  -- Admin -> Moudhi’s campaign
-    (2, 2, 2, 0),  -- Testuser -> Moudhi’s campaign
-    (3, 3, 3, 0);  -- Omar -> Moudhi’s campaign
+    ( 1, 1, 0),  -- Admin -> Moudhi’s campaign
+    ( 2, 2, 0),  -- Testuser -> Moudhi’s campaign
+    ( 3, 3, 0);  -- Omar -> Moudhi’s campaign
 
 
 -- Pledges to SAS Service Campaign (campaign_id = 2)
-INSERT INTO "pledges" ("id", "user_id", "account_id", "campaign_id", "amount", "created_at", "updated_at", "status", "withdrawn_at", "commited_at")
+INSERT INTO "pledges" ("user_id", "account_id", "campaign_id", "amount", "created_at", "updated_at", "status", "withdrawn_at", "commited_at")
 VALUES
-    (4, 1, 1, 2, 1000.000, '2025-05-11', '2025-05-11', 0, NULL, '2025-05-11'), -- Admin
-    (5, 2, 2, 2, 1000.000, '2025-05-11', '2025-05-11', 0, NULL, '2025-05-11'), -- Testuser
-    (6, 5, 5, 2, 1000.000, '2025-05-11', '2025-05-11', 0, NULL, '2025-05-11'); -- Omar
+    (1, 1, 2, 1000.000, '2025-05-11', '2025-05-11', 0, NULL, '2025-05-11'), -- Admin
+    ( 2, 2, 2, 1000.000, '2025-05-11', '2025-05-11', 0, NULL, '2025-05-11'), -- Testuser
+    ( 5, 5, 2, 1000.000, '2025-05-11', '2025-05-11', 0, NULL, '2025-05-11'); -- Omar
 
 -- For SAS Service Campaign (campaign_id = 2)
-INSERT INTO "pledge_transactions" ("id", "transaction_id", "pledge_id", "type")
+INSERT INTO "pledge_transactions" ( "transaction_id", "pledge_id", "type")
 VALUES
-    (4, 4, 4, 0),  -- Admin -> SAS campaign
-    (5, 5, 5, 0),  -- Testuser -> SAS campaign
-    (6, 7, 6, 0);  -- Omar -> SAS campaign
+    ( 4, 4, 0),  -- Admin -> SAS campaign
+    ( 5, 5, 0),  -- Testuser -> SAS campaign
+    ( 7, 6, 0);  -- Omar -> SAS campaign

@@ -5,16 +5,16 @@ VALUES ('ROLE_USER'),
 
 
 -- Insert users with admin first
-INSERT INTO "users" ("id", "civil_id", "username", "email", "password", "created_at", "updated_at", "is_active")
-VALUES (1, '111111111111', 'admin', 'admin@gmail.com', '$2a$10$KzdrH.oslwtuaKvF4Q/X1OZFawsndKNhJI0kC8rdjD/LdbSEXG9yK',
+INSERT INTO "users" ("civil_id", "username", "email", "password", "created_at", "updated_at", "is_active")
+VALUES ( '111111111111', 'admin', 'admin@gmail.com', '$2a$10$KzdrH.oslwtuaKvF4Q/X1OZFawsndKNhJI0kC8rdjD/LdbSEXG9yK',
         '2025-05-11', '2025-05-11', true),
-       (2, '222222222222', 'testuser', 'testuser@snddev.com',
+       ( '222222222222', 'testuser', 'testuser@snddev.com',
         '$2a$10$LZseq/6Q2MMKQHsqwLdVzO6EBBx.1K2CEcMUmA3LZOlpeG0p2kktu', '2025-05-11', '2025-05-11', true),
-       (3, '333333333333', 'owner', 'owner@gmail.com', '$2a$10$bhqL4lj.ofkMRshUqglrKeETgCuMjKyez7EGhpes9k.uTxrdx/rjW',
+       ( '333333333333', 'owner', 'owner@gmail.com', '$2a$10$bhqL4lj.ofkMRshUqglrKeETgCuMjKyez7EGhpes9k.uTxrdx/rjW',
         '2025-05-11', '2025-05-11', true),
-       (4, '444444444444', 'Moudhi', 'moudhi@gmail.com', '$2a$10$bhqL4lj.ofkMRshUqglrKeETgCuMjKyez7EGhpes9k.uTxrdx/rjW',
+       ( '444444444444', 'Moudhi', 'moudhi@gmail.com', '$2a$10$bhqL4lj.ofkMRshUqglrKeETgCuMjKyez7EGhpes9k.uTxrdx/rjW',
         '2025-05-11', '2025-05-11', true),
-       (5, '555555555555', 'omar', 'omar@gmail.com', '$2a$10$bhqL4lj.ofkMRshUqglrKeETgCuMjKyez7EGhpes9k.uTxrdx/rjW',
+       ( '555555555555', 'omar', 'omar@gmail.com', '$2a$10$bhqL4lj.ofkMRshUqglrKeETgCuMjKyez7EGhpes9k.uTxrdx/rjW',
         '2025-05-11', '2025-05-11', true);
 
 

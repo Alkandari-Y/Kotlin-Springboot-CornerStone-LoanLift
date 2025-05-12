@@ -6,7 +6,6 @@ import com.project.campaignlift.admin.dtos.toCampaignDetailsBasicAdmin
 import com.project.campaignlift.campaigns.dtos.CampaignDetailsAdmin
 import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.campaigns.dtos.toCampaignDetailsAdmin
-import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.providers.AuthDetailsProvider
 import com.project.campaignlift.providers.BankServiceProvider
@@ -57,9 +56,6 @@ class CampaignAdminApiController(
         return campaign.toCampaignDetailsAdmin(amountRaised)
     }
 
-    @PutMapping("/details/{campaignId}")
-    fun editCampaign(campaignId: Long) = "This is a campaign with id: $campaignId"
-
     @PostMapping("/details/{campaignId}")
     fun approveCampaign(
         @RequestAttribute("authUser") authUser: UserInfoDto,
@@ -103,12 +99,6 @@ class CampaignAdminApiController(
         return updatedCampaign.toCampaignDetailsBasicAdmin()
     }
 
-
-    @GetMapping("/details/{campaignId}/transactions")
-    fun getTransactionsByCampaignId(@PathVariable("campaignId") campaignId: Long)
-            = "get CampaignWithTransactionsListAdminDto"
-
-
     @GetMapping("/details/{campaignId}/owner")
     fun getCampaignOwnerDetails(
         @PathVariable("campaignId") campaignId: Long,
@@ -150,5 +140,4 @@ class CampaignAdminApiController(
         repaymentService.processSingleCampaignRepayment(campaign, mapOf(category.id!! to category))
         return ResponseEntity.ok("Triggered repayment")
     }
-
 }
