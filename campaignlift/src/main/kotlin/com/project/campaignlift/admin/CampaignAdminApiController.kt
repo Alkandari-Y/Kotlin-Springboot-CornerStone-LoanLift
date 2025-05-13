@@ -2,10 +2,12 @@ package com.project.campaignlift.admin
 
 import com.project.campaignlift.admin.dtos.CampaignDetailsBasicAdmin
 import com.project.campaignlift.admin.dtos.CampaignStatusRequest
+import com.project.campaignlift.admin.dtos.CampaignUpdateRequestAdmin
 import com.project.campaignlift.admin.dtos.toCampaignDetailsBasicAdmin
 import com.project.campaignlift.campaigns.dtos.CampaignDetailsAdmin
 import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.campaigns.dtos.toCampaignDetailsAdmin
+import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.providers.AuthDetailsProvider
 import com.project.campaignlift.providers.BankServiceProvider
@@ -54,6 +56,20 @@ class CampaignAdminApiController(
             ?: throw CampaignNotFoundException()
         val amountRaised = pledgeService.getAmountRaised(campaignId)
         return campaign.toCampaignDetailsAdmin(amountRaised)
+    }
+
+    @PutMapping("/details/{campaignId}")
+    fun campaignUpdateAdminById(
+        @PathVariable("campaignId") campaignId: Long,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+        @RequestBody campaignUpdateRequest: CampaignUpdateRequestAdmin
+    ): CampaignEntity {
+        val campaign = campaignService.adminUpdateCampaign(
+            campaignId = campaignId,
+            campaignUpdateRequest,
+            adminUser = authUser
+        )
+        return campaign
     }
 
     @PostMapping("/details/{campaignId}")

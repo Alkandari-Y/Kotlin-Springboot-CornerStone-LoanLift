@@ -1,6 +1,8 @@
 package com.project.campaignlift.services
 
 import com.project.banking.entities.AccountEntity
+import com.project.campaignlift.admin.dtos.CampaignUpdateRequestAdmin
+import com.project.campaignlift.admin.dtos.toAdminUpdatedEntity
 import com.project.campaignlift.campaigns.dtos.*
 import com.project.campaignlift.campaigns.dtos.CampaignListItemResponse
 import com.project.campaignlift.entities.CampaignEntity
@@ -113,6 +115,27 @@ class CampaignServiceImpl(
             username = user.username,
         )
         return campaignRepository.save(updatedCampaign)
+    }
+
+    override fun adminUpdateCampaign(
+        campaignId: Long,
+        campaignUpdate: CampaignUpdateRequestAdmin,
+        adminUser: UserInfoDto
+    ) : CampaignEntity {
+        val previousCampaign = campaignRepository.findByIdOrNull(campaignId)
+            ?: throw CampaignNotFoundException()
+
+        val category = categoryRepository.findByIdOrNull(campaignUpdate.categoryId)
+            ?: throw CategoryNotFoundException()
+
+        val updatedCampaign = campaignRepository.save(
+                campaignUpdate.toAdminUpdatedEntity(
+            previousCampaign = previousCampaign,
+            category = category,
+            adminUserId = adminUser.userId,
+            )
+        )
+        return updatedCampaign
     }
 
 
