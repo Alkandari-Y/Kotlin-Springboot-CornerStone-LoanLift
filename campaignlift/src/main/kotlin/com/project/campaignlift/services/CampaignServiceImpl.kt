@@ -34,7 +34,7 @@ class CampaignServiceImpl(
     private val pledgeRepository: PledgeRepository,
     private val mailService: MailService,
     @Value("\${aws.endpoint}")
-     val endpoint: String
+    val endpoint: String
 ) : CampaignService {
 
 
@@ -48,7 +48,7 @@ class CampaignServiceImpl(
             throw IncompleteUserRegistrationException()
         }
         val campaignAccount = accountRepository.save(
-    AccountEntity(
+            AccountEntity(
                 name = "${campaignDto.title} Account",
                 ownerId = user.userId,
                 ownerType = AccountType.CAMPAIGN,
@@ -92,7 +92,7 @@ class CampaignServiceImpl(
         }
 
         if (existing.status != CampaignStatus.NEW) {
-            throw CampaignUpdateNotAllowedException( existing.status.name)
+            throw CampaignUpdateNotAllowedException(existing.status.name)
         }
 
         val category = categoryRepository.findByIdOrNull(campaign.categoryId)
@@ -121,7 +121,7 @@ class CampaignServiceImpl(
         campaignId: Long,
         campaignUpdate: CampaignUpdateRequestAdmin,
         adminUser: UserInfoDto
-    ) : CampaignEntity {
+    ): CampaignEntity {
         val previousCampaign = campaignRepository.findByIdOrNull(campaignId)
             ?: throw CampaignNotFoundException()
 
@@ -129,10 +129,10 @@ class CampaignServiceImpl(
             ?: throw CategoryNotFoundException()
 
         val updatedCampaign = campaignRepository.save(
-                campaignUpdate.toAdminUpdatedEntity(
-            previousCampaign = previousCampaign,
-            category = category,
-            adminUserId = adminUser.userId,
+            campaignUpdate.toAdminUpdatedEntity(
+                previousCampaign = previousCampaign,
+                category = category,
+                adminUserId = adminUser.userId,
             )
         )
         return updatedCampaign
@@ -189,7 +189,8 @@ class CampaignServiceImpl(
     override fun getCampaignDetailsByIdForOwner(campaignId: Long, user: UserInfoDto): CampaignOwnerDetails {
         val campaign = campaignRepository.findByIdOrNull(campaignId)
             ?: throw CampaignNotFoundException()
-        val amountRaised = campaign.amountRaised.takeIf { it > BigDecimal.ZERO } ?: campaign.goalAmount ?: BigDecimal.ZERO
+        val amountRaised =
+            campaign.amountRaised.takeIf { it > BigDecimal.ZERO } ?: campaign.goalAmount ?: BigDecimal.ZERO
         val interest = amountRaised.multiply(campaign.interestRate.divide(BigDecimal(100), 3, RoundingMode.HALF_UP))
         val total = amountRaised + interest
         // monthly installment

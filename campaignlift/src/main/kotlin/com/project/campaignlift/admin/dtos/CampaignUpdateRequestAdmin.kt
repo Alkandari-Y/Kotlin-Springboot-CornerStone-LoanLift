@@ -3,6 +3,8 @@ package com.project.campaignlift.admin.dtos
 import com.project.banking.entities.CategoryEntity
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
+import com.project.common.enums.ErrorCode
+import com.project.common.exceptions.APIException
 import com.project.common.exceptions.campaigns.InvalidCampaignStatusChangeException
 import com.project.common.utils.dateFormatter
 import jakarta.validation.constraints.DecimalMin
@@ -10,6 +12,7 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -63,9 +66,15 @@ fun CampaignUpdateRequestAdmin.toAdminUpdatedEntity(
         throw InvalidCampaignStatusChangeException("Admin user id is required for pending status change")
     }
 
+    if (previousCampaign.id == null) {
+        throw APIException("campaign id is required for update", code = ErrorCode.INVALID_INPUT, httpStatus = HttpStatus.BAD_REQUEST)
+    }
+
+    val approvedBy = if (status == CampaignStatus.ACTIVE) adminUserId else null
+
     return  CampaignEntity(
-        id = previousCampaign.id!!,
-        createdBy = previousCampaign.createdBy!!,
+        id = previousCampaign.id,
+        createdBy = previousCampaign.createdBy,
         title = this.title,
         description = this.description,
         goalAmount = this.goalAmount,
@@ -73,7 +82,7 @@ fun CampaignUpdateRequestAdmin.toAdminUpdatedEntity(
         repaymentMonths = this.repaymentMonths,
         status = this.status,
         submittedAt = previousCampaign.submittedAt!!,
-        approvedBy = previousCampaign.approvedBy,
+        approvedBy = approvedBy,
         campaignDeadline = LocalDate.parse(this.campaignDeadline, dateFormatter),
         accountId = previousCampaign.accountId!!,
         imageUrl = previousCampaign.imageUrl,
