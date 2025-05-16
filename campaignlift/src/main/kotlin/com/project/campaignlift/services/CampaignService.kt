@@ -1,5 +1,6 @@
 package com.project.campaignlift.services
 
+import com.project.campaignlift.admin.dtos.CampaignUpdateRequestAdmin
 import com.project.campaignlift.campaigns.dtos.*
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
@@ -19,6 +20,12 @@ interface CampaignService {
         user: UserInfoDto,
         campaign: UpdateCampaignRequest,
         image: MultipartFile?
+    ): CampaignEntity
+
+    fun adminUpdateCampaign(
+        campaignId: Long,
+        campaignUpdate: CampaignUpdateRequestAdmin,
+        adminUser: UserInfoDto,
     ): CampaignEntity
 
     fun approveRejectCampaignStatus(
