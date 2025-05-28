@@ -23,6 +23,7 @@ data class CampaignOwnerDetails(
     val submittedAt: LocalDate,
     val campaignDeadline: LocalDate,
     val imageUrl: String?,
+    val accountId: Long
 ) : CampaignDetailResponse
 
 fun CampaignEntity.toOwnerDetails(
@@ -49,5 +50,6 @@ fun CampaignEntity.toOwnerDetails(
         submittedAt = this.submittedAt!!,
         campaignDeadline = this.campaignDeadline!!,
         imageUrl = this.imageUrl,
+        accountId = this.accountId!!
     )
 }

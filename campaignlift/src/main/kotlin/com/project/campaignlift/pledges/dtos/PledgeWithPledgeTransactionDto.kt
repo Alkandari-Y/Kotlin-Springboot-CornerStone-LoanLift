@@ -5,7 +5,8 @@ import com.project.campaignlift.entities.PledgeStatus
 import java.math.BigDecimal
 
 data class PledgeWithPledgeTransactionsDto(
-    val pledgeId: Long,
+    val id: Long,
+    val campaignId: Long,
     val userId: Long,
     val accountId: Long,
     val amount: BigDecimal,
@@ -15,8 +16,9 @@ data class PledgeWithPledgeTransactionsDto(
 
 fun PledgeEntity.toPledgeWithTransactionsDto(): PledgeWithPledgeTransactionsDto {
     return PledgeWithPledgeTransactionsDto(
-        pledgeId = this.id!!,
+        id = this.id!!,
         userId = this.userId,
+        campaignId = this.campaign.id!!,
         accountId = this.accountId,
         amount = this.amount,
         status = this.status,
