@@ -53,12 +53,12 @@ class RepaymentService(
         val totalInterest = campaign.amountRaised
             .multiply(campaign.interestRate.divide(BigDecimal(100), scale, roundingMode))
 
-        val monthlyInstallment = (campaign.amountRaised + totalInterest)
+        val distributable = (campaign.amountRaised + totalInterest)
             .divide(BigDecimal(campaign.repaymentMonths), scale, roundingMode)
             .abs()
 
-        val bankFee = monthlyInstallment.multiply(bankFeeRate).setScale(scale, roundingMode)
-        val distributable = monthlyInstallment - bankFee
+        val bankFee = distributable.multiply(bankFeeRate).setScale(scale, roundingMode)
+        val monthlyInstallment = distributable + bankFee
 
         if (campaignAccount.balance < monthlyInstallment) {
             logger.warn("Campaign ${campaign.id} defaulted. Insufficient balance.")
@@ -139,7 +139,7 @@ class RepaymentService(
 
             val totalPledged = pledgeRepository.getTotalCommittedAmountForCampaign(campaign.id!!)
             if (totalPledged < campaign.goalAmount) {
-                logger.info("Campaign ${campaign.id} did not meet its goal. Refundnig pledges...")
+                logger.info("Campaign ${campaign.id} did not meet its goal. Refunding pledges...")
 
                 val pledges = pledgeRepository.findAllByCampaignIdAndStatus(campaign.id!!, PledgeStatus.COMMITTED)
                 val accountIds = pledges.map { it.accountId }.toSet()

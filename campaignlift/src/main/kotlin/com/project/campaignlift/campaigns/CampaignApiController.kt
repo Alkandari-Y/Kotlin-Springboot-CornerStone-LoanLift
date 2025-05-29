@@ -135,6 +135,15 @@ class CampaignApiController(
     }
 
 
+    @GetMapping("/manage/{campaignId}/transactions")
+    fun getMyCampaignTransactionsById(
+        @PathVariable campaignId: Long,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+    ): ResponseEntity<CampaignTransactionHistoryResponse> {
+        return ResponseEntity.ok(campaignService.getCampaignTransactions(campaignId))
+    }
+
+
     @PutMapping("/manage/{campaignId}",
         consumes = ["multipart/form-data"]
     )
