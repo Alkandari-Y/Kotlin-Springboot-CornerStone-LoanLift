@@ -1,6 +1,7 @@
 package com.project.authentication.auth
 
 import com.project.authentication.auth.dtos.LoginRequest
+import com.project.authentication.auth.dtos.RefreshRequest
 import com.project.authentication.auth.dtos.RegisterCreateRequest
 import com.project.authentication.entities.AuthUserDetails
 import com.project.authentication.services.JwtService
@@ -57,9 +58,7 @@ class AuthApiController(
         return ResponseEntity(JwtResponse(access, refresh), HttpStatus.OK)
     }
 
-    data class RefreshRequest(
-        val refresh: String
-    )
+
     @PostMapping("/refresh")
     fun refreshToken(@RequestBody refreshRequest: RefreshRequest): ResponseEntity<JwtResponse> {
         val refreshToken = refreshRequest.refresh
