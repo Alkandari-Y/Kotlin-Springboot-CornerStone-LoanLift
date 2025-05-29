@@ -57,6 +57,31 @@ class AuthApiController(
         return ResponseEntity(JwtResponse(access, refresh), HttpStatus.OK)
     }
 
+    data class RefreshRequest(
+        val refresh: String
+    )
+    @PostMapping("/refresh")
+    fun refreshToken(@RequestBody refreshRequest: RefreshRequest): ResponseEntity<JwtResponse> {
+        val refreshToken = refreshRequest.refresh
+            ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
+
+        return try {
+            val username = jwtService.extractUsername(refreshToken)
+            if (!jwtService.isTokenType(refreshToken, "refresh")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            }
+
+            val user = userService.findUserByUsername(username)
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+            val (access, newRefresh) = jwtService.generateTokenPair(user, user.roles.map { it.name })
+            ResponseEntity.ok(JwtResponse(access, newRefresh))
+        } catch (ex: Exception) {
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
+    }
+
+
     @PostMapping("/validate")
     fun checkToken(
         principal: Principal

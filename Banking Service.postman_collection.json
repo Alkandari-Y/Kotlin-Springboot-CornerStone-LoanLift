@@ -4,7 +4,7 @@
 		"name": "Banking Service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "13380578",
-		"_collection_link": "https://blue-trinity-17335.postman.co/workspace/Kotlin-Spring-LoanLift~ea5b6b28-2a4a-466a-9480-eb762d8e4c9f/collection/13380578-4dcc523a-b331-4c89-89d9-b8bab33879bd?action=share&source=collection_link&creator=13380578"
+		"_collection_link": "https://blue-trinity-17335.postman.co/workspace/ea5b6b28-2a4a-466a-9480-eb762d8e4c9f/collection/13380578-4dcc523a-b331-4c89-89d9-b8bab33879bd?action=share&source=collection_link&creator=13380578"
 	},
 	"item": [
 		{
@@ -211,7 +211,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"sourceAccountNumber\": \"6340135448962211011701\",\n    \"destinationAccountNumber\": \"1381862194398884596\",\n    \"amount\": 11.532\n}",
+							"raw": "{\n    \"sourceAccountNumber\": \"41580903455094580619813\",\n    \"destinationAccountNumber\": \"44444444\",\n    \"amount\": 2.532\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -349,7 +349,10 @@
 					"response": []
 				},
 				{
-					"name": "Transactions by account",
+					"name": "Admin get clients",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -363,15 +366,63 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{bankingServiceUrl}}/transactions/account/138633995411886528264",
+							"raw": "{{bankingServiceUrl}}/accounts/clients?accountId=4",
+							"host": [
+								"{{bankingServiceUrl}}"
+							],
+							"path": [
+								"accounts",
+								"clients"
+							],
+							"query": [
+								{
+									"key": "accountNumber",
+									"value": "44444444",
+									"disabled": true
+								},
+								{
+									"key": "accountId",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Transactions by account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{bankingServiceUrl}}/transactions/account/41580903455094580619813",
 							"host": [
 								"{{bankingServiceUrl}}"
 							],
 							"path": [
 								"transactions",
 								"account",
-								"138633995411886528264"
+								"41580903455094580619813"
 							]
 						}
 					},
@@ -419,7 +470,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{adminToken}}",
+									"value": "{{token}}",
 									"type": "string"
 								}
 							]
