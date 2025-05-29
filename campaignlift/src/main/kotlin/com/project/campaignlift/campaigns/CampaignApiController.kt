@@ -59,7 +59,7 @@ class CampaignApiController(
         @RequestPart("image", required = true) image: MultipartFile,
         @RequestAttribute("authUser") authUser: UserInfoDto,
         authentication: Authentication
-    ): ResponseEntity<CampaignEntity> {
+    ): ResponseEntity<CampaignDetailResponse> {
 
         if (authUser.isActive.not()) {
             throw AccountNotVerifiedException()
@@ -86,7 +86,7 @@ class CampaignApiController(
             user = authUser,
             image = image,
         )
-        return ResponseEntity(campaign, HttpStatus.CREATED)
+        return ResponseEntity(campaign.toPublicDetails(), HttpStatus.CREATED)
     }
 
 
@@ -132,6 +132,15 @@ class CampaignApiController(
     ): ResponseEntity<Unit> {
         campaignService.deleteCampaign(campaignId, authUser)
         return ResponseEntity(HttpStatus.NO_CONTENT)
+    }
+
+
+    @GetMapping("/manage/{campaignId}/transactions")
+    fun getMyCampaignTransactionsById(
+        @PathVariable campaignId: Long,
+        @RequestAttribute("authUser") authUser: UserInfoDto,
+    ): ResponseEntity<CampaignTransactionHistoryResponse> {
+        return ResponseEntity.ok(campaignService.getCampaignTransactions(campaignId))
     }
 
 

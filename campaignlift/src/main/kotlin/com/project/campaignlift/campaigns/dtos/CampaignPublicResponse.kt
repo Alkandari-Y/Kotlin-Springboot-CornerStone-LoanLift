@@ -23,6 +23,7 @@ data class CampaignPublicDetails(
     val campaignDeadline: LocalDate,
     val imageUrl: String?,
     var amountRaised: BigDecimal,
+    var accountId: Long? = null,
 )  : CampaignDetailResponse
 
 data class CampaignPublicDetailsWithComments(
@@ -40,6 +41,7 @@ data class CampaignPublicDetailsWithComments(
     val campaignDeadline: LocalDate?,
     val imageUrl: String?,
     val amountRaised: BigDecimal = BigDecimal.ZERO,
+    var accountId: Long? = null,
     val comments: List<CommentProjection> = emptyList()
 ) : CampaignDetailResponse
 
@@ -64,6 +66,7 @@ fun CampaignEntity.toPublicDetailsWithComments(
         imageUrl = this.imageUrl,
         amountRaised = amountRaised,
         comments = comments,
+        accountId = this.accountId
     )
 }
 
@@ -84,4 +87,5 @@ fun CampaignEntity.toPublicDetails(
     campaignDeadline = this.campaignDeadline!!,
     imageUrl = this.imageUrl!!,
     amountRaised = amountRaised,
+    accountId = this.accountId
 )

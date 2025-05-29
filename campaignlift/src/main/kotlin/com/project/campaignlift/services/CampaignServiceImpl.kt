@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.YearMonth
 
 @Service
 class CampaignServiceImpl(
@@ -32,6 +33,7 @@ class CampaignServiceImpl(
     private val commentRepository: CommentRepository,
     private val accountRepository: AccountRepository,
     private val pledgeRepository: PledgeRepository,
+    private val pledgeTransactionRepository: PledgeTransactionRepository,
     private val mailService: MailService,
     @Value("\${aws.endpoint}")
     val endpoint: String
@@ -197,12 +199,12 @@ class CampaignServiceImpl(
         val grossInstallment = total.divide(BigDecimal(campaign.repaymentMonths), 3, RoundingMode.HALF_UP)
         // only used for distribution - system fees
         val bankFee = grossInstallment.multiply(BigDecimal("0.002")).setScale(3, RoundingMode.HALF_UP)
-        // for borrowers to recieve
-        val netToLenders = grossInstallment - bankFee
+        // for borrowers to receive
+        val netToLenders = grossInstallment
 
         return campaign.toOwnerDetails(
             amountRaised = amountRaised,
-            monthlyInstallment = grossInstallment,
+                monthlyInstallment = grossInstallment + bankFee,
             bankFee = bankFee,
             netToLenders = netToLenders,
         )
@@ -242,4 +244,25 @@ class CampaignServiceImpl(
             username = user.username,
         )
     }
+
+
+    override fun getCampaignTransactions(campaignId: Long): CampaignTransactionHistoryResponse {
+        val pledgeTransactions = pledgeTransactionRepository.findFundingAndRefundTransactions(campaignId)
+
+        val repaymentProjections = pledgeTransactionRepository.findMonthlyRepaymentSummaries(campaignId)
+        val repaymentSummaries = repaymentProjections.map {
+            val total = it.getTotalPaidWithBankFee().setScale(3, RoundingMode.HALF_UP)
+
+            MonthlyRepaymentSummaryDto(
+                YearMonth.from(it.getMonth().toLocalDateTime()),
+                total
+            )
+        }
+
+        return CampaignTransactionHistoryResponse(
+            pledgeTransactions = pledgeTransactions,
+            repaymentSummaries = repaymentSummaries
+        )
+    }
+
 }

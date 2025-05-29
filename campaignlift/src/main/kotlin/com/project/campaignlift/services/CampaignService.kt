@@ -54,5 +54,7 @@ interface CampaignService {
     ): CampaignOwnerDetails
 
     fun deleteCampaign(campaignId: Long, user: UserInfoDto)
+
+    fun getCampaignTransactions(campaignId: Long): CampaignTransactionHistoryResponse
 }
 

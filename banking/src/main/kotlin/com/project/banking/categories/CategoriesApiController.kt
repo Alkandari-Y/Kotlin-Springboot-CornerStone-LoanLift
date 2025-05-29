@@ -21,7 +21,6 @@ class CategoriesApiController (
     private val categoryService: CategoryService
 ){
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     fun getAllCategories()
     : ResponseEntity<List<CategoryEntity>> = ResponseEntity(
