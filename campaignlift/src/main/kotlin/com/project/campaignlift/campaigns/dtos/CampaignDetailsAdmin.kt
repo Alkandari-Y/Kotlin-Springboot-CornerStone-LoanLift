@@ -3,9 +3,7 @@ package com.project.campaignlift.campaigns.dtos
 import com.project.campaignlift.entities.CampaignEntity
 import com.project.campaignlift.entities.CampaignStatus
 import com.project.campaignlift.pledges.dtos.PledgeOverviewDto
-import com.project.campaignlift.pledges.dtos.UserPledgeDto
 import com.project.campaignlift.pledges.dtos.toPledgeOverviewDto
-import com.project.campaignlift.pledges.dtos.toUserPledgeDto
 import java.math.BigDecimal
 import java.time.LocalDate
 
