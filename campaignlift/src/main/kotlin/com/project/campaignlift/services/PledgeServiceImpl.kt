@@ -153,7 +153,7 @@ class PledgeServiceImpl(
         }
 
         return PledgeResultDto(
-            pledge = savedPledge.toUserPledgeDto(campaign.title, campaign.id!!),
+            pledge = savedPledge.toUserPledgeDto(campaign.title, campaign),
             transaction = pledgeTransaction.toResultDto()
         )
     }
@@ -249,7 +249,7 @@ class PledgeServiceImpl(
         return PledgeResultDto(
             pledge = savedPledge.toUserPledgeDto(
                 title = campaign.title,
-                campaignId = campaign.id!!
+                campaign = campaign
             ),
             transaction = pledgeTransaction.toResultDto()
         )

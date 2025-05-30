@@ -34,7 +34,10 @@ interface PledgeRepository: JpaRepository<PledgeEntity, Long> {
         p.status,
         c.title,
         c.id,
-        p.createdAt
+        p.createdAt,
+        c.imageUrl,
+        c.interestRate,
+        c.status
     )
     FROM PledgeEntity p
     JOIN p.campaign c
