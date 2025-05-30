@@ -1,6 +1,7 @@
 package com.project.authentication.auth
 
 import com.project.authentication.auth.dtos.LoginRequest
+import com.project.authentication.auth.dtos.RefreshRequest
 import com.project.authentication.auth.dtos.RegisterCreateRequest
 import com.project.authentication.entities.AuthUserDetails
 import com.project.authentication.services.JwtService
@@ -56,6 +57,29 @@ class AuthApiController(
         val (access, refresh) = jwtService.generateTokenPair(user, user.roles.map { it.name })
         return ResponseEntity(JwtResponse(access, refresh), HttpStatus.OK)
     }
+
+
+    @PostMapping("/refresh")
+    fun refreshToken(@RequestBody refreshRequest: RefreshRequest): ResponseEntity<JwtResponse> {
+        val refreshToken = refreshRequest.refresh
+            ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
+
+        return try {
+            val username = jwtService.extractUsername(refreshToken)
+            if (!jwtService.isTokenType(refreshToken, "refresh")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            }
+
+            val user = userService.findUserByUsername(username)
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+            val (access, newRefresh) = jwtService.generateTokenPair(user, user.roles.map { it.name })
+            ResponseEntity.ok(JwtResponse(access, newRefresh))
+        } catch (ex: Exception) {
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
+    }
+
 
     @PostMapping("/validate")
     fun checkToken(

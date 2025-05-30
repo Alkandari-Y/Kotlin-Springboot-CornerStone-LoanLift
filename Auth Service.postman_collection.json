@@ -4,7 +4,7 @@
 		"name": "Auth Service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "13380578",
-		"_collection_link": "https://blue-trinity-17335.postman.co/workspace/Kotlin-Spring-LoanLift~ea5b6b28-2a4a-466a-9480-eb762d8e4c9f/collection/13380578-d76cea34-181a-419a-9f64-31e47511d862?action=share&source=collection_link&creator=13380578"
+		"_collection_link": "https://blue-trinity-17335.postman.co/workspace/ea5b6b28-2a4a-466a-9480-eb762d8e4c9f/collection/13380578-d76cea34-181a-419a-9f64-31e47511d862?action=share&source=collection_link&creator=13380578"
 	},
 	"item": [
 		{
@@ -32,7 +32,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"testuser@snddev.com\",\n    \"civilId\": \"222222222222\",\n    \"password\": \"passworD123\"\n}",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"testuser@snddev.com\",\n    \"civilId\": \"111111111\",\n    \"password\": \"passworD123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -220,7 +220,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"owner\",\n    \"password\": \"passworD123\"\n}",
+							"raw": "{\n    \"username\": \"Moudhi\",\n    \"password\": \"passworD123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -250,6 +250,7 @@
 									"pm.test(\"Your test name\", function () {",
 									"    var jsonData = pm.response.json();",
 									"     pm.environment.set(\"token\", jsonData.access);",
+									"     pm.environment.set(\"refreshUser\", jsonData.access)",
 									"});"
 								],
 								"type": "text/javascript",
@@ -283,6 +284,59 @@
 					"response": []
 				},
 				{
+					"name": "Refresh User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {",
+									"    var jsonData = pm.response.json();",
+									"     pm.environment.set(\"token\", jsonData.access);",
+									"     pm.environment.set(\"refreshUser\", jsonData.refresh)",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ0ZXN0dXNlciIsInVzZXJJZCI6Miwicm9sZXMiOlsiUk9MRV9VU0VSIl0sImlzQWN0aXZlIjp0cnVlLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc0ODU1MTY2MCwiZXhwIjoxNzQ5MTU2NDYwfQ.pnw6vdG1utOiFSKCpks49FOYJImnj7jPbHOPk05-W4nBalQ_Y7EDRUqn_qWJvfgD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authServiceUrl}}/auth/refresh",
+							"host": [
+								"{{authServiceUrl}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Validate Token",
 					"request": {
 						"auth": {
@@ -290,7 +344,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "{{adminToken}}",
 									"type": "string"
 								}
 							]

@@ -33,6 +33,16 @@ class JwtService (
     fun generateRefreshToken(user: UserEntity, authorities: List<String>): String =
         generateToken(user, key, refreshTokenExpirationMs, "refresh", authorities)
 
+    fun isTokenType(token: String, expectedType: String): Boolean {
+        return try {
+            val jwt = parseToken(token)
+            val type = jwt["type"] as? String
+            type == expectedType
+        } catch (e: Exception) {
+            false
+        }
+    }
+
 
     private fun generateToken(
         user: UserEntity,

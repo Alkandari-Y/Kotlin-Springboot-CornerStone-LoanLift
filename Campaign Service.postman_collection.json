@@ -4,7 +4,7 @@
 		"name": "Campaign Service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "13380578",
-		"_collection_link": "https://blue-trinity-17335.postman.co/workspace/Kotlin-Spring-LoanLift~ea5b6b28-2a4a-466a-9480-eb762d8e4c9f/collection/13380578-33864466-caf0-4505-b4d0-e248fb7f541f?action=share&source=collection_link&creator=13380578"
+		"_collection_link": "https://blue-trinity-17335.postman.co/workspace/ea5b6b28-2a4a-466a-9480-eb762d8e4c9f/collection/13380578-33864466-caf0-4505-b4d0-e248fb7f541f?action=share&source=collection_link&creator=13380578"
 	},
 	"item": [
 		{
@@ -45,7 +45,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{campaignOwnerToken}}",
+									"value": "{{token}}",
 									"type": "string"
 								}
 							]
@@ -53,7 +53,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{campaignServiceUrl}}/campaigns/details/1",
+							"raw": "{{campaignServiceUrl}}/campaigns/details/1?includeComments=true",
 							"host": [
 								"{{campaignServiceUrl}}"
 							],
@@ -65,8 +65,7 @@
 							"query": [
 								{
 									"key": "includeComments",
-									"value": "true",
-									"disabled": true
+									"value": "true"
 								}
 							]
 						}
@@ -209,7 +208,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{campaignServiceUrl}}/admin/campaigns/details/4",
+							"raw": "{{campaignServiceUrl}}/admin/campaigns/details/5",
 							"host": [
 								"{{campaignServiceUrl}}"
 							],
@@ -217,7 +216,46 @@
 								"admin",
 								"campaigns",
 								"details",
-								"4"
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Campaign Admin Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Some edited title\",\r\n    \"description\": \"new description\",\r\n    \"status\": \"ACTIVE\",\r\n    \"categoryId\": 1,\r\n    \"goalAmount\": \"2000.000\",\r\n    \"interestRate\": \"0.03\",\r\n    \"repaymentMonths\": 20,\r\n    \"campaignDeadline\": \"20-02-2026\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/admin/campaigns/details/1",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"admin",
+								"campaigns",
+								"details",
+								"1"
 							]
 						}
 					},
@@ -380,14 +418,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{campaignServiceUrl}}/comments/campaign/6",
+							"raw": "{{campaignServiceUrl}}/comments/campaign/1",
 							"host": [
 								"{{campaignServiceUrl}}"
 							],
 							"path": [
 								"comments",
 								"campaign",
-								"6"
+								"1"
 							]
 						}
 					},
@@ -481,7 +519,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "{{adminToken}}",
 									"type": "string"
 								}
 							]
@@ -508,7 +546,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "{{campaignOwnerToken}}",
 									"type": "string"
 								}
 							]
@@ -517,7 +555,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"accountId\": 2,\n    \"campaignId\": 4,\n    \"amount\": 10000\n}",
+							"raw": "{\n    \"accountId\": 4,\n    \"campaignId\": 5,\n    \"amount\": 1000\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -585,7 +623,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "{{adminToken}}",
 									"type": "string"
 								}
 							]
@@ -602,14 +640,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{campaignServiceUrl}}/pledges/details/3",
+							"raw": "{{campaignServiceUrl}}/pledges/details/1",
 							"host": [
 								"{{campaignServiceUrl}}"
 							],
 							"path": [
 								"pledges",
 								"details",
-								"3"
+								"1"
 							]
 						}
 					},
@@ -643,14 +681,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{campaignServiceUrl}}/pledges/details/3/transactions",
+							"raw": "{{campaignServiceUrl}}/pledges/details/2/transactions",
 							"host": [
 								"{{campaignServiceUrl}}"
 							],
 							"path": [
 								"pledges",
 								"details",
-								"3",
+								"2",
 								"transactions"
 							]
 						}
@@ -665,7 +703,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "{{adminToken}}",
 									"type": "string"
 								}
 							]
@@ -682,14 +720,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{campaignServiceUrl}}/pledges/details/9",
+							"raw": "{{campaignServiceUrl}}/pledges/details/7",
 							"host": [
 								"{{campaignServiceUrl}}"
 							],
 							"path": [
 								"pledges",
 								"details",
-								"9"
+								"7"
 							]
 						}
 					},
@@ -711,7 +749,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{campaignOwnerToken}}",
+									"value": "{{token}}",
 									"type": "string"
 								}
 							]
@@ -852,14 +890,98 @@
 							]
 						},
 						"url": {
-							"raw": "{{campaignServiceUrl}}/campaigns/manage/29",
+							"raw": "{{campaignServiceUrl}}/campaigns/manage/5",
 							"host": [
 								"{{campaignServiceUrl}}"
 							],
 							"path": [
 								"campaigns",
 								"manage",
-								"29"
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Campaign Transactions",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "test campaign update",
+									"type": "text"
+								},
+								{
+									"key": "categoryId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "this is a test for form data datata atata",
+									"type": "text"
+								},
+								{
+									"key": "goalAmount",
+									"value": "10000",
+									"type": "text"
+								},
+								{
+									"key": "interestRate",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "repaymentMonths",
+									"value": "6",
+									"type": "text"
+								},
+								{
+									"key": "campaignDeadline",
+									"value": "01-09-2025",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "postman-cloud:///1f02c1f9-1dd4-4090-8738-fcb4f957957e"
+								},
+								{
+									"key": "accountId",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{campaignServiceUrl}}/campaigns/manage/5/transactions",
+							"host": [
+								"{{campaignServiceUrl}}"
+							],
+							"path": [
+								"campaigns",
+								"manage",
+								"5",
+								"transactions"
 							]
 						}
 					},
@@ -873,7 +995,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{campaignOwnerToken}}",
+									"value": "{{token}}",
 									"type": "string"
 								}
 							]
@@ -900,18 +1022,18 @@
 								},
 								{
 									"key": "goalAmount",
-									"value": "200000",
+									"value": "2000",
 									"type": "text"
 								},
 								{
 									"key": "campaignDeadline",
-									"value": "12-05-2025",
+									"value": "12-09-2025",
 									"type": "text"
 								},
 								{
 									"key": "image",
 									"type": "file",
-									"src": "postman-cloud:///1f02c1f9-1dd4-4090-8738-fcb4f957957e"
+									"src": "postman-cloud:///1f02efe0-f3de-41d0-826a-6fb52c6e3d1a"
 								},
 								{
 									"key": "accountId",
@@ -1101,7 +1223,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{campaignOwnerToken}}",
+									"value": "{{adminToken}}",
 									"type": "string"
 								}
 							]
@@ -1113,7 +1235,7 @@
 							"formdata": [
 								{
 									"key": "campaignId",
-									"value": "23",
+									"value": "3",
 									"type": "text"
 								},
 								{
@@ -1123,7 +1245,7 @@
 								},
 								{
 									"key": "isPublic",
-									"value": "false",
+									"value": "true",
 									"type": "text"
 								}
 							]
