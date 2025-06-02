@@ -181,7 +181,7 @@ class PledgeServiceImpl(
             throw InvalidPledgeOperationException("New amount must be different from current amount.")
         }
 
-        if (delta < MIN_PLEDGE_AMOUNT) {
+        if (delta >= MIN_PLEDGE_AMOUNT) {
             throw InvalidPledgeOperationException("Pledge amount must be greater than $MIN_PLEDGE_AMOUNT.")
         }
 
