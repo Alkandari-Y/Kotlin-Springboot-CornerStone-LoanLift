@@ -191,8 +191,9 @@ class CampaignServiceImpl(
     override fun getCampaignDetailsByIdForOwner(campaignId: Long, user: UserInfoDto): CampaignOwnerDetails {
         val campaign = campaignRepository.findByIdOrNull(campaignId)
             ?: throw CampaignNotFoundException()
-        val amountRaised =
-            campaign.amountRaised.takeIf { it >= BigDecimal.ZERO } ?: campaign.goalAmount ?: BigDecimal.ZERO
+        val amountRaised = pledgeRepository.getTotalCommittedAmountForCampaign(campaignId)
+
+//                .takeIf { it >= BigDecimal.ZERO } ?: campaign.goalAmount ?: BigDecimal.ZERO
         val interest = amountRaised.multiply(campaign.interestRate.divide(BigDecimal(100), 3, RoundingMode.HALF_UP))
         val total = amountRaised + interest
         // monthly installment
