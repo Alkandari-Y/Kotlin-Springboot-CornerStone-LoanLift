@@ -1,6 +1,7 @@
 package com.project.campaignlift.pledges
 
 import com.project.campaignlift.pledges.dtos.*
+import com.project.campaignlift.services.CampaignService
 import com.project.campaignlift.services.PledgeService
 import com.project.common.responses.authenthication.UserInfoDto
 import com.project.common.security.RemoteUserPrincipal
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/pledges")
 class PledgeApiController(
     private val pledgeService: PledgeService,
+    private val campaignService: CampaignService,
 ) {
 
     @GetMapping
@@ -66,7 +68,7 @@ class PledgeApiController(
         @PathVariable pledgeId: Long,
         @RequestAttribute("authUser") authUser: UserInfoDto,
         @AuthenticationPrincipal principal: RemoteUserPrincipal
-    ): ResponseEntity<PledgeWithPledgeTransactionsDto> {
+    ): ResponseEntity<UserPledgeDto> {
         val pledge = pledgeService.getPledgeDetails(pledgeId)
 
         val isOwner = authUser.userId == pledge.userId
@@ -76,7 +78,12 @@ class PledgeApiController(
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
-        return ResponseEntity(pledge.toPledgeWithTransactionsDto(), HttpStatus.OK)
+        val campaign = pledge.campaign
+
+        return ResponseEntity(pledge.toUserPledgeDto(
+            title = campaign.title,
+            campaign = campaign,
+        ), HttpStatus.OK)
     }
 
     @GetMapping("/details/{pledgeId}/transactions")
